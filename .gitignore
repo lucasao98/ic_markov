@@ -1,0 +1,15 @@
+/.settings/*
+/assets/*
+/commands/*
+/mail/*
+/runtime/*
+/tests/*
+/vagrant/*
+/vendor/*
+/web/*
+/widgets/*
+.bowerrc
+.buildpath
+.project
+`php
+codeception.yml

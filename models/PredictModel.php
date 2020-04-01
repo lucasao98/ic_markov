@@ -10,13 +10,31 @@ use app\models\Paper;
 use yii\console\widgets\Table;
     
 class PredictModel extends Model{
+    public function predictVector($matrix, $paper, $states_number){
+        $matrix = MatrixFactory::create($matrix);
+        $vector = [[]];
+
+        for($i = 0; $i < $states_number; $i++)
+            $vector[0][$i] = 0;
+        
+        $vector[0][$paper[count($paper)-1]['state']-1] = 1;
+        $vector = MatrixFactory::create($vector);
+
+        $vector = $vector->multiply($matrix);
+
+        echo "Previsão de tendências para o dia seguinte: <br>";
+        for($i=0; $i < $states_number; $i++){
+            echo 'Probabilidade de ' . round(($vector[0][$i])*100, 2) . '% para o estado ' . ($i+1) . '<br>'; 
+        }
+    }
+
 
     public function transitionMatrix($paper, $states, $states_number){
         $matrix = [[]];
         for($i = 0; $i < $states_number; $i++)
             for($j = 0; $j < $states_number; $j++)
                 $matrix[$i][$j] = 0;
-
+              
         for($i = 0; $i < count($paper)-1; $i++){
             /*if($paper[$i]['state'] != 0){
                 $j = $i+1;
@@ -30,15 +48,14 @@ class PredictModel extends Model{
             $matrix[$paper[$i]['state']-1][$paper[$j]['state']-1] += 1;
         }
 
+        $matrix[$paper[count($paper)-1]['state']-1][$paper[count($paper)-1]['state']-1] += 1;
+
         for($i = 0; $i < $states_number; $i++)
             for($j = 0; $j < $states_number; $j++){
                 $matrix[$i][$j] /= $states[$i];
             }
 
-        foreach($matrix as $m){
-            print_r($m);
-            echo '<br>';
-        }
+        return $matrix;
     }
     
     public function predict($start, $stock, $day, $states_number){ 
@@ -76,9 +93,9 @@ class PredictModel extends Model{
         /*$average = Paper::movingAverage($cursor_by_price, 3);
         asort($average);*/
 
-        $interval = round(abs($premin['preult'] - $premax['preult'])/$states_number, 3);
+        $interval = abs($premin['preult'] - $premax['preult'])/$states_number;
         echo("<br> Quantidade de intervalos $states_number <br>");
-        echo("O tamanho do intervalo é $interval" . '<br>');
+        echo('O tamanho do intervalo é ' . round($interval, 2) . '<br>');
 
         echo('<br>Intervalos: <br>');
 
@@ -98,7 +115,7 @@ class PredictModel extends Model{
             if($cursor['state'] != 0)
                 $states[$cursor['state']-1] += 1;
 
-            //echo($cursor['preult'] . ' -> ' . $cursor['state'] . " " . (Paper::toDate($cursor['date']))->format('d/m/Y') . '<br>');
+            echo($cursor['preult'] . ' -> ' . $cursor['state'] . " " . (Paper::toDate($cursor['date']))->format('d/m/Y') . '<br>');
         }
 
         echo('<br>Estado x Quantidade de elementos:<br>');
@@ -108,7 +125,14 @@ class PredictModel extends Model{
 
         echo '<br>';
 
-        $this->transitionMatrix($cursor_by_price, $states, $states_number);
+        $matrix = $this->transitionMatrix($cursor_by_price, $states, $states_number);
+
+        /*foreach($matrix as $m){
+            print_r($m);
+            echo '<br>';
+        }*/
+
+        $this->predictVector($matrix, $cursor_by_price, $states_number);
     }
 
 }    

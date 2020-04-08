@@ -49,7 +49,7 @@ TesteAsset::register($this);
             <a class="nav-link" href="#">About</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="?r=exercicios/metodos">Previs„o</a>
+            <a class="nav-link" href="?r=exercicios/metodos">Previs√£o</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="?r=site/login">Login</a>

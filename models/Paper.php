@@ -12,8 +12,7 @@ use yii\web\IdentityInterface;
  */
 class Paper extends ActiveRecord
 {
-
-
+	
 	public static function CollectionName()
 	{
 		return 'papers';

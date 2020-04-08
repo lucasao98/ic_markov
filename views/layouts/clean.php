@@ -34,10 +34,7 @@ TesteAsset::register($this);
   <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container">
-      <a class="navbar-brand" href="#">Meu Site</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <a class="navbar-brand" href="?r=exercicios/home">Meu Site</a>
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item active">
@@ -46,10 +43,10 @@ TesteAsset::register($this);
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">About</a>
+            <a class="nav-link" href="#">Sobre</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="?r=exercicios/metodos">Previs„o</a>
+            <a class="nav-link" href="?r=exercicios/metodos">Previs√£o</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="?r=site/login">Login</a>

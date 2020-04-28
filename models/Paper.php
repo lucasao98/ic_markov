@@ -2,10 +2,7 @@
 
 namespace app\models;
 
-use Yii;
-use yii\base\Model;
 use yii\mongodb\ActiveRecord;
-use yii\web\IdentityInterface;
 
 /**
  * ContactForm is the model behind the contact form.

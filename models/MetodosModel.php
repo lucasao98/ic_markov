@@ -15,6 +15,13 @@ class MetodosModel extends Model
         ];
         
     }
+
+    public function attributeLabels()
+    {
+        return [
+            'metodo' => 'Escolha o método de previsão:'
+        ];
+    }
     
 }
 

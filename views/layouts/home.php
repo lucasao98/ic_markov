@@ -49,6 +49,9 @@ TesteAsset::register($this);
             <a class="nav-link" href="?r=exercicios/metodos">Previsão</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="?r=exercicios/teste">Teste</a>
+          </li> 
+          <li class="nav-item">
             <a class="nav-link" href="?r=site/login">Login</a>
           </li>
         </ul>
@@ -57,7 +60,7 @@ TesteAsset::register($this);
   </nav>
 
   <!-- Header -->
-  <header class="bg-primary py-5 mb-5">
+  <!--<header class="bg-primary py-5 mb-5">
     <div class="container h-100">
       <div class="row h-100 align-items-center">
         <div class="col-lg-12">
@@ -66,7 +69,7 @@ TesteAsset::register($this);
         </div>
       </div>
     </div>
-  </header>
+  </header>-->
 	
 	<?= $content ?>
   <!-- Page Content -->

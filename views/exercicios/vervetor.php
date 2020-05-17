@@ -21,6 +21,10 @@ use yii\helpers\Html;
     for ($i = 0; $i < $model->states_number; $i++) {
         echo 'Probabilidade de ' . round(($vector[0][$i]) * 100, 2) . '% para o estado ' . ($i + 1) . '<br>';
     }
+
+    /*foreach($db as $cursor){
+        echo($cursor['preult'] . ' -> ' . $cursor['state'] . " " . $cursor['date']->toDateTime()->format('d/m/Y') . '<br>');
+    }*/
     ?>
 
 </h3>

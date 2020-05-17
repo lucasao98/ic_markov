@@ -4,7 +4,6 @@ namespace app\models;
 
 use yii\base\Model;
 use app\models\Paper;
-use MathPHP\LinearAlgebra\Matrix;
 use MathPHP\LinearAlgebra\MatrixFactory;
 
 class ConsultaModel extends Model
@@ -13,12 +12,13 @@ class ConsultaModel extends Model
     public $inicio;
     public $final;
     public $states_number;
+    public $periodo;
 
     public function rules()
     {
         return [
             [['nome', 'inicio', 'final', 'states_number'], 'required'],
-            ['states_number', 'integer'],
+            [['states_number', 'periodo'], 'integer'],
             [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy']
             //['final', 'compare', 'compareValue' => 'inicio', 'operator' => '>']
         ];
@@ -36,11 +36,10 @@ class ConsultaModel extends Model
 
     public function PegarDados($stock, $start, $day)
     {
-        return Paper::find()->where(
+        return Paper::find()->orderBy('date')->where(
             ['=', 'codneg', $stock],
-            ['=', 'tpmerc', '010'],
-            ['>=', 'date', $start]
-        )->andWhere(['<=', 'date', $day])->all();
+            ['=', 'tpmerc', '010']
+        )->andWhere(['>=', 'date', $start])->andWhere(['<=', 'date', $day])->all();
     }
 
     public function DefinirPremin($cursor_by_price)

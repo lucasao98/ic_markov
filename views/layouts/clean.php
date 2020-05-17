@@ -49,6 +49,9 @@ TesteAsset::register($this);
             <a class="nav-link" href="?r=exercicios/metodos">Previsão</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="?r=exercicios/teste">Teste</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="?r=site/login">Login</a>
           </li>
         </ul>

@@ -29,35 +29,37 @@ TesteAsset::register($this);
 </head>
 
 <body>
-<?php $this->beginBody() ?>
+  <?php $this->beginBody() ?>
 
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="#">Meu Site</a>
-      <div class="collapse navbar-collapse" id="navbarResponsive">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="?r=exercicios/home">Home
-              <span class="sr-only">(current)</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Sobre</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="?r=exercicios/metodos">Previsão</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="?r=exercicios/teste">Teste</a>
-          </li> 
-          <li class="nav-item">
-            <a class="nav-link" href="?r=site/login">Login</a>
-          </li>
-        </ul>
+  <header class="navigation">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">Meu Site</a>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="?r=exercicios/home">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Sobre</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="?r=exercicios/metodos">Previsão</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="?r=exercicios/teste">Teste</a>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
+    <aside class="nav-login">
+      <a class="nav-link" href="?r=site/login">Login</a>
+    </aside>
+  </header>
 
   <!-- Header -->
   <!--<header class="bg-primary py-5 mb-5">
@@ -70,8 +72,8 @@ TesteAsset::register($this);
       </div>
     </div>
   </header>-->
-	
-	<?= $content ?>
+
+  <?= $content ?>
   <!-- Page Content -->
   <div class="container">
 
@@ -154,9 +156,8 @@ TesteAsset::register($this);
     <!-- /.container -->
   </footer>
 
-<?php $this->endBody() ?>
+  <?php $this->endBody() ?>
 </body>
 
 </html>
 <?php $this->endPage() ?>
-

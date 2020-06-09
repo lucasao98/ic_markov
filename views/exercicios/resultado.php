@@ -1,6 +1,5 @@
 <?php
 
-use app\models\Paper;
 
 $prob = round($probabilidade * 100, 2);
 ?>

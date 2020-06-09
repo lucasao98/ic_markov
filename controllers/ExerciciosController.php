@@ -16,7 +16,7 @@ class ExerciciosController extends Controller
     {
         $this->layout = 'home';
 
-        return $this->render('index');
+        return $this->render('home');
     }
 
     public function actionPredict()

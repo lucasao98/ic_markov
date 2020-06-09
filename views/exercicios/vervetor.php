@@ -41,4 +41,4 @@ use yii\helpers\Html;
         <?= Html::hiddenInput('interval', $interval) ?>
         <?= Html::submitButton('Validar', ['class'=>'btn btn-primary']) ?>
     <?= Html::endForm() ?>
-</div> 
+</div>

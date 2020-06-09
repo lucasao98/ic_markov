@@ -21,6 +21,8 @@
         foreach ($dates as $date) {
             echo $date->toDateTime()->format('d/m/Y') . '<br>';
         }
+
+        print_r($intervals);
         ?>
     </h4>
 </body>

@@ -24,7 +24,8 @@
         "yiisoft/yii2-mongodb": "^2.1",
         "greenhost/backjob": "master-dev",
         "yiisoft/yii2-queue": "^2.3",
-        "markrogoyski/math-php": "^0.55.0"
+        "markrogoyski/math-php": "^0.55.0",
+        "miloschuman/yii2-highcharts-widget": "^8.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

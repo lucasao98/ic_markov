@@ -25,7 +25,8 @@
         "greenhost/backjob": "master-dev",
         "yiisoft/yii2-queue": "^2.3",
         "markrogoyski/math-php": "^0.55.0",
-        "miloschuman/yii2-highcharts-widget": "^8.0"
+        "miloschuman/yii2-highcharts-widget": "^8.0",
+        "scotthuangzl/yii2-google-chart": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

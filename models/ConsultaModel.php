@@ -124,4 +124,11 @@ class ConsultaModel extends Model
 
         return $vector;
     }
+
+    public function getInterval($premin, $interval, $i) {
+        $min = $premin + ($interval * $i);
+        $max = $premin + ($interval * ($i + 1));
+
+        return [$min, $max];
+    }
 }

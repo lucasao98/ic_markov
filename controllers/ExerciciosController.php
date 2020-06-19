@@ -154,14 +154,14 @@ class ExerciciosController extends Controller
             $acertou = 0;
             $errou = 0;
             $next = array();
+            $intervals = array();
             $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->getTimestamp());
             $nextDay = new Paper();
 
             while (1) {
                 $final = $start;
                 $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
-                $start = $start->modify('-1 year'); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
-                //echo $final . $start->format('d/m/Y');
+                $start = $start->modify("-$model->periodo month"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
                 /* -------------------------------------------------------------------- */
                 $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
 
@@ -201,7 +201,7 @@ class ExerciciosController extends Controller
                 $nextDay['state'] = $model->getState($nextDay['preult'], $premin['preult'], $interval, $model->states_number); // calcula o estado do dia seguinte
 
 
-                array_push($next, $nextDay['date']);
+                array_push($next, $nextDay);
                 $max = 0;
                 $vector = $vector[0];
 
@@ -210,6 +210,7 @@ class ExerciciosController extends Controller
                         $max = $i;
                 }
 
+                array_push($intervals, $model->getInterval($premin['preult'], $interval, $max));
                 if ($nextDay['state'] == $max + 1)
                     $acertou++;
                 else
@@ -218,11 +219,11 @@ class ExerciciosController extends Controller
 
                 //Se o dia previsto foi um mais a frente que o próximo o programa continua a partir do dia previsto
                 if ($nextDay['date'] != Paper::toIsoDate(($final->toDateTime()->modify('+1 day')->format('U')))) {
-                    $nextAux = $nextDay['date']->toDateTime()->modify('-1 year');
+                    $nextAux = $nextDay['date']->toDateTime()->modify("-$model->periodo month");
                     $start = Paper::toIsoDate($nextAux->getTimestamp());
                 }
 
-                $start = $start->toDateTime()->modify('+1 year');
+                $start = $start->toDateTime()->modify("+$model->periodo month");
                 $start = $start->modify('+1 day');
                 $start = $start->format('d/m/Y');
                 $consultas++;
@@ -232,7 +233,8 @@ class ExerciciosController extends Controller
                 'acertou' => $acertou,
                 'errou' => $errou,
                 'consultas' => $consultas,
-                'dates' => $next
+                'dates' => $next,
+                'intervals' => $intervals
             ]);
         } else {
             return $this->render('teste');

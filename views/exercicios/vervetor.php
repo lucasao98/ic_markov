@@ -31,7 +31,7 @@ use yii\helpers\Html;
 
 <br>
 <div>
-    <?= Html::beginForm('index.php?r=exercicios/validate', 'get') /*todos os parâmetros enviados pela 
+    <?= Html::beginForm('validate', 'get') /*todos os parâmetros enviados pela 
     actionPredict serão enviados para a actionValidate pela URL e serão consumidos via GET*/ ?>
     <?= Html::hiddenInput('stock', $stock) ?>
     <?= Html::hiddenInput('vector', $vector) ?>

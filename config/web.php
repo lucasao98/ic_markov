@@ -23,7 +23,9 @@ $config = [
         'job-queue' => [
             'class' => \yiicod\jobqueue\commands\JobQueueCommand::class,
         ]
-     ],   
+     ],
+     
+    // 'defautlRoute' => 'exercicios/index',
     
     'components' => [
         'request' => [
@@ -59,18 +61,17 @@ $config = [
         
         'mongodb' => [
             'class' => '\yii\mongodb\Connection',
-            'dsn' => 'mongodb://localhost:27017/stock',
+             'dsn' => 'mongodb://localhost:27017/stock' /*'mongodb://cmtd:iXuRY8v9Jx5MdDMoxnPjf6LWSGqPIX4sVWGIycdrmEOXgB3U1kD6o825OcLqo5aq3fshufxNBC0vQn9Zi36u1g==@cmtd.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@cmtd@/cmtd'*/,
         ],
         
         'db' => $db,
-        /*
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-        */
         
         'queue' => [
             'class' => \yii\queue\file\Queue::class,

@@ -39,7 +39,7 @@ TesteAsset::register($this);
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="?r=exercicios/home">Home
+              <a class="nav-link" href="home">Home
                 <span class="sr-only">(current)</span>
               </a>
             </li>
@@ -47,10 +47,10 @@ TesteAsset::register($this);
               <a class="nav-link" href="#">Sobre</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="?r=exercicios/metodos">Previsão</a>
+              <a class="nav-link" href="metodos">Previsão</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="?r=exercicios/teste">Teste</a>
+              <a class="nav-link" href="teste">Teste</a>
             </li>
           </ul>
         </div>

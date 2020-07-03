@@ -44,10 +44,10 @@ TesteAsset::register($this);
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Sobre</a>
+              <a class="nav-link" href="about">Sobre</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="metodos">Previsão</a>
+              <a class="nav-link" href="predict">Previsão</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="teste">Teste</a>
@@ -57,7 +57,7 @@ TesteAsset::register($this);
       </div>
     </nav>
     <aside class="nav-login">
-      <a class="nav-link" href="?r=site/login">Login</a>
+      <a class="nav-link" href="#">Login</a>
     </aside>
   </header>
 

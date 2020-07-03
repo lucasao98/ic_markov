@@ -25,7 +25,7 @@ $config = [
         ]
      ],
      
-    // 'defautlRoute' => 'exercicios/index',
+    // 'defautlRoute' => 'main/home',
     
     'components' => [
         'request' => [
@@ -61,7 +61,7 @@ $config = [
         
         'mongodb' => [
             'class' => '\yii\mongodb\Connection',
-             'dsn' => 'mongodb://localhost:27017/stock' /*'mongodb://cmtd:iXuRY8v9Jx5MdDMoxnPjf6LWSGqPIX4sVWGIycdrmEOXgB3U1kD6o825OcLqo5aq3fshufxNBC0vQn9Zi36u1g==@cmtd.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@cmtd@/cmtd'*/,
+             'dsn' => /*'mongodb://localhost:27017/stock'*/ 'mongodb://cmtd:iXuRY8v9Jx5MdDMoxnPjf6LWSGqPIX4sVWGIycdrmEOXgB3U1kD6o825OcLqo5aq3fshufxNBC0vQn9Zi36u1g==@cmtd.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@cmtd@/cmtd',
         ],
         
         'db' => $db,
@@ -70,6 +70,11 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '' => 'main/home',
+                'home' => 'main/home',
+                'predict' => 'main/predict',
+                'teste' => 'main/teste',
+                'about' => 'main/about'
             ],
         ],
         

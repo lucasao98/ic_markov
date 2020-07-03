@@ -4,7 +4,6 @@ namespace app\controllers;
 use app\models\Paper;
 use DateTime;
 use Exception;
-use Yii;
 use yii\base\Controller;
 use yii\httpclient\Client;
 use ZipArchive;
@@ -24,7 +23,7 @@ class ImportController extends Controller {
         
         ini_set('max_execution_time', 0); //300 seconds = 5 minutes
         ini_set('memory_limit', '-1');
-        Yii::debug("[IMPORT] start");
+        //Yii::debug("[IMPORT] start");
         
         $begin =  DateTime::createFromFormat('dmY',$startDate);
         $end =  DateTime::createFromFormat('dmY',$endDate);
@@ -45,10 +44,10 @@ class ImportController extends Controller {
                 //$this->downloadData($dateFormatted, $typeFromDownload);
                 //$this->extractData($dateFormatted);
                 $this->parseDataAndSaveInDatabase($dateFormatted, $typeFromDownload);
-                Yii::debug("[IMPORT]sucesso na data " . $dateFormatted);
+                //Yii::debug("[IMPORT]sucesso na data " . $dateFormatted);
                 
             } catch(\Exception $e) {
-                Yii::debug("[IMPORT]falha na data " . $dateFormatted . " " . $e->getMessage());
+                //Yii::debug("[IMPORT]falha na data " . $dateFormatted . " " . $e->getMessage());
                 
             }
             
@@ -65,14 +64,14 @@ class ImportController extends Controller {
             ]));
         }
         Yii::$app->queue->on(Queue::EVENT_AFTER_ERROR, function ($event) {
-            Yii::debug($event->error);
+            //Yii::debug($event->error);
             echo($event->error);
             return $event->error;
         });
             return "enfileirado";
     }*/
     public function downloadData($date, $type) {
-        Yii::debug("[IMPORT] start download data from " . $date);
+        //Yii::debug("[IMPORT] start download data from " . $date);
         
         
         $file_path = 'C:/Users/riqui/Downloads/bovespa/' . $date . '.zip';
@@ -86,11 +85,11 @@ class ImportController extends Controller {
         ->setUrl('http://bvmf.bmfbovespa.com.br/InstDados/SerHist/COTAHIST_' . $type . $date . '.zip')
         ->setOutputFile($fh)
         ->send();
-        Yii::debug("[IMPORT] end download data from " . $date);
+        //Yii::debug("[IMPORT] end download data from " . $date);
         
     }
     public function extractData($date) {
-        Yii::debug("[IMPORT] start extractData data from " . $date);
+        //Yii::debug("[IMPORT] start extractData data from " . $date);
         
         $file_path = 'C:/Users/riqui/Downloads/bovespa/' . $date . '.zip';
         $zip = new ZipArchive;
@@ -104,11 +103,11 @@ class ImportController extends Controller {
             echo 'failed, code:' . $res;
             
         }
-        Yii::debug("[IMPORT] end extractData data from " . $date);
+        //Yii::debug("[IMPORT] end extractData data from " . $date);
         
     }
     public function parseDataAndSaveInDatabase($date, $type) {
-        Yii::debug("[IMPORT] start parseDataAndSaveInDatabase data from " . $date);
+        //Yii::debug("[IMPORT] start parseDataAndSaveInDatabase data from " . $date);
         
         
         if($type == 'D') {
@@ -199,16 +198,16 @@ class ImportController extends Controller {
                     
                     $paper->save();
                 } catch(Exception $e) {
-                    Yii::debug("[IMPORT] error");
+                    //Yii::debug("[IMPORT] error");
                 }
                 
             }
             fclose($file);
         } else {
-            Yii::debug("[IMPORT] file not found " . $date);
+            //Yii::debug("[IMPORT] file not found " . $date);
             
         }
-        Yii::debug("[IMPORT] end parseDataAndSaveInDatabase data from " . $date);
+        //Yii::debug("[IMPORT] end parseDataAndSaveInDatabase data from " . $date);
         
         return "OK";
     }

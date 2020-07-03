@@ -9,7 +9,7 @@ use app\models\Paper;
 
 //date_default_timezone_set("america/bahia");
 
-class ExerciciosController extends Controller
+class MainController extends Controller
 {
 
     public function actionHome()
@@ -73,29 +73,6 @@ class ExerciciosController extends Controller
 
             return $this->render('predict', [
                 'consultaModel' => $model
-            ]);
-        }
-    }
-
-    public function actionMetodos()
-    {
-        $this->layout = 'clean';
-
-        $metodosModel = new MetodosModel;
-        $post = $_POST;
-
-        if ($metodosModel->load($post) && $metodosModel->validate()) {
-
-            if ($metodosModel->metodo == 'CMTD') {
-
-                return $this->redirect(['predict']);
-            } else {
-
-                return $this->render('cmo');
-            }
-        } else {
-            return $this->render('metodos', [
-                'model' => $metodosModel
             ]);
         }
     }
@@ -239,6 +216,11 @@ class ExerciciosController extends Controller
         } else {
             return $this->render('teste');
         }
+    }
+
+    public function actionAbout() {
+        $this->layout = 'clean';
+        return $this->render('about');
     }
 
     public function actionLogin()

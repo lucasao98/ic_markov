@@ -73,6 +73,7 @@ $config = [
                 '' => 'main/home',
                 'home' => 'main/home',
                 'predict' => 'main/predict',
+                'validate' => 'main/validate',
                 'teste' => 'main/teste',
                 'about' => 'main/about'
             ],

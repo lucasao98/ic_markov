@@ -4,7 +4,6 @@ namespace app\controllers;
 
 use yii\web\Controller;
 use app\models\ConsultaModel;
-use app\models\MetodosModel;
 use app\models\Paper;
 
 //date_default_timezone_set("america/bahia");
@@ -32,12 +31,14 @@ class MainController extends Controller
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
             $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00'); //Dia final do conjunto de treinamento
 
-            $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
-            $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
+            $start = Paper::toIsoDate($start->getTimestamp()); //Passando para o padrão de datas do banco
+            $final = Paper::toIsoDate($final->getTimestamp()); //Passando para o padrão de datas do banco
+            // echo $start . '<br>' . $final;
 
             $stock = $model->nome;
 
             $cursor_by_price = $model->PegarDados($stock, $start, $final);
+            // print_r($cursor_by_price);
 
             $premin = $model->DefinirPremin($cursor_by_price);
             $premax = $model->DefinirPremax($cursor_by_price);

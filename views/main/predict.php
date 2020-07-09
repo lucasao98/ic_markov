@@ -12,7 +12,7 @@ use app\models\Paper;
 ini_set('max_execution_time', 0); //300 seconds = 5 minutes
 ini_set('memory_limit', '-1');
 
-$dateAux = \DateTime::createFromFormat('d/m/Y', '09/03/2020');
+$dateAux = \DateTime::createFromFormat('d/m/YH:i:s', '30/12/201900:00:00');
 $dateAux = Paper::toIsoDate($dateAux->getTimestamp());
 //$data = Paper::find()->where(['>=', 'date', $dateAux])->all();
 

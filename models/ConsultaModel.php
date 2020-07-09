@@ -66,7 +66,7 @@ class ConsultaModel extends Model
         return $premax;
     }
 
-    public function getState($price, $premin, $interval, $states_number)
+    public static function getState($price, $premin, $interval, $states_number)
     {
         for ($i = 0; $i < $states_number; $i++) {
             if ($price >= ($premin + ($interval * $i)) && $price <= $premin + ($interval * ($i + 1))) {

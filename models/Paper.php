@@ -28,7 +28,7 @@ class Paper extends ActiveRecord
 		];
 	}
 
-	public function toIsoDate($timestamp)
+	public static function toIsoDate($timestamp)
 	{
 		return new \MongoDB\BSON\UTCDateTime($timestamp * 1000);
 	}

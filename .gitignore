@@ -7,4 +7,4 @@
 /controllers/SiteController.php
 /views/site/*
 /Procfile
-/assets/COTAHIST/*
+/assets/COTAHIST/*.TXT

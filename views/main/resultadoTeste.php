@@ -13,15 +13,18 @@
 </style>
 
 <body>
+    <!-- Resultado -->
     <h3 class="result-acertou"><?= "Acertou: $acertou - " . round(($acertou / $consultas) * 100, 2) . '%' ?></h3>
     <h3 class="result-errou"><?= "Errou: $errou - " . round(($errou / $consultas) * 100, 2) . '%' ?></h3>
 
     <h4>
         <?php
+        //Datas que foram previstas
         foreach ($dates as $date) {
             echo $date['date']->toDateTime()->format('d/m/Y') . '<br>';
         }
 
+        //Intervalo onde os preços previstos se encaixam
         print_r($intervals);
         ?>
     </h4>
@@ -42,6 +45,7 @@
             array_push($supData, [$formattedDate, $interval[1]]);
         }
 
+        //Plotagem do gráfico
         $series = [
             [
                 'name' => 'Preço de fechamento',

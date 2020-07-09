@@ -7,3 +7,4 @@
 /controllers/SiteController.php
 /views/site/*
 /assets/COTAHIST/*
+/Procfile

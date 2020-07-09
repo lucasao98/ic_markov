@@ -7,4 +7,3 @@
 /controllers/SiteController.php
 /views/site/*
 /Procfile
-*.TXT

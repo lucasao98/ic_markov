@@ -45,6 +45,10 @@ class MainController extends Controller
 
             $interval = abs($premin['preult'] - $premax['preult']) / $model->states_number; //calculo do intervalo
 
+            // echo $premin['preult'] . '<br>';
+            // echo $premax['preult'] . '<br>';
+            // echo $interval . '<br>';
+
             $states = []; //vetor que contem a quantidade de elementos em cada estado
             for ($i = 0; $i < $model->states_number; $i++) {
                 $states[$i] = 0;
@@ -54,6 +58,7 @@ class MainController extends Controller
                 $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
                 if ($cursor['state'] != 0)
                     $states[$cursor['state'] - 1] += 1;
+                // echo $cursor['date']->toDateTime()->format('d/m/Y') . ' -> ' . $cursor['state'] . ' = ' . $cursor['preult'];
             }
 
             $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number); //função que constrói a matriz de transição
@@ -149,8 +154,8 @@ class MainController extends Controller
                 $stock = $model->nome;
 
                 $nextDay = Paper::find()->orderBy('date')->where(['=', 'codneg', $stock])->andWhere(['>', 'date', $final])->one(); //busca o dia seguinte no banco
-                //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço acaba
-                if ($nextDay['date'] > $aux)
+                //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
+                if ($nextDay['date'] > $aux || $nextDay['date'] == null)
                     break;
 
                 $cursor_by_price = $model->PegarDados($stock, $start, $final);
@@ -165,11 +170,15 @@ class MainController extends Controller
                     $states[$i] = 0;
                 }
 
+                
                 foreach ($cursor_by_price as $cursor) { //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                    $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
-                    if ($cursor['state'] != 0)
-                        $states[$cursor['state'] - 1] += 1;
+                        $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
+                        if ($cursor['state'] != 0)
+                            $states[$cursor['state'] - 1] += 1;
                 }
+
+                // if(in_array(0, $states))
+                //     print_r($states);
 
                 $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number); //função que constrói a matriz de transição
 
@@ -177,7 +186,11 @@ class MainController extends Controller
                 /* Validação ----------------------------------------------------------------- */
 
                 $nextDay['state'] = $model->getState($nextDay['preult'], $premin['preult'], $interval, $model->states_number); // calcula o estado do dia seguinte
+                // if ($nextDay['state'] == 0 && $nextDay['preult'] >= $premax['preult'])
+                //     $nextDay['state'] = $model->states_number;
 
+                // else if ($nextDay['state'] == 0 && $nextDay['preult'] <= $premin['preult'])
+                //     $nextDay['state'] = 1;
 
                 array_push($next, $nextDay);
                 $max = 0;
@@ -207,19 +220,27 @@ class MainController extends Controller
                 $consultas++;
             }
 
+            $chart = $model->chartData($next, $intervals);
+
             return $this->render('resultadoTeste', [
                 'acertou' => $acertou,
                 'errou' => $errou,
                 'consultas' => $consultas,
-                'dates' => $next,
-                'intervals' => $intervals
+                'fechamentoData' => $chart['fechamentoData'],
+                'avgData' => $chart['avgData'],
+                'supData' => $chart['supData'],
+                'infData' => $chart['infData'],
+                'tendencia' => $chart['tendencia']
+                // 'next' => $next,
+                // 'intervals' => $intervals
             ]);
         } else {
             return $this->render('teste');
         }
     }
 
-    public function actionAbout() {
+    public function actionAbout()
+    {
         $this->layout = 'clean';
         return $this->render('about');
     }

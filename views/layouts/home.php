@@ -20,6 +20,7 @@ TesteAsset::register($this);
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
+  <title>Home</title>
   <?= Html::csrfMetaTags() ?>
 
   <!--  <title>Business Frontpage - Start Bootstrap Template</title> -->
@@ -79,33 +80,36 @@ TesteAsset::register($this);
 
     <div class="row">
       <div class="col-md-8 mb-5">
-        <h2>What We Do</h2>
+        <h2>Sobre a ferramenta</h2>
         <hr>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. A deserunt neque tempore recusandae animi soluta quasi? Asperiores rem dolore eaque vel, porro, soluta unde debitis aliquam laboriosam. Repellat explicabo, maiores!</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis optio neque consectetur consequatur magni in nisi, natus beatae quidem quam odit commodi ducimus totam eum, alias, adipisci nesciunt voluptate. Voluptatum.</p>
-        <a class="btn btn-primary btn-lg" href="#">Call to Action &raquo;</a>
+        <p>Está ferramenta foi criada durante um projeto de iniciação científica financiado pela FAPESB!</p>
+        <p>O objetivo desta ferramenta é de prever tendências em ações da BOVESPA usando Cadeias de Markov de Tempo Discreto.</p>
+        <!-- <a class="btn btn-primary btn-lg" href="#">Call to Action &raquo;</a> -->
       </div>
       <div class="col-md-4 mb-5">
-        <h2>Contact Us</h2>
+        <h2>Sobre os desenvolvedores</h2>
         <hr>
         <address>
-          <strong>Start Bootstrap</strong>
-          <br>3481 Melrose Place
-          <br>Beverly Hills, CA 90210
+          <strong>Bolsista</strong>
+          <br>João Henrique dos Santos Queiroz
+          <br>Bacharelando em Ciência da Computação
           <br>
         </address>
         <address>
-          <abbr title="Phone">P:</abbr>
-          (123) 456-7890
+          <abbr title="Email">Email:</abbr>
+          <a href="mailto:jhsqueiroz.cic@uesc.br">jhsqueiroz.cic@uesc.br</a>
+        </address>
+        <address>
+          <strong>Orientadora</strong>
+          <br>Martha Torres
+          <br>Professora adjunta da UESC
           <br>
-          <abbr title="Email">E:</abbr>
-          <a href="mailto:#">name@example.com</a>
         </address>
       </div>
     </div>
     <!-- /.row -->
 
-    <div class="row">
+    <!-- <div class="row">
       <div class="col-md-4 mb-5">
         <div class="card h-100">
           <img class="card-img-top" src="http://placehold.it/300x200" alt="">
@@ -142,19 +146,18 @@ TesteAsset::register($this);
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     <!-- /.row -->
 
   </div>
   <!-- /.container -->
 
   <!-- Footer -->
-  <footer class="py-5 bg-dark">
+  <!-- <footer class="py-5 bg-dark">
     <div class="container">
       <p class="m-0 text-center text-white">Copyright &copy; Your Website 2019</p>
     </div>
-    <!-- /.container -->
-  </footer>
+  </footer> -->
 
   <?php $this->endBody() ?>
 </body>

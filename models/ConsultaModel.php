@@ -34,12 +34,12 @@ class ConsultaModel extends Model
         ];
     }
 
-    public function PegarDados($stock, $start, $day)
+    public function PegarDados($stock, $start, $final)
     {
         return Paper::find()->orderBy('date')->where(
             ['=', 'codneg', $stock],
             ['=', 'tpmerc', '010']
-        )->andWhere(['>=', 'date', $start])->andWhere(['<=', 'date', $day])->all();
+        )->andWhere(['>=', 'date', $start])->andWhere(['<=', 'date', $final])->all();
     }
 
     public function DefinirPremin($cursor_by_price)
@@ -69,11 +69,11 @@ class ConsultaModel extends Model
     public static function getState($price, $premin, $interval, $states_number)
     {
         for ($i = 0; $i < $states_number; $i++) {
-            if ($price >= ($premin + ($interval * $i)) && $price <= $premin + ($interval * ($i + 1))) {
+            if ($price >= ($premin + ($interval * $i)) && $price-0.00001 <= ($premin + ($interval * ($i + 1)))) {
                 return $i + 1;
             }
         }
-
+        
         return 0;
     }
 
@@ -86,14 +86,6 @@ class ConsultaModel extends Model
                 $matrix[$i][$j] = 0;
 
         for ($i = 0; $i < count($paper) - 1; $i++) { //calculando a quantidade de elementos em cada transição da matriz
-            /*if($paper[$i]['state'] != 0){
-                $j = $i+1;
-                while($paper[$j]['state'] == 0){
-                    $j++;
-                }
-                
-            }*/
-
             $j = $i + 1;
             $matrix[$paper[$i]['state'] - 1][$paper[$j]['state'] - 1] += 1;
         }
@@ -102,7 +94,10 @@ class ConsultaModel extends Model
 
         for ($i = 0; $i < $states_number; $i++) //construção da matriz de transição $states contem a quantidade de elementos em cada estado
             for ($j = 0; $j < $states_number; $j++) {
-                $matrix[$i][$j] /= $states[$i];
+                if($states[$i] == 0)
+                    $matrix[$i][$j] = 0;
+                else
+                    $matrix[$i][$j] /= $states[$i];
             }
 
         return $matrix;
@@ -130,5 +125,55 @@ class ConsultaModel extends Model
         $max = $premin + ($interval * ($i + 1));
 
         return [$min, $max];
+    }
+
+    public function chartData($next, $intervals) {
+        //Dados para construção do gráfico
+        $fechamentoData = array();
+        $infData = array();
+        $supData = array();
+        $avgData = array();
+        $tendencia = 0;
+
+        //Dados dos preço de fechamento para o gráfico
+        foreach ($next as $date) {
+            $formattedDate = intval(($date['date']->toDateTime())->format('U') . '000');
+            array_push($fechamentoData, [$formattedDate, $date['preult']]);
+        }
+
+        //Dados dos preços dos intervalos para o gráfico
+        foreach ($intervals as $i => $interval) {
+            $formattedDate = intval(($next[$i]['date']->toDateTime())->format('U') . '000');
+            array_push($infData, [$formattedDate, $interval[0]]);
+            array_push($supData, [$formattedDate, $interval[1]]);
+        }
+
+        //Dados do valor médio para o gráfico
+        foreach ($intervals as $i => $interval) {
+            $formattedDate = intval(($next[$i]['date']->toDateTime())->format('U') . '000');
+            array_push($avgData, [$formattedDate, ($interval[0] + $interval[1]) / 2]);
+        }
+
+        for($i = 0; $i < count($avgData)-1; $i++) {
+            $avgAux = $avgData[$i+1][1] - $avgData[$i][1];
+            $fechamentoAux = $fechamentoData[$i+1][1] - $fechamentoData[$i][1];
+
+            if($avgAux > 0 && $fechamentoAux > 0)
+                $tendencia++;
+
+            else if($avgAux < 0 && $fechamentoAux < 0)
+                $tendencia++;
+
+            else if($avgAux == 0 && $fechamentoAux == 0)
+                $tendencia++;
+        }
+
+        return ([
+            'fechamentoData' => $fechamentoData,
+            'infData' => $infData,
+            'supData' => $supData,
+            'avgData' => $avgData,
+            'tendencia' => $tendencia
+        ]);
     }
 }

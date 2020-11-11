@@ -1,6 +1,6 @@
 <div class="col-md-8 mb-5">
-    <h2>What We Do</h2>
+    <h2>Sobre a ferramenta</h2>
     <hr>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. A deserunt neque tempore recusandae animi soluta quasi? Asperiores rem dolore eaque vel, porro, soluta unde debitis aliquam laboriosam. Repellat explicabo, maiores!</p>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Omnis optio neque consectetur consequatur magni in nisi, natus beatae quidem quam odit commodi ducimus totam eum, alias, adipisci nesciunt voluptate. Voluptatum.</p>
+    <p>Está ferramenta foi criada durante um projeto de iniciação científica financiado pela FAPESB!</p>
+    <p>O objetivo desta ferramenta é de prever tendências em ações da BOVESPA usando Cadeias de Markov de Tempo Discreto.</p>    
 </div>

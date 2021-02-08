@@ -7,6 +7,7 @@ use Exception;
 use yii\base\Controller;
 use yii\httpclient\Client;
 use ZipArchive;
+use Yii;
 
 class ImportController extends Controller {
 
@@ -43,14 +44,14 @@ class ImportController extends Controller {
             $dateFormatted = $i->format($format);
             
             try {
-                //$this->downloadData($dateFormatted, $typeFromDownload);
-                //$this->extractData($dateFormatted);
-                $this->parseDataAndSaveInDatabase($dateFormatted, $typeFromDownload);
+                // $this->downloadData($dateFormatted, $typeFromDownload);
+                $this->extractData($dateFormatted);
+                // $this->parseDataAndSaveInDatabase($dateFormatted, $typeFromDownload);
 
-                // Yii::debug("[IMPORT]sucesso na data " . $dateFormatted);
+                Yii::debug("[IMPORT]sucesso na data " . $dateFormatted);
                 
             } catch(\Exception $e) {
-                // Yii::debug("[IMPORT]falha na data " . $dateFormatted . " " . $e->getMessage());
+                return ("[IMPORT]falha na data " . $dateFormatted . " " . $e->getMessage());
                 
             }
             
@@ -76,7 +77,7 @@ class ImportController extends Controller {
             return "enfileirado";
     }*/
     public function downloadData($date, $type) {
-        // Yii::debug("[IMPORT] start download data from " . $date);
+        Yii::debug("[IMPORT] start download data from " . $date);
         
         
         $file_path = '../assets/COTAHIST/ZIP/' . $date . '.zip';
@@ -91,11 +92,11 @@ class ImportController extends Controller {
         ->setOutputFile($fh)
         ->send();
         
-        // Yii::debug("[IMPORT] end download data from " . $date);
+        Yii::debug("[IMPORT] end download data from " . $date);
         
     }
     public function extractData($date) {
-        // Yii::debug("[IMPORT] start extractData data from " . $date);
+        Yii::debug("[IMPORT] start extractData data from " . $date);
         
         $file_path = '../assets/COTAHIST/ZIP/' . $date . '.zip';
         $zip = new ZipArchive;
@@ -104,7 +105,9 @@ class ImportController extends Controller {
             echo 'ok';
             
             $zip->extractTo('../assets/COTAHIST');
+            $zip->deleteName($file_path);
             $zip->close();
+            unlink($file_path);
         } else {
             echo 'failed, code:' . $res;
             
@@ -112,7 +115,7 @@ class ImportController extends Controller {
         
     }
     public function parseDataAndSaveInDatabase($date, $type) {
-        // Yii::debug("[IMPORT] start parseDataAndSaveInDatabase data from " . $date);        
+        Yii::debug("[IMPORT] start parseDataAndSaveInDatabase data from " . $date);        
         
         if($type == 'D') {
             $extension = '.TXT';
@@ -203,14 +206,14 @@ class ImportController extends Controller {
                     $paper->save();
                 } catch(Exception $e) {
 
-                    // Yii::debug("[IMPORT] error");
+                    Yii::debug("[IMPORT] error");
                 }
                 
             }
             fclose($file);
         } else {
 
-            // Yii::debug("[IMPORT] file not found " . $date);
+            Yii::debug("[IMPORT] file not found " . $date);
             
         }
 

@@ -75,7 +75,8 @@ $config = [
                 'predict' => 'main/predict',
                 'validate' => 'main/validate',
                 'teste' => 'main/teste',
-                'about' => 'main/about'
+                'about' => 'main/about',
+                'import' => 'import/importForm'
             ],
         ],
         

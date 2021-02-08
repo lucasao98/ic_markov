@@ -5,6 +5,7 @@ namespace app\controllers;
 use yii\web\Controller;
 use app\models\ConsultaModel;
 use app\models\Paper;
+use Yii;
 
 //date_default_timezone_set("america/bahia");
 
@@ -132,6 +133,7 @@ class MainController extends Controller
         $post = $_POST;
 
         if ($model->load($post) && $model->validate() && $model->periodo) {
+            Yii::debug("Inicio");
             $start = $model->inicio;
             $consultas = 0;
             $acertou = 0;
@@ -141,24 +143,34 @@ class MainController extends Controller
             $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->getTimestamp());
             $nextDay = new Paper();
 
+            $final = $start;
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
+            $start = $start->modify("-$model->periodo month"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
+            /* -------------------------------------------------------------------- */
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
+
+            $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
+            $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
+
+            $stock = $model->nome;
+            $cursor_by_price = $model->PegarDados($stock, $start, $final); //Setup inicial do conjunto de treinamento
+            
+            $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
+            $nextDays = $model->PegarDados($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos
+            Yii::debug("Conjunto de treinamento pronto");
+
+
             while (1) {
-                $final = $start;
-                $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
-                $start = $start->modify("-$model->periodo month"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
-                /* -------------------------------------------------------------------- */
-                $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
 
-                $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
-                $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
+                if(count($nextDays) == 0)
+                    break;
 
-                $stock = $model->nome;
-
-                $nextDay = Paper::find()->orderBy('date')->where(['=', 'codneg', $stock])->andWhere(['>', 'date', $final])->one(); //busca o dia seguinte no banco
+                $nextDay = $nextDays[0]; //busca o dia seguinte no banco
+                array_shift($nextDays);
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 if ($nextDay['date'] > $aux || $nextDay['date'] == null)
                     break;
 
-                $cursor_by_price = $model->PegarDados($stock, $start, $final);
 
                 $premin = $model->DefinirPremin($cursor_by_price);
                 $premax = $model->DefinirPremax($cursor_by_price);
@@ -177,20 +189,12 @@ class MainController extends Controller
                             $states[$cursor['state'] - 1] += 1;
                 }
 
-                // if(in_array(0, $states))
-                //     print_r($states);
-
                 $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number); //função que constrói a matriz de transição
 
                 $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number); //função que constrói o vetor de predição
                 /* Validação ----------------------------------------------------------------- */
 
                 $nextDay['state'] = $model->getState($nextDay['preult'], $premin['preult'], $interval, $model->states_number); // calcula o estado do dia seguinte
-                // if ($nextDay['state'] == 0 && $nextDay['preult'] >= $premax['preult'])
-                //     $nextDay['state'] = $model->states_number;
-
-                // else if ($nextDay['state'] == 0 && $nextDay['preult'] <= $premin['preult'])
-                //     $nextDay['state'] = 1;
 
                 array_push($next, $nextDay);
                 $max = 0;
@@ -218,6 +222,18 @@ class MainController extends Controller
                 $start = $start->modify('+1 day');
                 $start = $start->format('d/m/Y');
                 $consultas++;
+
+                $final = $start;
+                $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
+                $start = $start->modify("-$model->periodo month"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
+                /* -------------------------------------------------------------------- */
+                $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
+
+                $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
+                $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
+
+                array_shift($cursor_by_price);
+                array_push($cursor_by_price, $nextDay);
             }
 
             $chart = $model->chartData($next, $intervals);

@@ -140,7 +140,7 @@ class MainController extends Controller
             $errou = 0;
             $next = array();
             $intervals = array();
-            $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->getTimestamp());
+            $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->format('U'));
             $nextDay = new Paper();
 
             $final = $start;
@@ -157,8 +157,8 @@ class MainController extends Controller
             
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
             $nextDays = $model->PegarDados($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos
+            $consultas = count($nextDays);
             Yii::debug("Conjunto de treinamento pronto");
-
 
             while (1) {
 
@@ -167,11 +167,16 @@ class MainController extends Controller
 
                 $nextDay = $nextDays[0]; //busca o dia seguinte no banco
                 array_shift($nextDays);
+                // $date = $nextDay['date']->toDateTime()->format('d/m/Y');
+                // print($date."\n");
+                // $last = $cursor_by_price[count($cursor_by_price)-1]['date']->toDateTime()->format('d/m/Y');
+                // print($last."\n");
+                // print("Ultima: ".$last."Proxima: ".$date."\n");
+                
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 if ($nextDay['date'] > $aux || $nextDay['date'] == null)
                     break;
-
-
+  
                 $premin = $model->DefinirPremin($cursor_by_price);
                 $premax = $model->DefinirPremax($cursor_by_price);
 
@@ -213,30 +218,31 @@ class MainController extends Controller
                 /* Preparação para a próxima iteração ----------------------------------------------------------------- */
 
                 //Se o dia previsto foi um mais a frente que o próximo o programa continua a partir do dia previsto
-                if ($nextDay['date'] != Paper::toIsoDate(($final->toDateTime()->modify('+1 day')->format('U')))) {
-                    $nextAux = $nextDay['date']->toDateTime()->modify("-$model->periodo month");
-                    $start = Paper::toIsoDate($nextAux->getTimestamp());
-                }
+                // if ($nextDay['date'] != Paper::toIsoDate(($final->toDateTime()->modify('+1 day')->format('U')))) {
+                //     $nextAux = $nextDay['date']->toDateTime()->modify("-$model->periodo month");
+                //     $start = Paper::toIsoDate($nextAux->getTimestamp());
+                // }
 
-                $start = $start->toDateTime()->modify("+$model->periodo month");
-                $start = $start->modify('+1 day');
-                $start = $start->format('d/m/Y');
-                $consultas++;
+                // $start = $start->toDateTime()->modify("+$model->periodo month");
+                // $start = $start->modify('+1 day');
+                // $start = $start->format('d/m/Y');
+                // $consultas++;
 
-                $final = $start;
-                $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
-                $start = $start->modify("-$model->periodo month"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
-                /* -------------------------------------------------------------------- */
-                $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
+                // $final = $start;
+                // $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
+                // $start = $start->modify("-$model->periodo month"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
+                // /* -------------------------------------------------------------------- */
+                // $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
 
-                $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
-                $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
+                // $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
+                // $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
 
                 array_shift($cursor_by_price);
                 array_push($cursor_by_price, $nextDay);
             }
 
             $chart = $model->chartData($next, $intervals);
+
 
             return $this->render('resultadoTeste', [
                 'acertou' => $acertou,

@@ -45,8 +45,8 @@ class ImportController extends Controller {
             
             try {
                 // $this->downloadData($dateFormatted, $typeFromDownload);
-                $this->extractData($dateFormatted);
-                // $this->parseDataAndSaveInDatabase($dateFormatted, $typeFromDownload);
+                // $this->extractData($dateFormatted);
+                $this->parseDataAndSaveInDatabase($dateFormatted, $typeFromDownload);
 
                 Yii::debug("[IMPORT]sucesso na data " . $dateFormatted);
                 

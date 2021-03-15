@@ -55,20 +55,35 @@ class MainController extends Controller
                 $states[$i] = 0;
             }
 
-            foreach ($cursor_by_price as $cursor) { //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+            $three_states = [0, 0, 0];
+
+            $cursor_by_price[0]["t_state"] = 2;
+
+            foreach ($cursor_by_price as $index => $cursor) { //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento        
+                if($index > 0) {
+                    $cursor['t_state'] = $model->getThreeSate($cursor['preult'], $cursor_by_price[$index-1]['preult']);
+                }
+
+                $three_states[$cursor['t_state'] - 1] += 1;
+
                 $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
+
                 if ($cursor['state'] != 0)
                     $states[$cursor['state'] - 1] += 1;
-                // echo $cursor['date']->toDateTime()->format('d/m/Y') . ' -> ' . $cursor['state'] . ' = ' . $cursor['preult'];
             }
 
-            $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number); //função que constrói a matriz de transição
+            $three_state_matrix = $model->transitionMatrix($cursor_by_price, $three_states, 3, "t_state");
+            $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state"); //função que constrói o vetor de predição
 
-            $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number); //função que constrói o vetor de predição
+            $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state"); //função que constrói a matriz de transição
+            $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state"); //função que constrói o vetor de predição
 
             return $this->render('vervetor', [
                 //'db' => $cursor_by_price,
                 'vector' => $vector,
+                't_vector' => $three_state_vector,
+                't_matrix' => $three_state_matrix,
+                'last' => $cursor_by_price[count($cursor_by_price)-1],
                 'model' => $model,
                 'stock' => $model->nome,
                 'states_number' => $model->states_number,
@@ -194,9 +209,9 @@ class MainController extends Controller
                             $states[$cursor['state'] - 1] += 1;
                 }
 
-                $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number); //função que constrói a matriz de transição
+                $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state"); //função que constrói a matriz de transição
 
-                $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number); //função que constrói o vetor de predição
+                $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state"); //função que constrói o vetor de predição
                 /* Validação ----------------------------------------------------------------- */
 
                 $nextDay['state'] = $model->getState($nextDay['preult'], $premin['preult'], $interval, $model->states_number); // calcula o estado do dia seguinte

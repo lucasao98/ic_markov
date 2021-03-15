@@ -77,8 +77,18 @@ class ConsultaModel extends Model
         return 0;
     }
 
+    public static function getThreeSate($price, $price_before)
+    {
+        if($price > $price_before) {
+            return 1;
+        } elseif ($price < $price_before) {
+            return 3;
+        } else
+            return 2;
+    }
+
     //Constroi a matriz de transição a partir do conjunto de treinamento
-    public function transitionMatrix($paper, $states, $states_number)
+    public function transitionMatrix($paper, $states, $states_number, $state_type)
     {
         $matrix = [[]];
         for ($i = 0; $i < $states_number; $i++)
@@ -87,10 +97,10 @@ class ConsultaModel extends Model
 
         for ($i = 0; $i < count($paper) - 1; $i++) { //calculando a quantidade de elementos em cada transição da matriz
             $j = $i + 1;
-            $matrix[$paper[$i]['state'] - 1][$paper[$j]['state'] - 1] += 1;
+            $matrix[$paper[$i][$state_type] - 1][$paper[$j][$state_type] - 1] += 1;
         }
 
-        $matrix[$paper[count($paper) - 1]['state'] - 1][$paper[count($paper) - 1]['state'] - 1] += 1; //contagem do ultimo valor do conjunto de treinamento
+        $matrix[$paper[count($paper) - 1][$state_type] - 1][$paper[count($paper) - 1][$state_type] - 1] += 1; //contagem do ultimo valor do conjunto de treinamento
 
         for ($i = 0; $i < $states_number; $i++) //construção da matriz de transição $states contem a quantidade de elementos em cada estado
             for ($j = 0; $j < $states_number; $j++) {
@@ -104,7 +114,7 @@ class ConsultaModel extends Model
     }
 
     //Constroi o vetor de previsão
-    public function predictVector($matrix, $paper, $states_number)
+    public function predictVector($matrix, $paper, $states_number, $state_type)
     {
         $matrix = MatrixFactory::create($matrix);
         $vector = [[]];
@@ -112,7 +122,7 @@ class ConsultaModel extends Model
         for ($i = 0; $i < $states_number; $i++)
             $vector[0][$i] = 0;
 
-        $vector[0][$paper[count($paper) - 1]['state'] - 1] = 1; //declaração do vetor de estado inicial a partir do ultimo dia do conjunto de treinamento
+        $vector[0][$paper[count($paper) - 1][$state_type] - 1] = 1; //declaração do vetor de estado inicial a partir do ultimo dia do conjunto de treinamento
         $vector = MatrixFactory::create($vector);
 
         $vector = $vector->multiply($matrix); //multiplicando

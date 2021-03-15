@@ -24,7 +24,9 @@ class Paper extends ActiveRecord
 	{
 		return [
 			"_id", "created_at", "date", "codbdi", "codneg", "tpmerc", "nomres",
-			"especi", "prazot", "modref", "preab", "premax", "premin", "premed", "preult", "preofc", "preofv", "totneg", "quatot", "voltot", "preexe", "indopc", "datven", "fatcot", "ptoexe", "codisi", "dismes", "state"
+			"especi", "prazot", "modref", "preab", "premax", "premin", "premed", 
+			"preult", "preofc", "preofv", "totneg", "quatot", "voltot", "preexe", "indopc", "datven", 
+			"fatcot", "ptoexe", "codisi", "dismes", "state", "t_state"
 		];
 	}
 

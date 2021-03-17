@@ -82,8 +82,8 @@ class MainController extends Controller
                 //'db' => $cursor_by_price,
                 'vector' => $vector,
                 't_vector' => $three_state_vector,
-                't_matrix' => $three_state_matrix,
                 'last' => $cursor_by_price[count($cursor_by_price)-1],
+                'last_price' => $cursor_by_price[count($cursor_by_price)-1]['preult'],
                 'model' => $model,
                 'stock' => $model->nome,
                 'states_number' => $model->states_number,
@@ -107,36 +107,80 @@ class MainController extends Controller
         //Os valores recebidos através da URL são string, por isso precisam de manipulação
         $stock = $_GET['stock'];
         $vector = substr($_GET['vector'], 1, -1); //Removendo o primeiro e último caractere "[ ]"
+        $t_vector = substr($_GET['t_vector'], 1, -1); //Removendo o primeiro e último caractere "[ ]"
         $states_number = intval($_GET['states_number']); //Convertendo para inteiro
         $day = Paper::toIsoDate((intval($_GET['day']) / 1000)); //Convertendo pra o padrão IsoDate utilizado pelo Mongo
         $premin = floatval($_GET['premin']); //Conversão para float
         $interval = floatval($_GET['interval']); //Conversão para float
+        $last_price = floatval($_GET['last_price']); //Conversão para float
 
         $vector = explode(", ", $vector); //Construindo um vetor de strings
         for ($i = 0; $i < count($vector); $i++) { //Pegando cada valor do vetor de strings e convertendo para float
             $vector[$i] = floatval($vector[$i]);
         }
 
+        $t_vector = explode(", ", $t_vector); //Construindo um vetor de strings
+        for ($i = 0; $i < count($t_vector); $i++) { //Pegando cada valor do vetor de strings e convertendo para float
+            $t_vector[$i] = floatval($t_vector[$i]);
+        }
+
         $nextDay = Paper::find()->orderBy('date')->where(['=', 'codneg', $stock])->andWhere(['>', 'date', $day])->one(); //busca o dia seguinte no banco
         $nextDay['state'] = ConsultaModel::getState($nextDay['preult'], $premin, $interval, $states_number); // calcula o estado do dia seguinte
         $max = 0;
+        $t_max = 0;
 
         for ($i = 1; $i < $states_number; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
             if ($vector[$i] >= $vector[$max])
                 $max = $i;
         }
 
+        for ($i = 1; $i < 3; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
+            if ($t_vector[$i] >= $t_vector[$t_max])
+                $t_max = $i;
+        }
+
         if ($nextDay['state'] == $max + 1)
-            $resultado = 'Acertou!';
+            $result = 'Acertou!';
 
         else
-            $resultado = 'Errou!';
+            $result = 'Errou!';
+
+        switch($t_max) {
+            case 0: 
+                if($nextDay['preult'] > $last_price)
+                    $result_three_state = 'Acertou!';
+                else
+                    $result_three_state = 'Errou!';
+                break;
+
+            case 1: 
+                if($nextDay['preult'] == $last_price)
+                    $result_three_state = 'Acertou!';
+                else
+                    $result_three_state = 'Errou!';
+                break;
+
+            case 2: 
+                if($nextDay['preult'] < $last_price)
+                    $result_three_state = 'Acertou!';
+                else
+                    $result_three_state = 'Errou!';
+                break;
+            
+            default:
+                break;
+        }
 
         return $this->render('resultado', [
-            'resultado' => $resultado,
+            'result' => $result,
+            'result_three_state' => $result_three_state,
             'nextDay' => $nextDay,
             'estado' => $max + 1,
-            'probabilidade' => $vector[$max]
+            'probabilidade' => $vector[$max],
+            'three_states' => $t_vector[$t_max],
+            't_max' => $t_max,
+            't_result' => $result_three_state,
+            'last_price' => $last_price
         ]);
     }
 

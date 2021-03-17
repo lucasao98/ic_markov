@@ -44,6 +44,8 @@ use yii\helpers\Html;
     <?= Html::hiddenInput('day', $day) ?>
     <?= Html::hiddenInput('premin', $premin) ?>
     <?= Html::hiddenInput('interval', $interval) ?>
+    <?= Html::hiddenInput('last_price', $last_price) ?>
+    <?= Html::hiddenInput('t_vector', $t_vector) ?>
     <?= Html::submitButton('Validar', ['class' => 'btn btn-primary']) ?>
     <?= Html::endForm() ?>
 </div>

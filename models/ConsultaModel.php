@@ -69,17 +69,17 @@ class ConsultaModel extends Model
     public static function getState($price, $premin, $interval, $states_number)
     {
         for ($i = 0; $i < $states_number; $i++) {
-            if ($price >= ($premin + ($interval * $i)) && $price-0.00001 <= ($premin + ($interval * ($i + 1)))) {
+            if ($price >= ($premin + ($interval * $i)) && $price - 0.00001 <= ($premin + ($interval * ($i + 1)))) {
                 return $i + 1;
             }
         }
-        
+
         return 0;
     }
 
     public static function getThreeSate($price, $price_before)
     {
-        if($price > $price_before) {
+        if ($price > $price_before) {
             return 1;
         } elseif ($price < $price_before) {
             return 3;
@@ -104,7 +104,7 @@ class ConsultaModel extends Model
 
         for ($i = 0; $i < $states_number; $i++) //construção da matriz de transição $states contem a quantidade de elementos em cada estado
             for ($j = 0; $j < $states_number; $j++) {
-                if($states[$i] == 0)
+                if ($states[$i] == 0)
                     $matrix[$i][$j] = 0;
                 else
                     $matrix[$i][$j] /= $states[$i];
@@ -130,19 +130,23 @@ class ConsultaModel extends Model
         return $vector;
     }
 
-    public function getInterval($premin, $interval, $i) {
+    public function getInterval($premin, $interval, $i)
+    {
         $min = $premin + ($interval * $i);
         $max = $premin + ($interval * ($i + 1));
 
         return [$min, $max];
     }
 
-    public function chartData($next, $intervals) {
+    public function chartData($next, $intervals, $client)
+    {
         //Dados para construção do gráfico
         $fechamentoData = array();
         $infData = array();
         $supData = array();
         $avgData = array();
+        $actionsData = array();
+        $cashData = array();
         $tendencia = 0;
 
         //Dados dos preço de fechamento para o gráfico
@@ -164,18 +168,24 @@ class ConsultaModel extends Model
             array_push($avgData, [$formattedDate, ($interval[0] + $interval[1]) / 2]);
         }
 
-        for($i = 0; $i < count($avgData)-1; $i++) {
-            $avgAux = $avgData[$i+1][1] - $avgData[$i][1];
-            $fechamentoAux = $fechamentoData[$i+1][1] - $fechamentoData[$i][1];
+        for ($i = 0; $i < count($avgData) - 1; $i++) {
+            $avgAux = $avgData[$i + 1][1] - $avgData[$i][1];
+            $fechamentoAux = $fechamentoData[$i + 1][1] - $fechamentoData[$i][1];
 
-            if($avgAux > 0 && $fechamentoAux > 0)
+            if ($avgAux > 0 && $fechamentoAux > 0)
                 $tendencia++;
 
-            else if($avgAux < 0 && $fechamentoAux < 0)
+            else if ($avgAux < 0 && $fechamentoAux < 0)
                 $tendencia++;
 
-            else if($avgAux == 0 && $fechamentoAux == 0)
+            else if ($avgAux == 0 && $fechamentoAux == 0)
                 $tendencia++;
+        }
+
+        foreach ($client as $data) {
+            $formattedDate = intval(($data['date']->toDateTime())->format('U') . '000');
+            array_push($actionsData, [$formattedDate, $data['client']['actions']]);
+            array_push($cashData, [$formattedDate, $data['client']['cash']]);
         }
 
         return ([
@@ -183,7 +193,33 @@ class ConsultaModel extends Model
             'infData' => $infData,
             'supData' => $supData,
             'avgData' => $avgData,
-            'tendencia' => $tendencia
+            'tendencia' => $tendencia,
+            'cashData' => $cashData,
+            'actionsData' => $actionsData
         ]);
+    }
+
+    public function handleBuy($client, $price)
+    {
+
+        if ($client['cash'] >= $price) {
+            $qtdBuy = floor($client['cash'] / $price);
+            $client['cash'] -= ($price * $qtdBuy);
+            $client['actions'] += $qtdBuy;
+            return $client;
+        } else {
+            return $client;
+        }
+    }
+
+    public function handleSell($client, $price)
+    {
+        if ($client['actions'] > 0) {
+            $client['cash'] += ($client['actions'] * $price);
+            $client['actions'] = 0;
+            return $client;
+        } else {
+            return $client;
+        }
     }
 }

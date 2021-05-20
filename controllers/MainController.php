@@ -204,6 +204,11 @@ class MainController extends Controller
             $intervals = array();
             $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->format('U'));
             $nextDay = new Paper();
+            $client1 = ['cash' => 100, 'actions' => 0];
+            $client2 = ['cash' => 100, 'actions' => 0];
+            $client3 = ['cash' => 100, 'actions' => 0];
+            $client4 = ['cash' => 100, 'actions' => 0];
+            $clientDatas = [];
             // $last_prices = array();
             // $next_prices = array();
 
@@ -294,14 +299,20 @@ class MainController extends Controller
                     $errou++;
 
                 $last_price =  $cursor_by_price[count($cursor_by_price) - 1]['preult'];
-                // $last_date =  intval(($cursor_by_price[count($cursor_by_price) - 1]['date']->toDateTime())->format('U') . '000');
-                // $next_date =  intval(($nextDay['date']->toDateTime())->format('U') . '000');
-
-                // array_push($next_prices, [$next_date, $nextDay['preult']]);
-                // array_push($last_prices, [$last_date, $last_price]);
 
                 switch ($t_max) {
                     case 0:
+                        $client1 = $model->handleBuy($client1, $last_price);
+                        $client2 = $model->handleBuy($client2, $last_price);
+                        $client3 = $model->handleBuy($client3, $last_price);
+
+                        if ($client4['actions'] * $last_price > 100) {
+                            $client4 = $model->handleSell($client4, $last_price);
+                        } else {
+                            $client4 = $model->handleBuy($client4, $last_price);
+                        }
+
+                        array_push($clientDatas, ['date' => $nextDay['date'], 'client' => $client1]);
                         if ($nextDay['preult'] > $last_price)
                             $t_acertou++;
                         else
@@ -309,6 +320,24 @@ class MainController extends Controller
                         break;
 
                     case 1:
+                        if ($client2['actions'] * $last_price > 100) {
+                            $client2 = $model->handleSell($client2, $last_price);
+                        } else if ($client2['cash'] > 100) {
+                            $client2 = $model->handleBuy($client2, $last_price);
+                        }
+
+                        if ($client3['actions'] > 0) {
+                            $client3 = $model->handleSell($client3, $last_price);
+                        } else {
+                            $client3 = $model->handleBuy($client3, $last_price);
+                        }
+
+                        if ($client4['actions'] * $last_price > 100) {
+                            $client4 = $model->handleSell($client4, $last_price);
+                        } else {
+                            $client4 = $model->handleBuy($client4, $last_price);
+                        }
+
                         if ($nextDay['preult'] == $last_price)
                             $t_acertou++;
                         else
@@ -316,6 +345,15 @@ class MainController extends Controller
                         break;
 
                     case 2:
+                        $client1 = $model->handleSell($client1, $last_price);
+                        $client2 = $model->handleSell($client2, $last_price);
+                        $client3 = $model->handleSell($client3, $last_price);
+
+                        if ($client4['actions'] * $last_price > 100) {
+                            $client4 = $model->handleSell($client4, $last_price);
+                        }
+
+                        array_push($clientDatas, ['date' => $nextDay['date'], 'client' => $client1]);
                         if ($nextDay['preult'] < $last_price)
                             $t_acertou++;
                         else
@@ -331,7 +369,7 @@ class MainController extends Controller
                 array_push($cursor_by_price, $nextDay);
             }
 
-            $chart = $model->chartData($next, $intervals);
+            $chart = $model->chartData($next, $intervals, $clientDatas);
 
 
             return $this->render('resultadoTeste', [
@@ -344,7 +382,13 @@ class MainController extends Controller
                 'avgData' => $chart['avgData'],
                 'supData' => $chart['supData'],
                 'infData' => $chart['infData'],
-                'tendencia' => $chart['tendencia']
+                'tendencia' => $chart['tendencia'],
+                'clientCash' => $chart['cashData'],
+                'clientActions' => $chart['actionsData'],
+                'cliente1' => $client1,
+                'cliente2' => $client2,
+                'cliente3' => $client3,
+                'cliente4' => $client4
                 // 'last_prices' => $last_prices,
                 // 'next_prices' => $next_prices
                 // 'next' => $next,

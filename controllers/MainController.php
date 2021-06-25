@@ -307,6 +307,7 @@ class MainController extends Controller
                     $client5 = $model->handleSell($client5, $last_price);
                 }
 
+                //Verifica qual dos 3 estados tem maior probabilidade e realiza compra/venda
                 switch ($t_max) {
                     case 0:
                         $client1 = $model->handleBuy($client1, $last_price);

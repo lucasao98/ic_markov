@@ -208,6 +208,7 @@ class MainController extends Controller
             $client2 = ['cash' => 100, 'actions' => 0];
             $client3 = ['cash' => 100, 'actions' => 0];
             $client4 = ['cash' => 100, 'actions' => 0];
+            $client5 = ['cash' => 100, 'actions' => 0];
             $clientDatas = [];
             // $last_prices = array();
             // $next_prices = array();
@@ -300,6 +301,12 @@ class MainController extends Controller
 
                 $last_price =  $cursor_by_price[count($cursor_by_price) - 1]['preult'];
 
+                if(count($nextDays) == $consultas-1) {
+                    $client5 = $model->handleBuy($client5, $last_price);
+                } else if(empty($nextDays)) {
+                    $client5 = $model->handleSell($client5, $last_price);
+                }
+
                 switch ($t_max) {
                     case 0:
                         $client1 = $model->handleBuy($client1, $last_price);
@@ -388,7 +395,8 @@ class MainController extends Controller
                 'cliente1' => $client1,
                 'cliente2' => $client2,
                 'cliente3' => $client3,
-                'cliente4' => $client4
+                'cliente4' => $client4,
+                'cliente5' => $client5
                 // 'last_prices' => $last_prices,
                 // 'next_prices' => $next_prices
                 // 'next' => $next,

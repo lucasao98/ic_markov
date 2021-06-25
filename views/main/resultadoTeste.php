@@ -28,6 +28,7 @@
     <h3><?= "Método 2: Quantia final: R$".$cliente2['cash']." e ".$cliente2['actions']." ações" ?></h3>
     <h3><?= "Método 3: Quantia final: R$".$cliente3['cash']." e ".$cliente3['actions']." ações" ?></h3>
     <h3><?= "Método 4: Quantia final: R$".$cliente4['cash']." e ".$cliente4['actions']." ações" ?></h3>
+    <h3><?= "Método 5: Quantia final: R$".$cliente5['cash']." e ".$cliente5['actions']." ações" ?></h3>
 
     <?php
 

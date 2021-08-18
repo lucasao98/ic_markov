@@ -201,17 +201,17 @@ class ConsultaModel extends Model
 
     public function handleBuy($client, $price)
     {
-
         if ($client['cash'] >= $price) {
             $qtdBuy = floor($client['cash'] / $price);
-            $client['cash'] -= ($price * $qtdBuy);
+            $client['cash'] = 0;
+            // $client['cash'] -= ($price * $qtdBuy);
             $client['actions'] += $qtdBuy;
             return $client;
         } else {
             return $client;
         }
     }
-
+    
     public function handleSell($client, $price)
     {
         if ($client['actions'] > 0) {

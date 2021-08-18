@@ -303,6 +303,7 @@ class MainController extends Controller
 
                 if(count($nextDays) == $consultas-1) {
                     $client5 = $model->handleBuy($client5, $last_price);
+                    $client5['cash'] = 0;
                 } else if(empty($nextDays)) {
                     $client5 = $model->handleSell($client5, $last_price);
                 }
@@ -342,7 +343,7 @@ class MainController extends Controller
 
                         if ($client4['actions'] * $last_price > 100) {
                             $client4 = $model->handleSell($client4, $last_price);
-                        } else {
+                        } else if($client4['actions'] == 0) {
                             $client4 = $model->handleBuy($client4, $last_price);
                         }
 

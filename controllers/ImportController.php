@@ -56,7 +56,7 @@ class ImportController extends Controller {
             }
             
         }
-        return "importado " ;
+        return $dateFormatted . " importado" ;
     }
     /*public function actionBackground($startDate, $endDate) {
         $begin =  DateTime::createFromFormat('dmY',$startDate);

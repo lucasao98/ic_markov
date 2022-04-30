@@ -35,7 +35,7 @@ TesteAsset::register($this);
   <header class="navigation">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div class="container">
-        <a class="navbar-brand" href="#">Meu Site</a>
+        <a class="navbar-brand" href="/home">Meu Site</a>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
@@ -47,18 +47,15 @@ TesteAsset::register($this);
               <a class="nav-link" href="about">Sobre</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="predict">Previsão</a>
+              <a class="nav-link" href="predict">Previsão do dia seguinte</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="teste">Teste</a>
+              <a class="nav-link" href="teste">Previsão de grandes intervalos</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
-    <aside class="nav-login">
-      <a class="nav-link" href="#">Login</a>
-    </aside>
   </header>
 
 	

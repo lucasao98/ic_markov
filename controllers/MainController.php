@@ -210,12 +210,10 @@ class MainController extends Controller
             $client4 = ['cash' => 100, 'actions' => 0];
             $client5 = ['cash' => 100, 'actions' => 0];
             $clientDatas = [];
-            // $last_prices = array();
-            // $next_prices = array();
 
             $final = $start;
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
-            $start = $start->modify("-$model->periodo month"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
+            $start = $start->modify("-$model->periodo $model->metric"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
             /* -------------------------------------------------------------------- */
             $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
 
@@ -224,6 +222,14 @@ class MainController extends Controller
 
             $stock = $model->nome;
             $cursor_by_price = $model->PegarDados($stock, $start, $final); //Setup inicial do conjunto de treinamento
+            $cursor_by_price_avg = [];
+            foreach($cursor_by_price as $index => $cursor) { //Criação do array com médias móveis
+                if($index > 1){
+                    array_push($cursor_by_price_avg, $cursor);
+                    $cursor_by_price_avg[$index-2]['preult'] = ($cursor['preult']+$cursor_by_price[$index-1]['preult']+$cursor_by_price[$index-2]['preult'])/3;  
+                }
+            }
+            
 
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
             $nextDays = $model->PegarDados($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos
@@ -301,10 +307,10 @@ class MainController extends Controller
 
                 $last_price =  $cursor_by_price[count($cursor_by_price) - 1]['preult'];
 
-                if(count($nextDays) == $consultas-1) {
+                if (count($nextDays) == $consultas - 1) {
                     $client5 = $model->handleBuy($client5, $last_price);
                     $client5['cash'] = 0;
-                } else if(empty($nextDays)) {
+                } else if (empty($nextDays)) {
                     $client5 = $model->handleSell($client5, $last_price);
                 }
 
@@ -343,7 +349,7 @@ class MainController extends Controller
 
                         if ($client4['actions'] * $last_price > 100) {
                             $client4 = $model->handleSell($client4, $last_price);
-                        } else if($client4['actions'] == 0) {
+                        } else if ($client4['actions'] == 0) {
                             $client4 = $model->handleBuy($client4, $last_price);
                         }
 

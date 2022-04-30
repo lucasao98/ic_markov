@@ -18,7 +18,9 @@ $dateAux = Paper::toIsoDate($dateAux->getTimestamp());
 
 ?>
 
-<h2>Previsão por CMTD</h2>
+<h2>Previsão do dia seguinte usando CMTD</h2>
+<p>Data Inicial: Inicio do conjunto de treinamento</p>
+<p>Data Final: Fim do conjunto de treinamento</p>
 <hr>
 
 <?php $form = ActiveForm::begin(['layout' => 'horizontal']) ?>

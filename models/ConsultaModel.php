@@ -13,12 +13,14 @@ class ConsultaModel extends Model
     public $final;
     public $states_number;
     public $periodo;
+    public $metric;
 
     public function rules()
     {
         return [
-            [['nome', 'inicio', 'final', 'states_number'], 'required'],
+            [['nome', 'inicio', 'final', 'states_number', 'metric'], 'required'],
             [['states_number', 'periodo'], 'integer'],
+            [['metric'], 'string'],
             [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy']
             //['final', 'compare', 'compareValue' => 'inicio', 'operator' => '>']
         ];
@@ -30,7 +32,8 @@ class ConsultaModel extends Model
             'nome' => 'Nome',
             'inicio' => 'Data Inicial',
             'final' => 'Data Final',
-            'states_number' => 'Quantidade de intervalos'
+            'states_number' => 'Quantidade de intervalos',
+            'metric' => 'Métrica'
         ];
     }
 
@@ -39,7 +42,7 @@ class ConsultaModel extends Model
         return Paper::find()->orderBy('date')->where(
             ['=', 'codneg', $stock],
             ['=', 'tpmerc', '010']
-        )->andWhere(['>=', 'date', $start])->andWhere(['<=', 'date', $final])->all();
+        )->andWhere(['>=', 'date', $start])->andWhere(['<=', 'date', $final])->addOrderBy('date ASC')->all();
     }
 
     public function DefinirPremin($cursor_by_price)

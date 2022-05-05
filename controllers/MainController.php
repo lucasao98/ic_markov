@@ -38,11 +38,11 @@ class MainController extends Controller
 
             $stock = $model->nome;
 
-            $cursor_by_price = $model->PegarDados($stock, $start, $final);
+            $cursor_by_price = $model->getData($stock, $start, $final);
             // print_r($cursor_by_price);
 
-            $premin = $model->DefinirPremin($cursor_by_price);
-            $premax = $model->DefinirPremax($cursor_by_price);
+            $premin = $model->definePremin($cursor_by_price);
+            $premax = $model->definePremax($cursor_by_price);
 
             $interval = abs($premin['preult'] - $premax['preult']) / $model->states_number; //calculo do intervalo
 
@@ -221,18 +221,13 @@ class MainController extends Controller
             $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
 
             $stock = $model->nome;
-            $cursor_by_price = $model->PegarDados($stock, $start, $final); //Setup inicial do conjunto de treinamento
-            $cursor_by_price_avg = [];
-            foreach($cursor_by_price as $index => $cursor) { //Criação do array com médias móveis
-                if($index > 1){
-                    array_push($cursor_by_price_avg, $cursor);
-                    $cursor_by_price_avg[$index-2]['preult'] = ($cursor['preult']+$cursor_by_price[$index-1]['preult']+$cursor_by_price[$index-2]['preult'])/3;  
-                }
-            }
-            
+            $cursor_by_price = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
+            $cursor_by_price_avg = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
+            $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg); //Cálculando médias e tirando as diferenças
+            echo $cursor_by_price[0]['preult'];
 
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
-            $nextDays = $model->PegarDados($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos
+            $nextDays = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos
             $consultas = count($nextDays);
             Yii::debug("Conjunto de treinamento pronto");
 
@@ -248,8 +243,8 @@ class MainController extends Controller
                 if ($nextDay['date'] > $aux || $nextDay['date'] == null)
                     break;
 
-                $premin = $model->DefinirPremin($cursor_by_price);
-                $premax = $model->DefinirPremax($cursor_by_price);
+                $premin = $model->definePremin($cursor_by_price);
+                $premax = $model->definePremax($cursor_by_price);
 
                 $interval = abs($premin['preult'] - $premax['preult']) / $model->states_number; //calculo do intervalo
 

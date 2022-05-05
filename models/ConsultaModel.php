@@ -37,7 +37,7 @@ class ConsultaModel extends Model
         ];
     }
 
-    public function PegarDados($stock, $start, $final)
+    public function getData($stock, $start, $final)
     {
         return Paper::find()->orderBy('date')->where(
             ['=', 'codneg', $stock],
@@ -45,7 +45,7 @@ class ConsultaModel extends Model
         )->andWhere(['>=', 'date', $start])->andWhere(['<=', 'date', $final])->addOrderBy('date ASC')->all();
     }
 
-    public function DefinirPremin($cursor_by_price)
+    public function definePremin($cursor_by_price)
     {
         $premin = $cursor_by_price[0]; //array com o menor preço do conjunto
 
@@ -57,7 +57,7 @@ class ConsultaModel extends Model
         return $premin;
     }
 
-    public function DefinirPremax($cursor_by_price)
+    public function definePremax($cursor_by_price)
     {
         $premax = $cursor_by_price[0]; //array com o maior preço do conjunto
 
@@ -224,5 +224,18 @@ class ConsultaModel extends Model
         } else {
             return $client;
         }
+    }
+
+    public static function handleAverages($cursors){
+        $cursors_avg = [];
+
+        foreach($cursors as $index => $cursor) { //Criação do array com médias móveis
+            if($index > 1){
+                array_push($cursors_avg, $cursor);
+                $cursors_avg[$index-2]['preult'] = ($cursor['preult']+$cursors[$index-1]['preult']+$cursors[$index-2]['preult'])/3;  
+            }
+        }
+
+        return $cursors_avg;
     }
 }

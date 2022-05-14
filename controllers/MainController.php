@@ -125,8 +125,8 @@ class MainController extends Controller
             $t_vector[$i] = floatval($t_vector[$i]);
         }
 
-        $nextDay = Paper::find()->orderBy('date')->where(['=', 'codneg', $stock])->andWhere(['>', 'date', $day])->one(); //busca o dia seguinte no banco
-        $nextDay['state'] = ConsultaModel::getState($nextDay['preult'], $premin, $interval, $states_number); // calcula o estado do dia seguinte
+        $next_day = Paper::find()->orderBy('date')->where(['=', 'codneg', $stock])->andWhere(['>', 'date', $day])->one(); //busca o dia seguinte no banco
+        $next_day['state'] = ConsultaModel::getState($next_day['preult'], $premin, $interval, $states_number); // calcula o estado do dia seguinte
         $max = 0;
         $t_max = 0;
 
@@ -140,7 +140,7 @@ class MainController extends Controller
                 $t_max = $i;
         }
 
-        if ($nextDay['state'] == $max + 1)
+        if ($next_day['state'] == $max + 1)
             $result = 'Acertou!';
 
         else
@@ -148,21 +148,21 @@ class MainController extends Controller
 
         switch ($t_max) {
             case 0:
-                if ($nextDay['preult'] > $last_price)
+                if ($next_day['preult'] > $last_price)
                     $result_three_state = 'Acertou!';
                 else
                     $result_three_state = 'Errou!';
                 break;
 
             case 1:
-                if ($nextDay['preult'] == $last_price)
+                if ($next_day['preult'] == $last_price)
                     $result_three_state = 'Acertou!';
                 else
                     $result_three_state = 'Errou!';
                 break;
 
             case 2:
-                if ($nextDay['preult'] < $last_price)
+                if ($next_day['preult'] < $last_price)
                     $result_three_state = 'Acertou!';
                 else
                     $result_three_state = 'Errou!';
@@ -175,7 +175,7 @@ class MainController extends Controller
         return $this->render('resultado', [
             'result' => $result,
             'result_three_state' => $result_three_state,
-            'nextDay' => $nextDay,
+            'next_day' => $next_day,
             'estado' => $max + 1,
             'probabilidade' => $vector[$max],
             'three_states' => $t_vector[$t_max],
@@ -198,12 +198,14 @@ class MainController extends Controller
             $consultas = 0;
             $acertou = 0;
             $errou = 0;
+            $acertou_avg = 0;
+            $errou_avg = 0;
             $t_acertou = 0;
             $t_errou = 0;
             $next = array();
             $intervals = array();
             $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->format('U'));
-            $nextDay = new Paper();
+            $next_day = new Paper();
             $client1 = ['cash' => 100, 'actions' => 0];
             $client2 = ['cash' => 100, 'actions' => 0];
             $client3 = ['cash' => 100, 'actions' => 0];
@@ -222,35 +224,47 @@ class MainController extends Controller
 
             $stock = $model->nome;
             $cursor_by_price = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
-            $cursor_by_price_avg = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
-            $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg); //Cálculando médias e tirando as diferenças
-            echo $cursor_by_price[0]['preult'];
+            $cursor_by_price_avg_aux = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
+            $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux); //Calculando médias e tirando as diferenças
 
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
-            $nextDays = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos
-            $consultas = count($nextDays);
+            $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos\
+            $consultas = count($next_days);
             Yii::debug("Conjunto de treinamento pronto");
 
             while (1) {
 
-                if (count($nextDays) == 0)
+                if (count($next_days) == 0)
                     break;
 
-                $nextDay = $nextDays[0]; //busca o dia seguinte no banco
-                array_shift($nextDays);
+                $next_day = array_shift($next_days); //busca o dia seguinte no banco
 
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
-                if ($nextDay['date'] > $aux || $nextDay['date'] == null)
+                if ($next_day['date'] > $aux || $next_day['date'] == null)
                     break;
 
                 $premin = $model->definePremin($cursor_by_price);
                 $premax = $model->definePremax($cursor_by_price);
 
                 $interval = abs($premin['preult'] - $premax['preult']) / $model->states_number; //calculo do intervalo
+                $last_price = $cursor_by_price[count($cursor_by_price) - 1]['preult'];
+
+                foreach ($cursor_by_price_avg as $avg) {
+                    $avg['preult'] += $last_price;
+                }
+
+                $premin_avg = $model->definePremin($cursor_by_price_avg);
+                $premax_avg = $model->definePremax($cursor_by_price_avg);
+
+                $interval_avg = abs($premin_avg['preult'] - $premax_avg['preult']) / $model->states_number; //calculo do intervalo
+
+
 
                 $states = []; //vetor que contem a quantidade de elementos em cada estado
+                $states_avg = []; //vetor que contem a quantidade de elementos em cada estado
                 for ($i = 0; $i < $model->states_number; $i++) {
                     $states[$i] = 0;
+                    $states_avg[$i] = 0;
                 }
 
                 $cursor_by_price[0]["t_state"] = 2;
@@ -269,24 +283,41 @@ class MainController extends Controller
                         $states[$cursor['state'] - 1] += 1;
                 }
 
+                foreach ($cursor_by_price_avg as $index => $cursor) { //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+                    $cursor['state'] = $model->getState($cursor['preult'], $premin_avg['preult'], $interval_avg, $model->states_number);
+                    if ($cursor['state'] != 0)
+                        $states_avg[$cursor['state'] - 1] += 1;
+                }
+
                 $three_state_matrix = $model->transitionMatrix($cursor_by_price, $three_states, 3, "t_state");
                 $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state"); //função que constrói o vetor de predição
 
                 $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state"); //função que constrói a matriz de transição
                 $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state"); //função que constrói o vetor de predição
+
+                $matrix_avg = $model->transitionMatrix($cursor_by_price_avg, $states_avg, $model->states_number, "state"); //função que constrói a matriz de transição
+                $vector_avg = $model->predictVector($matrix_avg, $cursor_by_price_avg, $model->states_number, "state"); //função que constrói o vetor de predição
                 /* Validação ----------------------------------------------------------------- */
 
-                $nextDay['state'] = $model->getState($nextDay['preult'], $premin['preult'], $interval, $model->states_number); // calcula o estado do dia seguinte
+                $next_day['state'] = $model->getState($next_day['preult'], $premin['preult'], $interval, $model->states_number); // calcula o estado do dia seguinte
+                $next_day['state_avg'] = $model->getState($next_day['preult'], $premin_avg['preult'], $interval_avg, $model->states_number); // calcula o estado do dia seguinte
 
-                array_push($next, $nextDay);
+                array_push($next, $next_day);
                 $max = 0;
+                $max_avg = 0;
                 $t_max = 0;
                 $vector = $vector[0];
+                $vector_avg = $vector_avg[0];
                 $t_vector = $three_state_vector[0];
 
                 for ($i = 1; $i < $model->states_number; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
                     if ($vector[$i] >= $vector[$max])
                         $max = $i;
+                }
+
+                for ($i = 1; $i < $model->states_number; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
+                    if ($vector_avg[$i] >= $vector_avg[$max_avg])
+                        $max_avg = $i;
                 }
 
                 for ($i = 1; $i < 3; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
@@ -295,17 +326,20 @@ class MainController extends Controller
                 }
 
                 array_push($intervals, $model->getInterval($premin['preult'], $interval, $max));
-                if ($nextDay['state'] == $max + 1)
+                if ($next_day['state'] == $max + 1)
                     $acertou++;
                 else
                     $errou++;
 
-                $last_price =  $cursor_by_price[count($cursor_by_price) - 1]['preult'];
+                if ($next_day['state_avg'] == $max_avg + 1)
+                    $acertou_avg++;
+                else
+                    $errou_avg++;
 
-                if (count($nextDays) == $consultas - 1) {
+                if (count($next_days) == $consultas - 1) {
                     $client5 = $model->handleBuy($client5, $last_price);
                     $client5['cash'] = 0;
-                } else if (empty($nextDays)) {
+                } else if (empty($next_days)) {
                     $client5 = $model->handleSell($client5, $last_price);
                 }
 
@@ -322,8 +356,8 @@ class MainController extends Controller
                             $client4 = $model->handleBuy($client4, $last_price);
                         }
 
-                        array_push($clientDatas, ['date' => $nextDay['date'], 'client' => $client1]);
-                        if ($nextDay['preult'] > $last_price)
+                        array_push($clientDatas, ['date' => $next_day['date'], 'client' => $client1]);
+                        if ($next_day['preult'] > $last_price)
                             $t_acertou++;
                         else
                             $t_errou++;
@@ -348,7 +382,7 @@ class MainController extends Controller
                             $client4 = $model->handleBuy($client4, $last_price);
                         }
 
-                        if ($nextDay['preult'] == $last_price)
+                        if ($next_day['preult'] == $last_price)
                             $t_acertou++;
                         else
                             $t_errou++;
@@ -363,8 +397,8 @@ class MainController extends Controller
                             $client4 = $model->handleSell($client4, $last_price);
                         }
 
-                        array_push($clientDatas, ['date' => $nextDay['date'], 'client' => $client1]);
-                        if ($nextDay['preult'] < $last_price)
+                        array_push($clientDatas, ['date' => $next_day['date'], 'client' => $client1]);
+                        if ($next_day['preult'] < $last_price)
                             $t_acertou++;
                         else
                             $t_errou++;
@@ -376,7 +410,10 @@ class MainController extends Controller
                 /* Preparação para a próxima iteração ----------------------------------------------------------------- */
 
                 array_shift($cursor_by_price);
-                array_push($cursor_by_price, $nextDay);
+                array_push($cursor_by_price, $next_day);
+                array_shift($cursor_by_price_avg_aux);
+                array_push($cursor_by_price_avg_aux, clone $next_day);
+                $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux); //Calculando médias e tirando as diferenças
             }
 
             $chart = $model->chartData($next, $intervals, $clientDatas);
@@ -385,6 +422,8 @@ class MainController extends Controller
             return $this->render('resultadoTeste', [
                 'acertou' => $acertou,
                 'errou' => $errou,
+                'acertou_avg' => $acertou_avg,
+                'errou_avg' => $errou_avg,
                 't_acertou' => $t_acertou,
                 't_errou' => $t_errou,
                 'consultas' => $consultas,
@@ -400,10 +439,6 @@ class MainController extends Controller
                 'cliente3' => $client3,
                 'cliente4' => $client4,
                 'cliente5' => $client5
-                // 'last_prices' => $last_prices,
-                // 'next_prices' => $next_prices
-                // 'next' => $next,
-                // 'intervals' => $intervals
             ]);
         } else {
             return $this->render('teste');

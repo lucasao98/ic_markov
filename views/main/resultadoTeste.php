@@ -18,6 +18,10 @@
     <h3 class="result-acertou"><?= "Acertou: $acertou - " . round(($acertou / $consultas) * 100, 2) . '%' ?></h3>
     <h3 class="result-errou"><?= "Errou: $errou - " . round(($errou / $consultas) * 100, 2) . '%' ?></h3>
     <br />
+    <h1>Previsão com médias móveis</h1>
+    <h3 class="result-acertou"><?= "Acertou: $acertou_avg - " . round(($acertou_avg / $consultas) * 100, 2) . '%' ?></h3>
+    <h3 class="result-errou"><?= "Errou: $errou_avg - " . round(($errou_avg / $consultas) * 100, 2) . '%' ?></h3>
+    <br />
     <h1>Previsão com 3 estados</h1>
     <h3 class="result-acertou"><?= "Acertou: $t_acertou - " . round(($t_acertou / $consultas) * 100, 2) . '%' ?></h3>
     <h3 class="result-errou"><?= "Errou: $t_errou - " . round(($t_errou / $consultas) * 100, 2) . '%' ?></h3>

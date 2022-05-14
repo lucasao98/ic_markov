@@ -214,7 +214,7 @@ class ConsultaModel extends Model
             return $client;
         }
     }
-    
+
     public function handleSell($client, $price)
     {
         if ($client['actions'] > 0) {
@@ -226,13 +226,14 @@ class ConsultaModel extends Model
         }
     }
 
-    public static function handleAverages($cursors){
+    public static function handleAverages($cursors)
+    {
         $cursors_avg = [];
 
-        foreach($cursors as $index => $cursor) { //Criação do array com médias móveis
-            if($index > 1){
+        foreach ($cursors as $index => $cursor) { //Criação do array com médias móveis
+            if ($index > 2) {
                 array_push($cursors_avg, $cursor);
-                $cursors_avg[$index-2]['preult'] = ($cursor['preult']+$cursors[$index-1]['preult']+$cursors[$index-2]['preult'])/3;  
+                $cursors_avg[$index - 3]['preult'] = $cursors[$index]['preult'] - (($cursor['preult'] + $cursors[$index - 1]['preult'] + $cursors[$index - 2]['preult'] + $cursors[$index - 3]['preult'] ) / 4);
             }
         }
 

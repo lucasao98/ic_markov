@@ -14,15 +14,16 @@ class ConsultaModel extends Model
     public $states_number;
     public $periodo;
     public $metric;
+    public $base;
 
     public function rules()
     {
         return [
             [['nome', 'inicio', 'final', 'states_number', 'metric'], 'required'],
-            [['states_number', 'periodo'], 'integer'],
+            [['states_number', 'periodo', 'base'], 'integer'],
             [['metric'], 'string'],
-            [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy']
-            //['final', 'compare', 'compareValue' => 'inicio', 'operator' => '>']
+            [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy'],
+            ['base', 'compare', 'compareValue' => 1, 'operator' => '>'],
         ];
     }
 
@@ -33,7 +34,8 @@ class ConsultaModel extends Model
             'inicio' => 'Data Inicial',
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
-            'metric' => 'Métrica'
+            'metric' => 'Métrica',
+            'base' => 'Base Média Movel'
         ];
     }
 
@@ -226,14 +228,21 @@ class ConsultaModel extends Model
         }
     }
 
-    public static function handleAverages($cursors)
+    public static function handleAverages($cursors, $base)
     {
         $cursors_avg = [];
-
+        $limit = $base - 1;
+        
         foreach ($cursors as $index => $cursor) { //Criação do array com médias móveis
-            if ($index > 2) {
+            $acc = 0;
+
+            if ($index >= $limit) {
+                for ($i = 0; $i <= $limit; $i++) {
+                    $acc += $cursors[$limit - $i]['preult'];
+                }
+
                 array_push($cursors_avg, $cursor);
-                $cursors_avg[$index - 3]['preult'] = $cursors[$index]['preult'] - (($cursor['preult'] + $cursors[$index - 1]['preult'] + $cursors[$index - 2]['preult'] + $cursors[$index - 3]['preult'] ) / 4);
+                $cursors_avg[$index - $limit]['preult'] = $cursors[$index]['preult'] - ($acc / $limit + 1);
             }
         }
 

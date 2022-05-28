@@ -26,7 +26,7 @@ class MainController extends Controller
         $model = new ConsultaModel;
         $post = $_POST;
 
-        if ($model->load($post) && $model->validate()) {
+        if ($model->validate()) {
             $start = $model->inicio;
             $final = $model->final;
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
@@ -212,6 +212,7 @@ class MainController extends Controller
             $client4 = ['cash' => 100, 'actions' => 0];
             $client5 = ['cash' => 100, 'actions' => 0];
             $clientDatas = [];
+            $base = $model->base;
 
             $final = $start;
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
@@ -225,7 +226,7 @@ class MainController extends Controller
             $stock = $model->nome;
             $cursor_by_price = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
             $cursor_by_price_avg_aux = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
-            $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux); //Calculando médias e tirando as diferenças
+            $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux, $base); //Calculando médias e tirando as diferenças
 
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
             $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos\
@@ -413,7 +414,7 @@ class MainController extends Controller
                 array_push($cursor_by_price, $next_day);
                 array_shift($cursor_by_price_avg_aux);
                 array_push($cursor_by_price_avg_aux, clone $next_day);
-                $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux); //Calculando médias e tirando as diferenças
+                $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux, $base); //Calculando médias e tirando as diferenças
             }
 
             $chart = $model->chartData($next, $intervals, $clientDatas);

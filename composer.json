@@ -26,11 +26,11 @@
         "yiisoft/yii2-queue": "^2.3",
         "markrogoyski/math-php": "^0.55.0",
         "miloschuman/yii2-highcharts-widget": "^8.0",
-        "onmotion/yii2-widget-apexcharts": "*"
+        "onmotion/yii2-widget-apexcharts": "*",
+        "yiisoft/yii2-debug": "~2.1.0",
+        "yiisoft/yii2-gii": "~2.1.0"
     },
     "require-dev": {
-        "yiisoft/yii2-debug": "~2.1.0",
-        "yiisoft/yii2-gii": "~2.1.0",
         "yiisoft/yii2-faker": "~2.0.0",
 
         "codeception/base": "~2.3.0",

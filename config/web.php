@@ -61,7 +61,8 @@ $config = [
         
         'mongodb' => [
             'class' => '\yii\mongodb\Connection',
-             'dsn' => 'mongodb://localhost:27017/stock',
+             'dsn' => 'mongodb+srv://<username>::<password>@cluster0.dfivfix.mongodb.net/<dbname>?retryWrites=true&w=majority',
+             'defaultDatabaseName' => '<dbname>'
         ],
         
         'db' => $db,

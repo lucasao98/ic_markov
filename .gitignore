@@ -9,3 +9,4 @@
 /Procfile
 /assets/COTAHIST
 /backup/*
+.env

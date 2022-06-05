@@ -1,5 +1,4 @@
 <?php
-
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
@@ -61,8 +60,8 @@ $config = [
         
         'mongodb' => [
             'class' => '\yii\mongodb\Connection',
-             'dsn' => 'mongodb+srv://<username>::<password>@cluster0.dfivfix.mongodb.net/<dbname>?retryWrites=true&w=majority',
-             'defaultDatabaseName' => '<dbname>'
+             'dsn' => $_ENV['MONGO_URL'],
+             'defaultDatabaseName' => 'stock'
         ],
         
         'db' => $db,

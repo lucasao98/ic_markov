@@ -394,7 +394,7 @@ $consultaModel = new ConsultaModel;
 ]) ?>
 
 <?= $form->field($consultaModel, 'states_number')->textInput() ?>
-<?= $form->field($consultaModel, 'base')->textInput() ?>
+<!-- <?= $form->field($consultaModel, 'base')->textInput() ?> -->
 
 <div class="form-group">
 	<div class="col-lg-offset-2">

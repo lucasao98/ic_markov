@@ -19,11 +19,11 @@ class ConsultaModel extends Model
     public function rules()
     {
         return [
-            [['nome', 'inicio', 'final', 'states_number', 'metric'], 'required'],
-            [['states_number', 'periodo', 'base'], 'integer'],
+        [['nome', 'inicio', 'final', 'states_number'], 'required'],
+            [['states_number', 'periodo'], 'integer'],
             [['metric'], 'string'],
             [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy'],
-            ['base', 'compare', 'compareValue' => 1, 'operator' => '>'],
+            // ['base', 'compare', 'compareValue' => 1, 'operator' => '>'],
         ];
     }
 
@@ -35,7 +35,7 @@ class ConsultaModel extends Model
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
             'metric' => 'Métrica',
-            'base' => 'Base Média Movel'
+            // 'base' => 'Base Média Movel'
         ];
     }
 
@@ -82,7 +82,7 @@ class ConsultaModel extends Model
         return 0;
     }
 
-    public static function getThreeSate($price, $price_before)
+    public static function getThreeState($price, $price_before)
     {
         if ($price > $price_before) {
             return 1;
@@ -105,9 +105,11 @@ class ConsultaModel extends Model
             $matrix[$paper[$i][$state_type] - 1][$paper[$j][$state_type] - 1] += 1;
         }
 
-        $matrix[$paper[count($paper) - 1][$state_type] - 1][$paper[count($paper) - 1][$state_type] - 1] += 1; //contagem do ultimo valor do conjunto de treinamento
+        //contagem do ultimo valor do conjunto de treinamento
+        $matrix[$paper[count($paper) - 1][$state_type] - 1][$paper[count($paper) - 1][$state_type] - 1] += 1;
 
-        for ($i = 0; $i < $states_number; $i++) //construção da matriz de transição $states contem a quantidade de elementos em cada estado
+        //construção da matriz de transição $states contem a quantidade de elementos em cada estado
+        for ($i = 0; $i < $states_number; $i++)
             for ($j = 0; $j < $states_number; $j++) {
                 if ($states[$i] == 0)
                     $matrix[$i][$j] = 0;
@@ -127,7 +129,8 @@ class ConsultaModel extends Model
         for ($i = 0; $i < $states_number; $i++)
             $vector[0][$i] = 0;
 
-        $vector[0][$paper[count($paper) - 1][$state_type] - 1] = 1; //declaração do vetor de estado inicial a partir do ultimo dia do conjunto de treinamento
+        //declaração do vetor de estado inicial a partir do ultimo dia do conjunto de treinamento
+        $vector[0][$paper[count($paper) - 1][$state_type] - 1] = 1;
         $vector = MatrixFactory::create($vector);
 
         $vector = $vector->multiply($matrix); //multiplicando
@@ -143,7 +146,7 @@ class ConsultaModel extends Model
         return [$min, $max];
     }
 
-    public function chartData($next, $intervals, $client)
+    public function chartData($next, $intervals, $client, $t_datas)
     {
         //Dados para construção do gráfico
         $fechamentoData = array();
@@ -152,6 +155,7 @@ class ConsultaModel extends Model
         $avgData = array();
         $actionsData = array();
         $cashData = array();
+        $t_data = array();
         $tendencia = 0;
 
         //Dados dos preço de fechamento para o gráfico
@@ -171,6 +175,11 @@ class ConsultaModel extends Model
         foreach ($intervals as $i => $interval) {
             $formattedDate = intval(($next[$i]['date']->toDateTime())->format('U') . '000');
             array_push($avgData, [$formattedDate, ($interval[0] + $interval[1]) / 2]);
+        }
+
+        foreach ($t_datas as $i => $t) {
+            $formattedDate = intval(($next[$i]['date']->toDateTime())->format('U') . '000');
+            array_push($t_data, [$formattedDate, $t]);
         }
 
         for ($i = 0; $i < count($avgData) - 1; $i++) {
@@ -200,7 +209,8 @@ class ConsultaModel extends Model
             'avgData' => $avgData,
             'tendencia' => $tendencia,
             'cashData' => $cashData,
-            'actionsData' => $actionsData
+            'actionsData' => $actionsData,
+            't_data' => $t_data
         ]);
     }
 
@@ -208,8 +218,8 @@ class ConsultaModel extends Model
     {
         if ($client['cash'] >= $price) {
             $qtdBuy = floor($client['cash'] / $price);
-            $client['cash'] = 0;
-            // $client['cash'] -= ($price * $qtdBuy);
+            // $client['cash'] = 0;
+            $client['cash'] -= ($price * $qtdBuy);
             $client['actions'] += $qtdBuy;
             return $client;
         } else {
@@ -232,7 +242,7 @@ class ConsultaModel extends Model
     {
         $cursors_avg = [];
         $limit = $base - 1;
-        
+
         foreach ($cursors as $index => $cursor) { //Criação do array com médias móveis
             $acc = 0;
 

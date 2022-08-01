@@ -2,7 +2,7 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost:3306;dbname=users',
+    'dsn' => 'mongodb://localhost:27017/stock',
     'username' => 'root',
     'password' => '',
     'charset' => 'utf8',

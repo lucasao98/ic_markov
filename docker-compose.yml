@@ -1,9 +1,17 @@
 version: '2'
 services:
   php:
-    image: yiisoftware/yii2-php:7.1-apache
+    image: yiisoftware/yii2-php:7.4-apache
     volumes:
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
       - ./:/app:delegated
     ports:
       - '8000:80'
+  
+  mongo:
+    image: mongo
+    container_name: mongo
+    volumes:
+      - ./backup:/backup
+    ports:
+      - '27017:27017'

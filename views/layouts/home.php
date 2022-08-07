@@ -23,7 +23,6 @@ TesteAsset::register($this);
   <title>Home</title>
   <?= Html::csrfMetaTags() ?>
 
-  <!--  <title>Business Frontpage - Start Bootstrap Template</title> -->
   <title><?= Html::encode($this->title) ?></title>
   <?php $this->head() ?>
 
@@ -31,12 +30,10 @@ TesteAsset::register($this);
 
 <body>
   <?php $this->beginBody() ?>
-
-  <!-- Navigation -->
   <header class="navigation">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div class="container">
-        <a class="navbar-brand" href="#">Meu Site</a>
+        <a class="navbar-brand" href="/home">Meu Site</a>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
@@ -48,31 +45,17 @@ TesteAsset::register($this);
               <a class="nav-link" href="about">Sobre</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="predict">Previsão</a>
+              <a class="nav-link" href="predict">Previsão do dia seguinte</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="teste">Teste</a>
+              <a class="nav-link" href="teste">Previsão de grandes intervalos</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
-    <aside class="nav-login">
-      <a class="nav-link" href="#">Login</a>
-    </aside>
   </header>
 
-  <!-- Header -->
-  <!--<header class="bg-primary py-5 mb-5">
-    <div class="container h-100">
-      <div class="row h-100 align-items-center">
-        <div class="col-lg-12">
-          <h1 class="display-4 text-white mt-5 mb-2">Meu Site</h1>
-          <p class="lead mb-5 text-white-50">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Non possimus ab labore provident mollitia. Id assumenda voluptate earum corporis facere quibusdam quisquam iste ipsa cumque unde nisi, totam quas ipsam.</p>
-        </div>
-      </div>
-    </div>
-  </header>-->
 
   <?= $content ?>
   <!-- Page Content -->
@@ -84,7 +67,7 @@ TesteAsset::register($this);
         <hr>
         <p>Está ferramenta foi criada durante um projeto de iniciação científica financiado pela FAPESB!</p>
         <p>O objetivo desta ferramenta é de prever tendências em ações da BOVESPA usando Cadeias de Markov de Tempo Discreto.</p>
-        <!-- <a class="btn btn-primary btn-lg" href="#">Call to Action &raquo;</a> -->
+
       </div>
       <div class="col-md-4 mb-5">
         <h2>Sobre os desenvolvedores</h2>
@@ -107,57 +90,9 @@ TesteAsset::register($this);
         </address>
       </div>
     </div>
-    <!-- /.row -->
 
-    <!-- <div class="row">
-      <div class="col-md-4 mb-5">
-        <div class="card h-100">
-          <img class="card-img-top" src="http://placehold.it/300x200" alt="">
-          <div class="card-body">
-            <h4 class="card-title">Card title</h4>
-            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque sequi doloribus.</p>
-          </div>
-          <div class="card-footer">
-            <a href="#" class="btn btn-primary">Find Out More!</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-5">
-        <div class="card h-100">
-          <img class="card-img-top" src="http://placehold.it/300x200" alt="">
-          <div class="card-body">
-            <h4 class="card-title">Card title</h4>
-            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque sequi doloribus totam ut praesentium aut.</p>
-          </div>
-          <div class="card-footer">
-            <a href="#" class="btn btn-primary">Find Out More!</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-5">
-        <div class="card h-100">
-          <img class="card-img-top" src="http://placehold.it/300x200" alt="">
-          <div class="card-body">
-            <h4 class="card-title">Card title</h4>
-            <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque.</p>
-          </div>
-          <div class="card-footer">
-            <a href="#" class="btn btn-primary">Find Out More!</a>
-          </div>
-        </div>
-      </div>
-    </div> -->
-    <!-- /.row -->
 
   </div>
-  <!-- /.container -->
-
-  <!-- Footer -->
-  <!-- <footer class="py-5 bg-dark">
-    <div class="container">
-      <p class="m-0 text-center text-white">Copyright &copy; Your Website 2019</p>
-    </div>
-  </footer> -->
 
   <?php $this->endBody() ?>
 </body>

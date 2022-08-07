@@ -14,7 +14,12 @@ $consultaModel = new ConsultaModel;
 
 ?>
 
-<h2>Previsão por CMTD</h2>
+<h2>Previsão de grandes períodos usando CMTD</h2>
+<p>Data Inicial: Primeira data do período a ser previsto</p>
+<p>Data Final: Última data do períiodo a ser previsto</p>
+<p>Periodo: Número (inteiro) de meses ou anos que formarão o conjunto de treinamento</p>
+<p>Métrica: Métrica para criação do conjunto de treinamento</p>
+<p>Base Média Móvel: Número de elementos usados para o cálculo da média móvel</p>
 <hr>
 
 <?php $form = ActiveForm::begin(['layout' => 'horizontal']) ?>
@@ -375,15 +380,21 @@ $consultaModel = new ConsultaModel;
 	'dateFormat' => 'dd/MM/yyyy'
 ]) ?>
 
-
 <?= $form->field($consultaModel, 'final')->widget(DatePicker::className(), [
 	'language' => 'pt-BR',
 	'dateFormat' => 'dd/MM/yyyy'
 ]) ?>
 
+
 <?= $form->field($consultaModel, 'periodo')->textInput() ?>
 
+<?= $form->field($consultaModel, 'metric')->dropDownList([
+	'month' => 'Meses',
+	'year' => 'Anos'
+]) ?>
+
 <?= $form->field($consultaModel, 'states_number')->textInput() ?>
+<!-- <?= $form->field($consultaModel, 'base')->textInput() ?> -->
 
 <div class="form-group">
 	<div class="col-lg-offset-2">

@@ -1,5 +1,4 @@
 <?php
-
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
@@ -61,7 +60,8 @@ $config = [
         
         'mongodb' => [
             'class' => '\yii\mongodb\Connection',
-             'dsn' => 'mongodb://localhost:27017/stock',
+             'dsn' => 'mongodb://localhost:27017/',
+             'defaultDatabaseName' => 'stock'
         ],
         
         'db' => $db,

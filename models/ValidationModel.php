@@ -8,7 +8,6 @@ class ValidationModel extends Model{
     public $vector;
     public $model;
     public $stock;
-    public $states_number; 
     public $day;
     public $premin; 
     public $premax;
@@ -17,7 +16,7 @@ class ValidationModel extends Model{
     public function rules()
     {
         return [
-            [['stock', 'vector', 'model', 'states_number', 'day', 'premin', 'premax', 'interval'], 'required']
+            [['stock', 'vector', 'model','day', 'premin', 'premax', 'interval'], 'required']
         ];
     }
 }

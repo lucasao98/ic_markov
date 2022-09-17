@@ -15,9 +15,19 @@
   color: white;
 }
 
+.navigation a:hover {
+  color: #337ab7;
+}
+
 .navbar-brand {
   font-size: 1.5em;
-}  
+}
+
+.navbar-brand:hover {
+  font-size: 1.5em;
+  color:#337ab7;
+  background-color: white;
+}
 
 .nav-login {
   padding-top: 10px;
@@ -29,6 +39,10 @@
 
 .navbar ul {
   list-style: none;
+}
+
+.mt-1 {
+  margin-top: 10px;
 }
 
 * {

@@ -14,12 +14,11 @@ ini_set('memory_limit', '-1');
 
 $dateAux = \DateTime::createFromFormat('d/m/YH:i:s', '30/12/201900:00:00');
 $dateAux = Paper::toIsoDate($dateAux->getTimestamp());
-//$data = Paper::find()->where(['>=', 'date', $dateAux])->all();
 
 ?>
 
 <div class="container">
-    <h2>Previsão do dia seguinte usando CMTD</h2>
+    <h2>Previsão do dia seguinte com 3 estados usando CMTD</h2>
     <p>Data Inicial: Inicio do conjunto de treinamento</p>
     <p>Data Final: Fim do conjunto de treinamento</p>
     <hr>
@@ -388,8 +387,6 @@ $dateAux = Paper::toIsoDate($dateAux->getTimestamp());
             'language' => 'pt-BR',
             'dateFormat' => 'dd/MM/yyyy'
     ]) ?>
-
-    <?= $form->field($consultaModel, 'states_number')->textInput() ?>
 
     <div class="form-group">
         <div class="col-lg-offset-2">

@@ -3,18 +3,20 @@
 use yii\helpers\Html;
 
 ?>
+<div class="container">
 
-<h3>
-
-    <?=
-
-        'Preço do último dia: R$'.$last['preult'].'<br>';
-        echo 'Estado do último dia: '.$last['state'].'<br>';
+    <h3>
+        <?=
+        'Preço do último dia: R$' . $last['preult'] . '<br>';
+        echo 'Estado do último dia: ' . $last['state'] . '<br>';
 
         echo '<br><br>';
 
         echo "Intervalos:<br>";
-        for ($i = 0; $i < $states_number; $i++) { //imprime na tela os intervalos
+        
+        //imprime na tela os intervalos
+        
+        for ($i = 0; $i < $states_number; $i++) { 
             $price = $premin + $interval * ($i);
             echo ('Estado ' . ($i + 1) . ' de ' . round($price, 2) . ' até ' . round(($price + $interval), 2) . '<br>');
         }
@@ -25,14 +27,12 @@ use yii\helpers\Html;
         for ($i = 0; $i < $model->states_number; $i++) {
             echo 'Probabilidade de ' . round(($vector[0][$i]) * 100, 2) . '% para o estado ' . ($i + 1) . '<br>';
         }
+        ?>
 
-        echo "<br>Previsão usando 3 estados: <br>";
-        print(round(($t_vector[0][0]) * 100, 2)."% de probabilidade do preço subir<br>");
-        print(round(($t_vector[0][1]) * 100, 2)."% de probabilidade do preço se manter<br>");
-        print(round(($t_vector[0][2]) * 100, 2)."% de probabilidade do preço diminuir");
-    ?>
 
-</h3>
+    </h3>
+    <a class="btn btn-warning" href="predict-result-interval">Voltar</a>
+</div>
 
 <br>
 <div>
@@ -45,7 +45,6 @@ use yii\helpers\Html;
     <?= Html::hiddenInput('premin', $premin) ?>
     <?= Html::hiddenInput('interval', $interval) ?>
     <?= Html::hiddenInput('last_price', $last_price) ?>
-    <?= Html::hiddenInput('t_vector', $t_vector) ?>
     <!-- <?= Html::submitButton('Validar', ['class' => 'btn btn-primary']) ?> -->
     <?= Html::endForm() ?>
 </div>

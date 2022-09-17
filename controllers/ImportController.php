@@ -58,24 +58,7 @@ class ImportController extends Controller
         }
         return $dateFormatted . " importado";
     }
-    /*public function actionBackground($startDate, $endDate) {
-        $begin =  DateTime::createFromFormat('dmY',$startDate);
-        $end =  DateTime::createFromFormat('dmY',$endDate);
-        for($i = $begin; $i <= $end; $i->modify('+1 day')){
-            $dateFormatted = $i->format("dmY");
-            $id = Yii::$app->queue->push(new DownloadJob([
-                'dateFormatted' => $dateFormatted
-            ]));
-        }
-        Yii::$app->queue->on(Queue::EVENT_AFTER_ERROR, function ($event) {
 
-            // Yii::debug($event->error);
-
-            echo($event->error);
-            return $event->error;
-        });
-            return "enfileirado";
-    }*/
     public function downloadData($date, $type)
     {
         Yii::debug("[IMPORT] start download data from " . $date);
@@ -98,6 +81,7 @@ class ImportController extends Controller
 
         Yii::debug("[IMPORT] end download data from " . $date);
     }
+    
     public function extractData($date)
     {
         Yii::debug("[IMPORT] start extractData data from " . $date);
@@ -116,6 +100,7 @@ class ImportController extends Controller
         $zip->deleteName($file_path);
         $zip->close();
     }
+
     public function parseDataAndSaveInDatabase($date, $type)
     {
         Yii::debug("[IMPORT] start parseDataAndSaveInDatabase data from " . $date);

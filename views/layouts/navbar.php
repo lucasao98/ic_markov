@@ -20,9 +20,9 @@ TesteAsset::register($this);
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
-  <title>Home</title>
   <?= Html::csrfMetaTags() ?>
 
+  <!--  <title>Business Frontpage - Start Bootstrap Template</title> -->
   <title><?= Html::encode($this->title) ?></title>
   <?php $this->head() ?>
 
@@ -32,7 +32,7 @@ TesteAsset::register($this);
   <?php $this->beginBody() ?>
 
   <div class="container">
-    <nav class="navbar bg-primary navigation">
+    <nav class="navbar bg-primary navigation mt-1">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -42,26 +42,25 @@ TesteAsset::register($this);
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/home">Meu Site</a>
+          <a class="navbar-brand" href="home">Meu Site</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
             <li><a href="home">Home<span class="sr-only">(current)</span></a></li>
-            <li><a href="about">Sobre<span class="sr-only"></span></a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Método com Intervalos<span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="teste">Teste</a></li>
-                <li><a href="predict">Predição</a></li>
+                <li><a href="predict-result-interval">Predição</a></li>
               </ul>
             </li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Método com 3 estados<span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="#">Teste</a></li>
-                <li><a href="#">Predição</a></li>
+                <li><a href="teste-estados">Teste</a></li>
+                <li><a href="predict-three-states">Predição</a></li>
               </ul>
             </li>
           </ul>
@@ -71,7 +70,7 @@ TesteAsset::register($this);
   </div>
 
   <?= $content ?>
-  
+
   <?php $this->endBody() ?>
 </body>
 

@@ -24,8 +24,6 @@ $config = [
         ]
      ],
      
-    // 'defautlRoute' => 'main/home',
-    
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
@@ -69,12 +67,15 @@ $config = [
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+            'enableStrictParsing' => true,
             'rules' => [
                 '' => 'main/home',
                 'home' => 'main/home',
-                'predict' => 'main/predict',
+                'predict-result-interval' => 'main/predict-result-interval',
+                'predict-three-states' => 'main/predict-three-states',
                 'validate' => 'main/validate',
                 'teste' => 'main/teste',
+                'teste-estados' => 'main/teste-estados',
                 'about' => 'main/about',
                 'import' => 'import/importForm'
             ],

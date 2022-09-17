@@ -19,11 +19,10 @@ class ConsultaModel extends Model
     public function rules()
     {
         return [
-        [['nome', 'inicio', 'final', 'states_number'], 'required'],
+            [['nome', 'inicio', 'final'], 'required'],
             [['states_number', 'periodo'], 'integer'],
             [['metric'], 'string'],
             [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy'],
-            // ['base', 'compare', 'compareValue' => 1, 'operator' => '>'],
         ];
     }
 
@@ -35,7 +34,6 @@ class ConsultaModel extends Model
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
             'metric' => 'Métrica',
-            // 'base' => 'Base Média Movel'
         ];
     }
 
@@ -96,11 +94,13 @@ class ConsultaModel extends Model
     public function transitionMatrix($paper, $states, $states_number, $state_type)
     {
         $matrix = [[]];
+        
         for ($i = 0; $i < $states_number; $i++)
             for ($j = 0; $j < $states_number; $j++)
                 $matrix[$i][$j] = 0;
 
-        for ($i = 0; $i < count($paper) - 1; $i++) { //calculando a quantidade de elementos em cada transição da matriz
+        //calculando a quantidade de elementos em cada transição da matriz
+        for ($i = 0; $i < count($paper) - 1; $i++) { 
             $j = $i + 1;
             $matrix[$paper[$i][$state_type] - 1][$paper[$j][$state_type] - 1] += 1;
         }

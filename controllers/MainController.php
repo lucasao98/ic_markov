@@ -6,6 +6,7 @@ use yii\web\Controller;
 use app\models\ConsultaModel;
 use app\models\Paper;
 use Yii;
+use MathPHP\LinearAlgebra\MatrixFactory;
 
 //date_default_timezone_set("america/bahia");
 
@@ -701,37 +702,6 @@ class MainController extends Controller
                         break;
                 }
 
-
-                if (($max + 1) == $last_day['state']) {
-                    if ($client2['cash'] > 100) {
-                        $client2 = $model->handleBuy($client2, $last_day['preult']);
-                    }
-                    if ($client2['actions'] * $last_day['preult'] > 100) {
-                        $client2 = $model->handleSell($client2, $last_day['preult']);
-                    }
-
-                    $client3 = $model->handleBuy($client3, $last_day['preult']);
-                    $client3 = $model->handleSell($client3, $last_day['preult']);
-
-                    $client4 = $model->handleBuy($client4, $last_day['preult']);
-                    if ($client4['actions'] * $last_day['preult'] > 100) {
-                        $client4 = $model->handleSell($client4, $last_day['preult']);
-                    }
-                }
-
-
-                if (($max + 1) < $last_day['state']) {
-                    $client1 = $model->handleSell($client1, $last_day['preult']);
-                    $client2 = $model->handleSell($client2, $last_day['preult']);
-                    $client3 = $model->handleSell($client3, $last_day['preult']);
-
-                    if ($client4['actions'] * $last_day['preult'] > 100) {
-                        $client4 = $model->handleSell($client4, $last_day['preult']);
-                    }
-
-                    array_push($clientDatas, ['date' => $next_day['date'], 'client' => $client1]);
-                }
-
                 if (count($next_days) == $consultas - 1) {
                     $t_client5 = $model->handleBuy($t_client5, $last_day['preult']);
                     $t_client5['cash'] = 0;
@@ -772,6 +742,7 @@ class MainController extends Controller
         if ($model->load($post) && $model->validate()) {
             $start = $model->inicio;
             $final = $model->final;
+            $model->states_number = 3;
 
             //Dia de início do conjunto de treinamento
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
@@ -805,10 +776,10 @@ class MainController extends Controller
                 }
 
                 $three_states[$cursor['t_state'] - 1] += 1;
-
             }
+
             $three_state_matrix = $model->transitionMatrix($cursor_by_price, $three_states, 3, "t_state");
-            
+
             //função que constrói o vetor de predição
             $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state"); 
             
@@ -823,5 +794,65 @@ class MainController extends Controller
         return $this->render('predict-three-states', [
             'consultaModel' => $model
         ]);
+    }
+
+    public function actionSteadyStatePredict(){
+        $this->layout = 'navbar';
+
+        $model = new ConsultaModel;
+        $post = $_POST;
+
+        if ($model->load($post) && $model->validate()){
+            $start = $model->inicio;
+            $final = $model->final;
+
+            //Dia de início do conjunto de treinamento
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
+
+            //Dia final do conjunto de treinamento
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00'); 
+
+            //Passando para o padrão de datas do banco
+            $start = Paper::toIsoDate($start->getTimestamp()); 
+            $final = Paper::toIsoDate($final->getTimestamp()); 
+
+            $action_name = $model->nome;
+
+            $actions_by_date = $model->getData($action_name, $start, $final);
+
+            $actions_by_date[0]["t_state"] = 2;
+
+            $three_states = [0, 0, 0];
+
+            //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+            foreach ($actions_by_date as $index => $cursor) {         
+                if ($index > 0) {
+                    $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_by_date[$index - 1]['preult']);
+                }
+
+                $three_states[$cursor['t_state'] - 1] += 1;
+            }
+
+            $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
+
+            /*$matrix = [
+                [0.20,0.30,0.50],
+                [0.10,0.00,0.90],
+                [0.55,0.00,0.45],
+            ];*/
+
+            /*
+            Criar um laço e verificando de 5 em 5 se a matriz convergiu, caso tenha convergido
+            se verifica para valores menores, caso não se verifica para valores maiores até que se
+            encontre um valor em que a matriz convergiu.
+            */
+
+            $Matrix = MatrixFactory::create($three_state_matrix);
+
+
+            echo $model->getSteadyState($Matrix);
+        }else{
+            return $this->render('steady-state-predict');
+        }
     }
 }

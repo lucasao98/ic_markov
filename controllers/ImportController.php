@@ -14,9 +14,10 @@ class ImportController extends Controller
 {
 
     // import&startDate=02012020&endDate=02012020&type=year
-    public function actionForm()
+    public function actionImportForm()
     {
-        return $this->render('importForm');
+        $this->layout = 'navbar';
+        return $this->render('import-form');
     }
 
     public function actionImport(/*$startDate, $endDate, $type*/)
@@ -33,6 +34,7 @@ class ImportController extends Controller
 
         $begin =  DateTime::createFromFormat('dmY', $startDate);
         $end =  DateTime::createFromFormat('dmY', $endDate);
+
         if ($type == 'day') {
             $format = 'dmY';
             $typeFromDownload = 'D';

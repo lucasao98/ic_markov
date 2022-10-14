@@ -5,6 +5,7 @@ namespace app\models;
 use yii\base\Model;
 use app\models\Paper;
 use MathPHP\LinearAlgebra\MatrixFactory;
+use MathPHP\LinearAlgebra\Vector;
 
 class ConsultaModel extends Model
 {
@@ -90,6 +91,46 @@ class ConsultaModel extends Model
             return 2;
     }
 
+    public function getSteadyState($matrix){
+
+        $stop_loop = 0;
+        $R = $matrix->multiply($matrix);
+        $tried_values = 1;
+
+        if($this->validateMatrix($R) === 0){
+            while($stop_loop != 1){
+                for($i=1;$i<=$tried_values;$i++){
+                    $R = $R->multiply($matrix);
+                }
+
+                if($this->validateMatrix($R) === 0){
+                    $tried_values += 1;
+                }else{
+                    $stop_loop = 1;
+                }
+            }
+        }
+
+        return $this->validateMatrix($R);
+    }
+
+    private function validateMatrix($Matrix){
+        if(number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[1][0], 4, '.', ' ') && number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ') && number_format($Matrix[1][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ')){
+            if(number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[1][1], 4, '.', ' ') && number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ') && number_format($Matrix[1][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ')){
+                if(number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[1][2], 4, '.', ' ') && number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ') && number_format($Matrix[1][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ')){
+                    $pi_one = number_format($Matrix[0][0], 4, '.', ' ');
+                    $pi_two = number_format($Matrix[0][1], 4, '.', ' ');
+                    $pi_three = number_format($Matrix[0][2], 4, '.', ' ');
+
+                    $vector_stable = new Vector([$pi_one,$pi_two,$pi_three]);
+                    return $vector_stable;
+                }
+            }
+        }
+        
+        return 0;
+    }
+
     //Constroi a matriz de transição a partir do conjunto de treinamento
     public function transitionMatrix($paper, $states, $states_number, $state_type)
     {
@@ -108,7 +149,7 @@ class ConsultaModel extends Model
         //contagem do ultimo valor do conjunto de treinamento
         $matrix[$paper[count($paper) - 1][$state_type] - 1][$paper[count($paper) - 1][$state_type] - 1] += 1;
 
-        //construção da matriz de transição $states contem a quantidade de elementos em cada estado
+        //construção da matriz de transição $states contem a quantidade de elementos total em cada estado
         for ($i = 0; $i < $states_number; $i++)
             for ($j = 0; $j < $states_number; $j++) {
                 if ($states[$i] == 0)

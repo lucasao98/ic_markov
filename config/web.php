@@ -77,7 +77,8 @@ $config = [
                 'teste' => 'main/teste',
                 'teste-estados' => 'main/teste-estados',
                 'about' => 'main/about',
-                'import' => 'import/importForm'
+                'steady-state-predict' => 'main/steady-state-predict',
+                'import' => 'import/import-form'
             ],
         ],
         

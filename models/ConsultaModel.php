@@ -96,12 +96,19 @@ class ConsultaModel extends Model
         $stop_loop = 0;
         $R = $matrix->multiply($matrix);
         $tried_values = 1;
+        $contador = 1;
+
+        if($this->isErgodicAndisIrreducible($matrix) === 0){
+            return 0;
+        }
 
         if($this->validateMatrix($R) === 0){
             while($stop_loop != 1){
                 for($i=1;$i<=$tried_values;$i++){
                     $R = $R->multiply($matrix);
                 }
+
+                $contador += $tried_values;
 
                 if($this->validateMatrix($R) === 0){
                     $tried_values += 1;
@@ -110,8 +117,7 @@ class ConsultaModel extends Model
                 }
             }
         }
-
-        return $this->validateMatrix($R);
+        return [$this->validateMatrix($R),$contador];
     }
 
     private function validateMatrix($Matrix){
@@ -129,6 +135,16 @@ class ConsultaModel extends Model
         }
         
         return 0;
+    }
+
+    private function isErgodicAndisIrreducible($matrix){
+        if($matrix[0][0] == 0 && $matrix[1][1] == 0 && $matrix[2][2] == 0){
+            if($matrix[0][2] == 0 && $matrix[1][1] == 0 && $matrix[2][0] == 0){
+                return 0;
+            }
+        }
+
+        return 1;
     }
 
     //Constroi a matriz de transição a partir do conjunto de treinamento

@@ -17,7 +17,7 @@ $consultaModel = new ConsultaModel;
 <div class="container">
 	<h2>Previsão de grandes períodos usando CMTD</h2>
 	<p>Data Inicial: Primeira data do período a ser previsto</p>
-	<p>Data Final: Última data do períiodo a ser previsto</p>
+	<p>Data Final: Última data do período a ser previsto</p>
 	<p>Periodo: Número (inteiro) de meses ou anos que formarão o conjunto de treinamento</p>
 	<p>Métrica: Métrica para criação do conjunto de treinamento</p>
 	<p>Base Média Móvel: Número de elementos usados para o cálculo da média móvel</p>

@@ -805,7 +805,7 @@ class MainController extends Controller
         if ($model->load($post) && $model->validate()){
             $start = $model->inicio;
             $final = $model->final;
-
+            
             //Dia de início do conjunto de treinamento
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
 
@@ -817,40 +817,38 @@ class MainController extends Controller
             $final = Paper::toIsoDate($final->getTimestamp()); 
 
             $action_name = $model->nome;
-
+            
             $actions_by_date = $model->getData($action_name, $start, $final);
 
             $actions_by_date[0]["t_state"] = 2;
 
             $three_states = [0, 0, 0];
-
+            
             //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
             foreach ($actions_by_date as $index => $cursor) {         
                 if ($index > 0) {
                     $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_by_date[$index - 1]['preult']);
                 }
-
+                
                 $three_states[$cursor['t_state'] - 1] += 1;
             }
-
+            
             $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
-
-            /*$matrix = [
-                [0.20,0.30,0.50],
-                [0.10,0.00,0.90],
-                [0.55,0.00,0.45],
-            ];*/
-
-            /*
-            Criar um laço e verificando de 5 em 5 se a matriz convergiu, caso tenha convergido
-            se verifica para valores menores, caso não se verifica para valores maiores até que se
-            encontre um valor em que a matriz convergiu.
-            */
-
+            
             $Matrix = MatrixFactory::create($three_state_matrix);
+            
+            $result = $model->getSteadyState($Matrix);
 
+            if($result === 0){
+                $session = Yii::$app->session;
+                $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo. '. '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');
+                return $this->render('steady-state-predict');
+            }
 
-            echo $model->getSteadyState($Matrix);
+            return $this->render('steady-state-result', [
+                'matrix' => $result[0],
+                'times' => $result[1],
+            ]);
         }else{
             return $this->render('steady-state-predict');
         }

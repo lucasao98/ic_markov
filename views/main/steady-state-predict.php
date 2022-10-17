@@ -13,7 +13,19 @@ AppAsset::register($this);
 <div class="container">
     <h2>Predição do Estado Estável</h2>
     <p>Data Inicial: Primeira data do período a ser previsto</p>
-	<p>Data Final: Última data do períiodo a ser previsto</p>
+    <p>Data Final: Última data do período a ser previsto</p>
+
+    <?php
+    $session = Yii::$app->session;
+    if ($session->hasFlash('error')):
+    ?>
+
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <?= $session->getFlash('error'); ?>
+    </div>
+
+    <?php endif; ?>
 
     <div class="container m-3">
 

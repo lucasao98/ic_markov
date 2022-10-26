@@ -841,7 +841,7 @@ class MainController extends Controller
 
             if($result === 0){
                 $session = Yii::$app->session;
-                $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo. '. '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');
+                $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo, ou existem mais de um limite. '. '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');
                 return $this->render('steady-state-predict');
             }
 

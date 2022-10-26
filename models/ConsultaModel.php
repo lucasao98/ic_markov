@@ -102,6 +102,10 @@ class ConsultaModel extends Model
             return 0;
         }
 
+        if($this->haveOnlyOneLimiting($matrix) === 0){
+            return 0;
+        }
+
         if($this->validateMatrix($R) === 0){
             while($stop_loop != 1){
                 for($i=1;$i<=$tried_values;$i++){
@@ -144,6 +148,13 @@ class ConsultaModel extends Model
             }
         }
 
+        return 1;
+    }
+
+    private function haveOnlyOneLimiting($matrix){
+        if($matrix[0][2] == 0 && $matrix[1][2] == 0 && $matrix[2][0] == 0 && $matrix[2][1] == 0){
+            return 0;
+        }
         return 1;
     }
 

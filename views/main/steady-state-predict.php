@@ -14,6 +14,7 @@ AppAsset::register($this);
     <h2>Predição do Estado Estável</h2>
     <p>Data Inicial: Primeira data do período a ser previsto</p>
     <p>Data Final: Última data do período a ser previsto</p>
+    <p>O vetor resultante terá a configuração de: [ aumento, permanence igual, abaixa ]</p>
 
     <?php
     $session = Yii::$app->session;

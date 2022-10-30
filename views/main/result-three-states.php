@@ -9,5 +9,5 @@
     <h3><?= "Método 3: Quantia final: R$" . $t_cliente3['cash'] . " e " . $t_cliente3['actions'] . " ações" ?></h3>
     <h3><?= "Método 4: Quantia final: R$" . $t_cliente4['cash'] . " e " . $t_cliente4['actions'] . " ações" ?></h3>
     <h3><?= "Método 5: Quantia final: R$" . $t_cliente5['cash'] . " e " . $t_cliente5['actions'] . " ações" ?></h3>
-    <a class="btn btn-warning" href="teste-estados">Voltar</a>
+    <a class="btn btn-warning" href="predict-three-states-test">Voltar</a>
 </div>

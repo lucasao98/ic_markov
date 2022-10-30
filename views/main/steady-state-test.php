@@ -11,20 +11,26 @@ $consultaModel = new ConsultaModel;
 AppAsset::register($this);
 ?>
 <div class="container">
-    <h2>Predição do Estado Estável</h2>
+    <h2>Teste de verificação das ações</h2>
     <p>Data Inicial: Primeira data do período a ser previsto</p>
     <p>Data Final: Última data do período a ser previsto</p>
+    <p>Esse teste vai calcular o estado estável de uma determinada ação, salvar em um arquivo csv
+        o nome da ação, e seu estado estável. Após a análise de todas as ações, serão
+        tomadas as decisões de escolher as melhores ações no seus setores correspondentes.
+    </p>
     
     <hr>
 
+    
+
     <?php
     $session = Yii::$app->session;
-    if ($session->hasFlash('error')) :
+    if ($session->hasFlash('success')) :
     ?>
 
-        <div class="alert alert-danger alert-dismissible" role="alert">
+        <div class="alert alert-success alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <?= $session->getFlash('error'); ?>
+            <?= $session->getFlash('success'); ?>
         </div>
 
     <?php endif; ?>

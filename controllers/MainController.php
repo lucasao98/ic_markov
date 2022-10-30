@@ -95,7 +95,7 @@ class MainController extends Controller
                 'interval' => $interval
             ]);
         }
-        return $this->render('predict', [
+        return $this->render('predict-interval', [
             'consultaModel' => $model
         ]);
     }
@@ -525,7 +525,7 @@ class MainController extends Controller
     {
     }
 
-    public function actionTesteEstados()
+    public function actionPredictThreeStatesTest()
     {
 
         $this->layout = 'navbar';
@@ -717,7 +717,7 @@ class MainController extends Controller
                 array_shift($cursor_by_price);
                 array_push($cursor_by_price, $next_day);
             }
-            return $this->render('resultadoTresEstados', [
+            return $this->render('result-three-states', [
                 't_acertou' => $t_acertou,
                 't_errou' => $t_errou,
                 'consultas' => $consultas,
@@ -728,7 +728,7 @@ class MainController extends Controller
                 't_cliente5' => $t_client5,
             ]);
         } else {
-            return $this->render('teste-estados');
+            return $this->render('predict-three-states-test');
         }
     }
 
@@ -796,7 +796,8 @@ class MainController extends Controller
         ]);
     }
 
-    public function actionSteadyStatePredict(){
+    public function actionSteadyStatePredict()
+    {
         $this->layout = 'navbar';
 
         $model = new ConsultaModel;
@@ -846,11 +847,99 @@ class MainController extends Controller
             }
 
             return $this->render('steady-state-result', [
-                'matrix' => $result[0],
+                'up' => $result[0][0],
+                'the_same' => $result[0][1],
+                'down' => $result[0][2],
+                'vector' => $result[0],
                 'times' => $result[1],
             ]);
         }else{
             return $this->render('steady-state-predict');
+        }
+    }
+
+    public function actionSteadyStateTest()
+    {
+        $this->layout = 'navbar';
+
+        $model = new ConsultaModel;
+        $post = $_POST;
+
+        if ($model->load($post) && $model->validate()){
+            $start = $model->inicio;
+            $final = $model->final;
+
+            //Dia de início do conjunto de treinamento
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
+
+            //Dia final do conjunto de treinamento
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00'); 
+            $total_days = date_diff($final,$start);
+            //Passando para o padrão de datas do banco
+            $start = Paper::toIsoDate($start->getTimestamp()); 
+            $final = Paper::toIsoDate($final->getTimestamp()); 
+
+            $action_name = $model->nome;
+            
+            $actions_by_date = $model->getData($action_name, $start, $final);
+
+            $actions_by_date[0]["t_state"] = 2;
+
+            $three_states = [0, 0, 0];
+            
+            //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+            foreach ($actions_by_date as $index => $cursor) {         
+                if ($index > 0) {
+                    $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_by_date[$index - 1]['preult']);
+                }
+                
+                $three_states[$cursor['t_state'] - 1] += 1;
+            }
+            
+            $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
+            
+            $Matrix = MatrixFactory::create($three_state_matrix);
+            
+            $result = $model->getSteadyState($Matrix);
+
+            if($result === 0){
+                $session = Yii::$app->session;
+                $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo, ou existem mais de um limite. '. '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');
+                return $this->render('steady-state-predict');
+            }
+
+            $header = [
+                [
+                    'AÇÃO',
+                    'PERÍODO(em dias)',
+                    'AUMENTO',
+                    'PERMANECEU O PREÇO',
+                    'DIMINUIU'
+                ]
+            ];
+            
+            $data_action = [
+                [
+                    $action_name,
+                    $total_days->days,
+                    $result[0][0],
+                    $result[0][1],
+                    $result[0][2],
+                ]
+            ];
+
+            $sucess = $model->writeInFile('../assets/arquivo_testes.csv',$data_action,',');
+            if($sucess == 0){
+                return "Erro na leitura do arquivo!";
+            }
+
+            $session = Yii::$app->session;
+            $alert = $session->setFlash('success', '<strong>A ação foi salva no csv com sucesso.</strong>');
+            
+            return $this->render('steady-state-test');
+
+        }else{
+            return $this->render('steady-state-test');
         }
     }
 }

@@ -4,19 +4,48 @@ use yii\helpers\Html;
 
 ?>
 <div class="container">
+    <h2>Resultado da previsão com intervalos</h2>
+    <?php
+    echo '<h3>Preço do último dia: R$' . $last['preult'] . '<br>';
+    echo 'Estado do último dia: ' . $last['state'] . '<br></h3>';
+    ?>
+</div>
+
+
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Intervalos</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Estados</th>
+                <th>De</th>
+                <th>Até</th>
+                <th>Previsão Tendência dia seguinte</th>
+            </tr>
+            <?php
+            for ($i = 0; $i < $states_number; $i++) {
+                $price = $premin + $interval * ($i);
+                echo "<tr><td>Estado " . ($i + 1) . "</td>";
+                echo "<td>" . round($price, 2) . "</td>";
+                echo "<td>" . round(($price + $interval), 2) . "</td>";
+                echo "<td>" . round(($vector[0][$i]) * 100, 2) . "%</td></tr>";
+            }
+            ?>
+        </tbody>
+    </table>
 
     <h3>
+
         <?=
-        'Preço do último dia: R$' . $last['preult'] . '<br>';
-        echo 'Estado do último dia: ' . $last['state'] . '<br>';
+        "Intervalos:<br>";
 
-        echo '<br><br>';
-
-        echo "Intervalos:<br>";
-        
         //imprime na tela os intervalos
-        
-        for ($i = 0; $i < $states_number; $i++) { 
+
+        for ($i = 0; $i < $states_number; $i++) {
             $price = $premin + $interval * ($i);
             echo ('Estado ' . ($i + 1) . ' de ' . round($price, 2) . ' até ' . round(($price + $interval), 2) . '<br>');
         }
@@ -28,10 +57,10 @@ use yii\helpers\Html;
             echo 'Probabilidade de ' . round(($vector[0][$i]) * 100, 2) . '% para o estado ' . ($i + 1) . '<br>';
         }
         ?>
-
-
     </h3>
-    <a class="btn btn-warning" href="predict-result-interval">Voltar</a>
+    <div class="container">
+        <a class="btn btn-warning" href="predict-result-interval">Voltar</a>
+    </div>
 </div>
 
 <br>

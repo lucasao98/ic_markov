@@ -15,7 +15,7 @@
 <body>
     <div class="container">
         <!-- Resultado -->
-        <h1>Previsão com estados fixos</h1>
+        <h1>Resultado da previsão com estados fixos</h1>
         <h3 class="result-acertou"><?= "Acertou: $acertou - " . round(($acertou / $consultas) * 100, 2) . '%' ?></h3>
         <h3 class="result-errou"><?= "Errou: $errou - " . round(($errou / $consultas) * 100, 2) . '%' ?></h3>
         <h3><?= "Compra e venda:" ?></h3>

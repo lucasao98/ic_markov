@@ -75,9 +75,10 @@ $config = [
                 'predict-three-states' => 'main/predict-three-states',
                 'validate' => 'main/validate',
                 'teste' => 'main/teste',
-                'teste-estados' => 'main/teste-estados',
+                'predict-three-states-test' => 'main/predict-three-states-test',
                 'about' => 'main/about',
                 'steady-state-predict' => 'main/steady-state-predict',
+                'steady-state-test' => 'main/steady-state-test',
                 'import' => 'import/import-form'
             ],
         ],

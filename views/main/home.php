@@ -12,26 +12,26 @@
       <hr>
       <address>
         <strong>Bolsista</strong>
-        <br>João Henrique dos Santos Queiroz
+        <br><a href="http://lattes.cnpq.br/1580249210152521" target="_blank">João Henrique dos Santos Queiroz</a>
         <br>Bacharelando em Ciência da Computação</br>
         <br>
         <address>
           <abbr title="Email">Email:</abbr>
-          <a href="mailto:jhsqueiroz.cic@uesc.br">jhsqueiroz.cic@uesc.br</a>
+          <p>jhsqueiroz.cic@uesc.br</p>
         </address>
         <strong>Voluntario</strong>
-        <br>Luca Sacramento de Oliveira
+        <br><a href="http://lattes.cnpq.br/7198524375865048" target="_blank">Luca Sacramento de Oliveira</a> 
         <br>Bacharelando em Ciência da Computação<br>
         <br>
         <address>
           <abbr title="Email">Email:</abbr>
-          <a href="mailto:lsoliveira.cic@uesc.br">lsoliveira.cic@uesc.br</a>
+          <p>lsoliveira.cic@uesc.br</p>
         </address>
       </address>
 
       <address>
-        <br>Martha Torres
-        <br>Professora adjunta da UESC
+        <a href="http://lattes.cnpq.br/5466915298318577" target="_blank">Martha Ximena Torres Delgado</a>
+        <br>Professora titular da UESC
         <br>
       </address>
     </div>

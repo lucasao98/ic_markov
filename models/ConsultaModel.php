@@ -6,6 +6,7 @@ use yii\base\Model;
 use app\models\Paper;
 use MathPHP\LinearAlgebra\MatrixFactory;
 use MathPHP\LinearAlgebra\Vector;
+use phpDocumentor\Reflection\PseudoTypes\True_;
 
 class ConsultaModel extends Model
 {
@@ -30,7 +31,7 @@ class ConsultaModel extends Model
     public function attributeLabels()
     {
         return [
-            'nome' => 'Nome',
+            'nome' => 'Ação',
             'inicio' => 'Data Inicial',
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
@@ -91,7 +92,8 @@ class ConsultaModel extends Model
             return 2;
     }
 
-    public function getSteadyState($matrix){
+    public function getSteadyState($matrix)
+    {
 
         $stop_loop = 0;
         $R = $matrix->multiply($matrix);
@@ -124,7 +126,8 @@ class ConsultaModel extends Model
         return [$this->validateMatrix($R),$contador];
     }
 
-    private function validateMatrix($Matrix){
+    private function validateMatrix($Matrix)
+    {
         if(number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[1][0], 4, '.', ' ') && number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ') && number_format($Matrix[1][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ')){
             if(number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[1][1], 4, '.', ' ') && number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ') && number_format($Matrix[1][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ')){
                 if(number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[1][2], 4, '.', ' ') && number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ') && number_format($Matrix[1][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ')){
@@ -141,7 +144,8 @@ class ConsultaModel extends Model
         return 0;
     }
 
-    private function isErgodicAndisIrreducible($matrix){
+    private function isErgodicAndisIrreducible($matrix)
+    {
         if($matrix[0][0] == 0 && $matrix[1][1] == 0 && $matrix[2][2] == 0){
             if($matrix[0][2] == 0 && $matrix[1][1] == 0 && $matrix[2][0] == 0){
                 return 0;
@@ -151,7 +155,8 @@ class ConsultaModel extends Model
         return 1;
     }
 
-    private function haveOnlyOneLimiting($matrix){
+    private function haveOnlyOneLimiting($matrix)
+    {
         if($matrix[0][2] == 0 && $matrix[1][2] == 0 && $matrix[2][0] == 0 && $matrix[2][1] == 0){
             return 0;
         }
@@ -325,5 +330,44 @@ class ConsultaModel extends Model
         }
 
         return $cursors_avg;
+    }
+
+    public static function readFile($file,$header=True,$separeted_by=',')
+    {
+        //Verifica se o arquivo existe
+        if(!file_exists($file)){
+            return 0;
+        }
+
+        $data = [];
+
+        // Abre o arquivo
+        $csv = fopen($file,'r');
+
+        // Cabeçalho dos dados
+        $header_data = $header ? fgetcsv($csv,0,$separeted_by) : [];
+
+        // Lê todas as linhas do arquivo
+        while ($line = fgetcsv($csv,0,$separeted_by)){
+            $data[] = $line;
+        }
+
+        fclose($csv);
+
+        return $data;
+
+    }
+
+    public function writeInFile($file,$data,$separeted_by=',')
+    {
+        $csv = fopen($file,'a');
+
+        foreach($data as $line){
+            fputcsv($csv,$line,$separeted_by);
+        }
+
+        fclose($csv);
+
+        return 1;
     }
 }

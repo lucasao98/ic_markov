@@ -24,7 +24,6 @@ $dateAux = Paper::toIsoDate($dateAux->getTimestamp());
     <p>Data Final: Fim do conjunto de treinamento</p>
     <hr>
 
-
     <?php $form = ActiveForm::begin(['layout' => 'horizontal']) ?>
 
     <?= $form->field($consultaModel, 'nome')->dropDownList(
@@ -375,6 +374,9 @@ $dateAux = Paper::toIsoDate($dateAux->getTimestamp());
             'WEGE3' => 'WEGE3',
             'WHRL3' => 'WHRL3',
             'WHRL4' => 'WHRL4'
+        ],
+        [
+            'style' => ['width' => '190px', 'height' => '30px']
         ]
     ) ?>
 
@@ -389,10 +391,16 @@ $dateAux = Paper::toIsoDate($dateAux->getTimestamp());
             'dateFormat' => 'dd/MM/yyyy'
     ]) ?>
 
-    <?= $form->field($consultaModel, 'states_number')->textInput() ?>
+    <?= $form->field($consultaModel, 'states_number')->textInput(
+        [
+            'style' => ['width' => '190px', 'height' => '30px']
+        ]
+    ) ?>
+    
+    <hr>
 
     <div class="form-group">
-        <div class="col-lg-offset-2">
+        <div class="col-lg-offset-5">
             <?= Html::submitButton('Enviar', ['class'=>'btn btn-primary']) ?>
         </div>
     </div>

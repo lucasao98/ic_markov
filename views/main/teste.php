@@ -373,6 +373,8 @@ $consultaModel = new ConsultaModel;
 			'WEGE3' => 'WEGE3',
 			'WHRL3' => 'WHRL3',
 			'WHRL4' => 'WHRL4'
+		],[
+			'style' => ['width' => '190px', 'height' => '30px']
 		]
 	) ?>
 
@@ -387,15 +389,30 @@ $consultaModel = new ConsultaModel;
 	]) ?>
 
 
-	<?= $form->field($consultaModel, 'periodo')->textInput() ?>
+	<?= $form->field($consultaModel, 'periodo')->textInput(
+		[
+			'style' => ['width' => '190px', 'height' => '30px']
+		]
+	) ?>
 
-	<?= $form->field($consultaModel, 'metric')->dropDownList([
-		'month' => 'Meses',
-		'year' => 'Anos'
-	]) ?>
+	<?= $form->field($consultaModel, 'metric')->dropDownList(
+		[
+			'month' => 'Meses',
+			'year' => 'Anos'
+		],
+		[
+			'style' => ['width' => '190px', 'height' => '30px']
+		]
+	) ?>
 
-	<?= $form->field($consultaModel, 'states_number')->textInput() ?>
+	<?= $form->field($consultaModel, 'states_number')->textInput(
+		[
+			'style' => ['width' => '190px', 'height' => '30px']
+		]
+	) ?>
 	<!-- <?= $form->field($consultaModel, 'base')->textInput() ?> -->
+
+	<hr>
 
 	<div class="form-group">
 		<div class="col-lg-offset-6">

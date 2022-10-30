@@ -22,6 +22,8 @@ $consultaModel = new ConsultaModel;
 	<p>Métrica: Métrica para criação do conjunto de treinamento</p>
 </div>
 
+<hr>
+
 <?php $form = ActiveForm::begin(['layout' => 'horizontal']) ?>
 
 <?= $form->field($consultaModel, 'nome')->dropDownList(
@@ -372,6 +374,8 @@ $consultaModel = new ConsultaModel;
 		'WEGE3' => 'WEGE3',
 		'WHRL3' => 'WHRL3',
 		'WHRL4' => 'WHRL4'
+	],[
+		'style' => ['width' => '190px', 'height' => '30px']
 	]
 ) ?>
 
@@ -385,15 +389,23 @@ $consultaModel = new ConsultaModel;
 	'dateFormat' => 'dd/MM/yyyy'
 ]) ?>
 
-<?= $form->field($consultaModel, 'periodo')->textInput() ?>
+<?= $form->field($consultaModel, 'periodo')->textInput([
+	'style' => ['width' => '190px', 'height' => '30px']
+]) ?>
 
 <?= $form->field($consultaModel, 'metric')->dropDownList([
 	'month' => 'Meses',
 	'year' => 'Anos'
-]) ?>
+],
+[
+	'style' => ['width' => '190px', 'height' => '30px']
+]
+) ?>
+
+<hr>
 
 <div class="form-group">
-	<div class="col-lg-offset-6">
+	<div class="col-lg-offset-5">
 		<?= Html::submitButton('Enviar', ['class' => 'btn btn-primary']) ?>
 	</div>
 </div>

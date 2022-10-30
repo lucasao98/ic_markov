@@ -42,13 +42,12 @@ TesteAsset::register($this);
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="home">Meu Site</a>
+          <a class="navbar-brand" href="home"><span class="glyphicon glyphicon-home"></span></a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li><a href="home">Home<span class="sr-only">(current)</span></a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Método com Intervalos<span class="caret"></span></a>
               <ul class="dropdown-menu">
@@ -59,14 +58,14 @@ TesteAsset::register($this);
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Método com 3 estados<span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="teste-estados">Teste</a></li>
+                <li><a href="predict-three-states-test">Teste</a></li>
                 <li><a href="predict-three-states">Predição</a></li>
               </ul>
             </li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Estado Estável<span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="">Teste</a></li>
+                <li><a href="steady-state-test">Teste</a></li>
                 <li><a href="steady-state-predict">Predição</a></li>
               </ul>
             </li>

@@ -2,11 +2,12 @@
 
 namespace app\models;
 
-use yii\base\Model;
 use app\models\Paper;
 use MathPHP\LinearAlgebra\MatrixFactory;
 use MathPHP\LinearAlgebra\Vector;
-use phpDocumentor\Reflection\PseudoTypes\True_;
+use yii\base\Model;
+use Yii;
+use yii\base\ErrorException;
 
 class ConsultaModel extends Model
 {
@@ -98,7 +99,7 @@ class ConsultaModel extends Model
         $stop_loop = 0;
         $R = $matrix->multiply($matrix);
         $tried_values = 1;
-        $contador = 1;
+        $contador = 2;
 
         if($this->isErgodicAndisIrreducible($matrix) === 0){
             return 0;
@@ -112,6 +113,14 @@ class ConsultaModel extends Model
             while($stop_loop != 1){
                 for($i=1;$i<=$tried_values;$i++){
                     $R = $R->multiply($matrix);
+                }
+
+                if($this->isErgodicAndisIrreducible($matrix) === 0){
+                    return 0;
+                }
+        
+                if($this->haveOnlyOneLimiting($matrix) === 0){
+                    return 0;
                 }
 
                 $contador += $tried_values;
@@ -171,14 +180,17 @@ class ConsultaModel extends Model
         for ($i = 0; $i < $states_number; $i++)
             for ($j = 0; $j < $states_number; $j++)
                 $matrix[$i][$j] = 0;
+        
 
         //calculando a quantidade de elementos em cada transição da matriz
+
         for ($i = 0; $i < count($paper) - 1; $i++) { 
             $j = $i + 1;
             $matrix[$paper[$i][$state_type] - 1][$paper[$j][$state_type] - 1] += 1;
         }
 
         //contagem do ultimo valor do conjunto de treinamento
+        
         $matrix[$paper[count($paper) - 1][$state_type] - 1][$paper[count($paper) - 1][$state_type] - 1] += 1;
 
         //construção da matriz de transição $states contem a quantidade de elementos total em cada estado
@@ -189,8 +201,144 @@ class ConsultaModel extends Model
                 else
                     $matrix[$i][$j] /= $states[$i];
             }
-
         return $matrix;
+    }
+
+    public function firstPassageTime($matrix){
+        $steady_states = $this->getSteadyState($matrix);
+        try {
+            // Up to up
+            $m0_0 = 1/$steady_states[0][0]; 
+        } catch (ErrorException $err) {
+            Yii::warning("Divisão por zero");
+            return 0;
+        }
+
+        try {
+            //Same to same
+            $m1_1 = 1/$steady_states[0][1];
+        } catch (ErrorException $err) {
+            Yii::warning("Divisão por zero");
+            return 0;
+        }
+
+        try {
+            //Down to down
+            $m2_2 = 1/$steady_states[0][2];
+        } catch (ErrorException $err) {
+            Yii::warning("Divisão por zero");
+            return 0;
+        }
+
+        // Up to same
+        $m0_1 = 1 + $matrix[0][0] . 'm0_1' . $matrix[0][2] . 'm2_1';
+
+        // Up to down
+        $m0_2 = 1 + $matrix[0][0] . 'm0_2' . $matrix[0][1] . 'm1_2';
+
+
+        // Same to up
+        $m1_0 = 1 + $matrix[1][1] . 'm1_0' . $matrix[1][2] . 'm2_0';
+
+        // Same to down
+        $m1_2 = 1 + $matrix[1][0] . 'm0_2' . $matrix[1][1] . 'm1_2';
+
+
+        // Down to up
+        $m2_0 = 1 + $matrix[2][1] . 'm1_0' . $matrix[2][2] . 'm2_0';
+
+        // Down to same
+        $m2_1 = 1 + $matrix[2][0] . 'm0_1' . $matrix[2][2] . 'm2_1';
+
+
+        /**
+         * 
+         * Formando os sistemas lineares
+         * 
+        */
+
+        // Up to same
+        $m0_1 = 1 + $matrix[0][0] . 'm0_1' . $matrix[0][2] . 'm2_1';
+
+        // Down to same
+        $m2_1 = 1 + $matrix[2][0] . 'm0_1' . $matrix[2][2] . 'm2_1';
+
+
+
+        // Up to down
+        $m0_2 = 1 + $matrix[0][0] . 'm0_2' . $matrix[0][1] . 'm1_2';
+
+        // Same to down
+        $m1_2 = 1 + $matrix[1][0] . 'm0_2' . $matrix[1][1] . 'm1_2';
+
+
+        // Same to up
+        $m1_0 = 1 + $matrix[1][1] . 'm1_0' . $matrix[1][2] . 'm2_0';
+
+        // Down to up
+        $m2_0 = 1 + $matrix[2][1] . 'm1_0' . $matrix[2][2] . 'm2_0';
+
+
+        /**
+         * 
+         * Criando matriz de cada sistema para resolução
+         * 
+        */
+
+        // Up to same
+        // -1 = $matrix[0][0] - 1$m0_1 . 'm0_1' . $matrix[0][2] . 'm2_1';
+
+        // Down to same
+        // -1 = $matrix[2][0] . 'm0_1' . $matrix[2][2] -1$m2_1 . 'm2_1';
+
+
+
+        // Up to down
+        // -1 = $matrix[0][0] -1$m0_2 . 'm0_2' . $matrix[0][1] . 'm1_2';
+
+        // Same to down
+        // -1 = $matrix[1][0] . 'm0_2' . $matrix[1][1] -1$m1_2 . 'm1_2';
+
+
+        // Same to up
+        // -1 = $matrix[1][1] -1$m1_0 . 'm1_0' . $matrix[1][2] . 'm2_0';
+
+        // Down to up
+        // -1 = $matrix[2][1] . 'm1_0' . $matrix[2][2] - 1$m2_0 . 'm2_0';
+
+        $matrix_0 = [
+            [($matrix[0][0] - 1), $matrix[0][2]],
+            [$matrix[2][0], ($matrix[2][2] -1)]
+        ];
+
+        $matrix_1 = [
+            [($matrix[0][0] -1),  $matrix[0][1]],
+            [$matrix[1][0], ($matrix[1][1] -1)]
+        ];
+
+        $matrix_2 = [
+            [($matrix[1][1] -1), $matrix[1][2]],
+            [$matrix[2][1], ($matrix[2][2] - 1)]
+        ];
+        
+        $matrix_0 = MatrixFactory::create($matrix_0);
+        $matrix_1 = MatrixFactory::create($matrix_1);
+        $matrix_2 = MatrixFactory::create($matrix_2);
+
+        $vector_result = [-1 , -1];
+
+        $result_0 = $matrix_0->solve($vector_result);
+        $result_1 = $matrix_1->solve($vector_result);
+        $result_2 = $matrix_2->solve($vector_result);
+
+        $matrix_result = [
+            [$m0_0, $result_0[0], $result_0[1]],
+            [$result_1[0], $m1_1, $result_1[1]],
+            [$result_2[0], $result_2[1], $m2_2],
+        ];
+
+        return $matrix_result;
+
     }
 
     //Constroi o vetor de previsão

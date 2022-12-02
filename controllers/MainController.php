@@ -824,7 +824,7 @@ class MainController extends Controller
             $actions_by_date[0]["t_state"] = 2;
 
             $three_states = [0, 0, 0];
-            
+
             //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
             foreach ($actions_by_date as $index => $cursor) {         
                 if ($index > 0) {
@@ -834,8 +834,11 @@ class MainController extends Controller
                 $three_states[$cursor['t_state'] - 1] += 1;
             }
             
+           
             $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
-            
+
+
+
             $Matrix = MatrixFactory::create($three_state_matrix);
             
             $result = $model->getSteadyState($Matrix);
@@ -846,12 +849,23 @@ class MainController extends Controller
                 return $this->render('steady-state-predict');
             }
 
+            $first_passage_vector = $model->firstPassageTime($Matrix);
+
+            if($first_passage_vector == 0){
+                $session = Yii::$app->session;
+                $alert = $session->setFlash('error', 'Alguma probabilidade da conversão foi zero 
+                e ocorreu um erro no cálculo de primeira passagem. Por Favor 
+                Escolha outro intervalo.');
+                return $this->render('steady-state-predict');
+            }
+
             return $this->render('steady-state-result', [
                 'up' => $result[0][0],
                 'the_same' => $result[0][1],
                 'down' => $result[0][2],
                 'vector' => $result[0],
                 'times' => $result[1],
+                'first_passage' => $first_passage_vector
             ]);
         }else{
             return $this->render('steady-state-predict');
@@ -901,7 +915,7 @@ class MainController extends Controller
             $Matrix = MatrixFactory::create($three_state_matrix);
             
             $result = $model->getSteadyState($Matrix);
-
+            
             if($result === 0){
                 $session = Yii::$app->session;
                 $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo, ou existem mais de um limite. '. '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');

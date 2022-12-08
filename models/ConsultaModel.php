@@ -205,7 +205,9 @@ class ConsultaModel extends Model
     }
 
     public function firstPassageTime($matrix){
+
         $steady_states = $this->getSteadyState($matrix);
+
         try {
             // Up to up
             $m0_0 = 1/$steady_states[0][0]; 
@@ -229,26 +231,27 @@ class ConsultaModel extends Model
             Yii::warning("Divisão por zero");
             return 0;
         }
+        
 
         // Up to same
-        $m0_1 = 1 + $matrix[0][0] . 'm0_1' . $matrix[0][2] . 'm2_1';
+        //$m0_1 = 1 + $matrix[0][0] . 'm0_1' . $matrix[0][2] . 'm2_1';
 
         // Up to down
-        $m0_2 = 1 + $matrix[0][0] . 'm0_2' . $matrix[0][1] . 'm1_2';
+        //$m0_2 = 1 + $matrix[0][0] . 'm0_2' . $matrix[0][1] . 'm1_2';
 
 
         // Same to up
-        $m1_0 = 1 + $matrix[1][1] . 'm1_0' . $matrix[1][2] . 'm2_0';
+        //$m1_0 = 1 + $matrix[1][1] . 'm1_0' . $matrix[1][2] . 'm2_0';
 
         // Same to down
-        $m1_2 = 1 + $matrix[1][0] . 'm0_2' . $matrix[1][1] . 'm1_2';
+        //$m1_2 = 1 + $matrix[1][0] . 'm0_2' . $matrix[1][1] . 'm1_2';
 
 
         // Down to up
-        $m2_0 = 1 + $matrix[2][1] . 'm1_0' . $matrix[2][2] . 'm2_0';
+        //$m2_0 = 1 + $matrix[2][1] . 'm1_0' . $matrix[2][2] . 'm2_0';
 
         // Down to same
-        $m2_1 = 1 + $matrix[2][0] . 'm0_1' . $matrix[2][2] . 'm2_1';
+        //$m2_1 = 1 + $matrix[2][0] . 'm0_1' . $matrix[2][2] . 'm2_1';
 
 
         /**
@@ -258,25 +261,25 @@ class ConsultaModel extends Model
         */
 
         // Up to same
-        $m0_1 = 1 + $matrix[0][0] . 'm0_1' . $matrix[0][2] . 'm2_1';
+        //$m0_1 = 1 + $matrix[0][0] . 'm0_1' . $matrix[0][2] . 'm2_1';
 
         // Down to same
-        $m2_1 = 1 + $matrix[2][0] . 'm0_1' . $matrix[2][2] . 'm2_1';
+        //$m2_1 = 1 + $matrix[2][0] . 'm0_1' . $matrix[2][2] . 'm2_1';
 
 
 
         // Up to down
-        $m0_2 = 1 + $matrix[0][0] . 'm0_2' . $matrix[0][1] . 'm1_2';
+        //$m0_2 = 1 + $matrix[0][0] . 'm0_2' . $matrix[0][1] . 'm1_2';
 
         // Same to down
-        $m1_2 = 1 + $matrix[1][0] . 'm0_2' . $matrix[1][1] . 'm1_2';
+        //$m1_2 = 1 + $matrix[1][0] . 'm0_2' . $matrix[1][1] . 'm1_2';
 
 
         // Same to up
-        $m1_0 = 1 + $matrix[1][1] . 'm1_0' . $matrix[1][2] . 'm2_0';
+        //$m1_0 = 1 + $matrix[1][1] . 'm1_0' . $matrix[1][2] . 'm2_0';
 
         // Down to up
-        $m2_0 = 1 + $matrix[2][1] . 'm1_0' . $matrix[2][2] . 'm2_0';
+        //$m2_0 = 1 + $matrix[2][1] . 'm1_0' . $matrix[2][2] . 'm2_0';
 
 
         /**
@@ -305,7 +308,8 @@ class ConsultaModel extends Model
 
         // Down to up
         // -1 = $matrix[2][1] . 'm1_0' . $matrix[2][2] - 1$m2_0 . 'm2_0';
-
+        
+        
         $matrix_0 = [
             [($matrix[0][0] - 1), $matrix[0][2]],
             [$matrix[2][0], ($matrix[2][2] -1)]

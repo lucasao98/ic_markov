@@ -837,35 +837,25 @@ class MainController extends Controller
            
             $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
 
-
-
             $Matrix = MatrixFactory::create($three_state_matrix);
             
             $result = $model->getSteadyState($Matrix);
+            //var_dump($Matrix[0]);
+            //var_dump($Matrix[1]);
+            //var_dump($Matrix[2]);
 
             if($result === 0){
                 $session = Yii::$app->session;
                 $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo, ou existem mais de um limite. '. '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');
                 return $this->render('steady-state-predict');
             }
-
-            $first_passage_vector = $model->firstPassageTime($Matrix);
-
-            if($first_passage_vector == 0){
-                $session = Yii::$app->session;
-                $alert = $session->setFlash('error', 'Alguma probabilidade da conversão foi zero 
-                e ocorreu um erro no cálculo de primeira passagem. Por Favor 
-                Escolha outro intervalo.');
-                return $this->render('steady-state-predict');
-            }
-
+            
             return $this->render('steady-state-result', [
                 'up' => $result[0][0],
                 'the_same' => $result[0][1],
                 'down' => $result[0][2],
                 'vector' => $result[0],
                 'times' => $result[1],
-                'first_passage' => $first_passage_vector
             ]);
         }else{
             return $this->render('steady-state-predict');
@@ -924,11 +914,18 @@ class MainController extends Controller
 
             $header = [
                 [
-                    'AÇÃO',
+                    'Ação',
+                    'Tipo',
+                    'Último Dia',
+                    'Preço Último Dia',
+                    'Dias Após n iterações',
+                    'Preço dias após n iterações',
                     'PERÍODO(em dias)',
-                    'AUMENTO',
-                    'PERMANECEU O PREÇO',
-                    'DIMINUIU'
+                    'Iterações',
+                    'Aumentou',
+                    'Permaneceu Igual',
+                    'Diminuiu',
+                    'Acertou'
                 ]
             ];
             
@@ -954,6 +951,65 @@ class MainController extends Controller
 
         }else{
             return $this->render('steady-state-test');
+        }
+    }
+
+    public function actionFirstPassageTime(){
+        $this->layout = 'navbar';
+
+        $model = new ConsultaModel;
+        $post = $_POST;
+
+        if ($model->load($post) && $model->validate()){
+            $start = $model->inicio;
+            $final = $model->final;
+
+            //Dia de início do conjunto de treinamento
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
+
+            //Dia final do conjunto de treinamento
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00'); 
+            $total_days = date_diff($final,$start);
+            //Passando para o padrão de datas do banco
+            $start = Paper::toIsoDate($start->getTimestamp()); 
+            $final = Paper::toIsoDate($final->getTimestamp()); 
+
+            $action_name = $model->nome;
+            
+            $actions_by_date = $model->getData($action_name, $start, $final);
+
+            $actions_by_date[0]["t_state"] = 2;
+
+            $three_states = [0, 0, 0];
+            
+            //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+            foreach ($actions_by_date as $index => $cursor) {         
+                if ($index > 0) {
+                    $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_by_date[$index - 1]['preult']);
+                }
+                
+                $three_states[$cursor['t_state'] - 1] += 1;
+            }
+            
+            $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
+            
+            $Matrix = MatrixFactory::create($three_state_matrix);
+            
+            $first_passage_vector = $model->firstPassageTime($Matrix);
+
+            if($first_passage_vector == 0){
+                $session = Yii::$app->session;
+                $alert = $session->setFlash('error', 'Alguma probabilidade da conversão foi zero 
+                e ocorreu um erro no cálculo de primeira passagem. Por Favor 
+                Escolha outro intervalo.');
+                return $this->render('first-passage-time');
+            }
+
+            return $this->render('first-passage-time-result', [
+                'first_passage' => $first_passage_vector
+            ]);
+        }else{
+            return $this->render('first-passage-time');
         }
     }
 }

@@ -69,6 +69,12 @@ TesteAsset::register($this);
                 <li><a href="steady-state-predict">Predição</a></li>
               </ul>
             </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tempo de Primeira Passagem<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="first-passage-time">Predição</a></li>
+              </ul>
+            </li>
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->

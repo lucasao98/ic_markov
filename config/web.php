@@ -81,7 +81,8 @@ $config = [
                 'steady-state-test' => 'main/steady-state-test',
                 'first-passage-time' => 'main/first-passage-time',
                 'first-passage-time-result' => 'main/first-passage-time-result',
-                'import' => 'import/import-form'
+                'import' => 'import/import-form',
+                'import-data' => 'import/import-data'
             ],
         ],
         

@@ -205,12 +205,15 @@ class ConsultaModel extends Model
     }
 
     public function firstPassageTime($matrix){
-
+        
+        // Retorna o vetor com os valores que a matriz converge
         $steady_states = $this->getSteadyState($matrix);
-
+        
+       
         try {
             // Up to up
             $m0_0 = 1/$steady_states[0][0]; 
+
         } catch (ErrorException $err) {
             Yii::warning("Divisão por zero");
             return 0;
@@ -231,10 +234,16 @@ class ConsultaModel extends Model
             Yii::warning("Divisão por zero");
             return 0;
         }
-        
 
         // Up to same
         //$m0_1 = 1 + $matrix[0][0] . 'm0_1' . $matrix[0][2] . 'm2_1';
+
+        //Up to Up
+        //$m0_0 = 1 + $matrix[0][1] . 'm1_0 . $matrix[0][2] . 'm2_0';
+        //same to same
+        //$m1_1 = 1 + $matrix[1][0] . 'm0_1 . $matrix[1][2] . 'm2_1';
+        //down to down
+        //$m2_2 = 1 + $matrix[1][0] . 'm0_2 . $matrix[1][1] . 'm1_2';
 
         // Up to down
         //$m0_2 = 1 + $matrix[0][0] . 'm0_2' . $matrix[0][1] . 'm1_2';
@@ -266,6 +275,9 @@ class ConsultaModel extends Model
         // Down to same
         //$m2_1 = 1 + $matrix[2][0] . 'm0_1' . $matrix[2][2] . 'm2_1';
 
+        //same to same
+        //$m1_1 = 1 + $matrix[1][0] . 'm0_1 . $matrix[1][2] . 'm2_1';
+
 
 
         // Up to down
@@ -293,7 +305,6 @@ class ConsultaModel extends Model
 
         // Down to same
         // -1 = $matrix[2][0] . 'm0_1' . $matrix[2][2] -1$m2_1 . 'm2_1';
-
 
 
         // Up to down

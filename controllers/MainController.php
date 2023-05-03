@@ -824,26 +824,18 @@ class MainController extends Controller
             $actions_by_date[0]["t_state"] = 2;
 
             $three_states = [0, 0, 0];
-
             //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-            foreach ($actions_by_date as $index => $cursor) {         
+            foreach ($actions_by_date as $index => $cursor) {   
                 if ($index > 0) {
                     $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_by_date[$index - 1]['preult']);
                 }
-                
                 $three_states[$cursor['t_state'] - 1] += 1;
             }
-            
-           
             $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
 
             $Matrix = MatrixFactory::create($three_state_matrix);
             
             $result = $model->getSteadyState($Matrix);
-            //var_dump($Matrix[0]);
-            //var_dump($Matrix[1]);
-            //var_dump($Matrix[2]);
-
             if($result === 0){
                 $session = Yii::$app->session;
                 $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo, ou existem mais de um limite. '. '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');

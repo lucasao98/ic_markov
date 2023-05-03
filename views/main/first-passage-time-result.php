@@ -5,7 +5,7 @@ use app\assets\AppAsset;
 AppAsset::register($this);
 ?>
 <div class="container">
-    <h2>Resultado do Cálculo de Primeira Passagem</h2>
+    <h2>Resultado do Cálculo de Tempo da Primeira Passagem</h2>
 </div>
 
 <div class="container">
@@ -45,7 +45,7 @@ AppAsset::register($this);
 </div>
 
 <div class="form-group mt-2">
-    <div class="col-lg-offset-1">
+    <div class="col-lg-offset-2">
         <a class="btn btn-warning" href="steady-state-predict">Voltar</a>
     </div>
 </div>

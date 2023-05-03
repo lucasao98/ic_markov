@@ -20,8 +20,11 @@ class ImportController extends Controller
         return $this->render('import-form');
     }
 
-    public function actionImport(/*$startDate, $endDate, $type*/)
+    public function actionImportData(/*$startDate, $endDate, $type*/)
     {
+        $this->layout = 'navbar';
+
+
         $startDate = $_GET['startDate'];
         $endDate = $_GET['endDate'];
         $type = $_GET['type'];
@@ -31,9 +34,8 @@ class ImportController extends Controller
 
         // Yii::debug("[IMPORT] start");
 
-
-        $begin =  DateTime::createFromFormat('dmY', $startDate);
-        $end =  DateTime::createFromFormat('dmY', $endDate);
+        $begin =  DateTime::createFromFormat('Y', $startDate);
+        $end =  DateTime::createFromFormat('j-M-Y', $endDate);
 
         if ($type == 'day') {
             $format = 'dmY';
@@ -43,23 +45,35 @@ class ImportController extends Controller
             $typeFromDownload = 'A';
         }
 
+        $begin = $begin->format($format);
 
+        try {
+            //$this->downloadData($begin, $typeFromDownload);
+            //$this->extractData($startDate);
+            $this->parseDataAndSaveInDatabase($begin, $typeFromDownload);
+
+            Yii::debug("[IMPORT]sucesso na data " . $begin);
+        } catch (\Exception $e) {
+            return ("[IMPORT]falha na data " . $begin . " " . $e->getMessage());
+        }
+        /*
         for ($i = $begin; $i <= $end; $i->modify('+1 ' . $type)) {
-
+            
             $dateFormatted = $i->format($format);
 
             try {
-                // $this->downloadData($dateFormatted, $typeFromDownload);
-                // $this->extractData($dateFormatted);
-                $this->parseDataAndSaveInDatabase($dateFormatted, $typeFromDownload);
+                //$this->downloadData($dateFormatted, $typeFromDownload);
+                //$this->extractData($dateFormatted);
+                //$this->parseDataAndSaveInDatabase($dateFormatted, $typeFromDownload);
 
                 Yii::debug("[IMPORT]sucesso na data " . $dateFormatted);
             } catch (\Exception $e) {
                 return ("[IMPORT]falha na data " . $dateFormatted . " " . $e->getMessage());
             }
         }
-        return $dateFormatted . " importado";
-    }
+            return $dateFormatted . " importado";*/
+        }
+        
 
     public function downloadData($date, $type)
     {
@@ -75,7 +89,7 @@ class ImportController extends Controller
 
         $response = $client->createRequest()
             ->setMethod('GET')
-            ->setUrl('http://bvmf.bmfbovespa.com.br/InstDados/SerHist/COTAHIST_' . $type . $date . '.zip')
+            ->setUrl('https://bvmf.bmfbovespa.com.br/pt-br/cotacoes-historicas/FormConsultaValida.asp?arq=COTAHIST_' . $type . $date . '.ZIP')
             ->setOutputFile($fh)
             ->send();
 
@@ -88,7 +102,7 @@ class ImportController extends Controller
     {
         Yii::debug("[IMPORT] start extractData data from " . $date);
 
-        $file_path = '../assets/COTAHIST/ZIP/' . $date . '.zip';
+        $file_path = '../assets/COTAHIST_A' . $date . '.ZIP';
         $zip = new ZipArchive;
         $res = $zip->open($file_path);
         if ($res === TRUE) {
@@ -115,7 +129,8 @@ class ImportController extends Controller
             $typeWithSeparator = "_A";
         }
 
-        $file = fopen("../assets/COTAHIST/COTAHIST" . $typeWithSeparator . $date . $extension, "r");
+        $file = fopen("../assets/COTAHIST/ZIP/COTAHIST" . $typeWithSeparator . $date . $extension, "r");
+
         if ($file) {
             $header = fgets($file);
             while (($line = fgets($file)) !== false) {

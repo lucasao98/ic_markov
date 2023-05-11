@@ -5,6 +5,7 @@
 
 use yii\helpers\Html;
 use app\assets\TesteAsset;
+use yii\bootstrap\ButtonDropdown;
 
 TesteAsset::register($this);
 
@@ -31,50 +32,61 @@ TesteAsset::register($this);
 <body>
   <?php $this->beginBody() ?>
 
+
+
   <div class="container">
     <nav class="navbar bg-primary navigation mt-1">
       <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="home"><span class="glyphicon glyphicon-home"></span></a>
-        </div>
-
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Método com Intervalos<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="teste">Teste</a></li>
-                <li><a href="predict-result-interval">Predição</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Método com 3 estados<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="predict-three-states-test">Teste</a></li>
-                <li><a href="predict-three-states">Predição</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Estado Estável<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="steady-state-test">Teste</a></li>
-                <li><a href="steady-state-predict">Predição</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tempo de Primeira Passagem<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="first-passage-time">Predição</a></li>
-              </ul>
-            </li>
+            <?php
+
+            echo ButtonDropdown::widget([
+              'label' => 'Método com Intervalos',
+              'dropdown' => [
+                'items' => [
+                  ['label' => 'Teste', 'url' => 'teste'],
+                  ['label' => 'Predição', 'url' => 'predict-result-interval'],
+                ],
+              ],
+            ]);
+
+
+            echo ButtonDropdown::widget([
+              'label' => 'Método com 3 estados',
+              'dropdown' => [
+                'items' => [
+                  ['label' => 'Teste', 'url' => 'predict-three-states-test'],
+                  ['label' => 'Predição', 'url' => 'predict-three-states'],
+                ],
+              ],
+            ]);
+
+
+            echo ButtonDropdown::widget([
+              'label' => 'Estado Estável',
+              'dropdown' => [
+                'items' => [
+                  ['label' => 'Teste', 'url' => 'steady-state-test'],
+                  ['label' => 'Predição', 'url' => 'steady-state-predict'],
+                ],
+              ],
+            ]);
+
+
+            echo ButtonDropdown::widget([
+              'label' => 'Tempo de primeira passagem',
+              'dropdown' => [
+                'items' => [
+                  ['label' => 'Predição', 'url' => 'first-passage-time'],
+                ],
+              ],
+            ]);
+
+            ?>
+          </ul>
+
           </ul>
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->

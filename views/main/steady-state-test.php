@@ -14,10 +14,6 @@ AppAsset::register($this);
     <h2>Teste de verificação das ações</h2>
     <p>Data Inicial: Primeira data do período a ser previsto</p>
     <p>Data Final: Última data do período a ser previsto</p>
-    <p>Esse teste vai calcular o estado estável de uma determinada ação, salvar em um arquivo csv
-        o nome da ação, e seu estado estável. Após a análise de todas as ações, serão
-        tomadas as decisões de escolher as melhores ações no seus setores correspondentes.
-    </p>
     
     <hr>
 

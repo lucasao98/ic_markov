@@ -13,7 +13,7 @@
       <address>
         <strong>Bolsista</strong>
         <br><a href="http://lattes.cnpq.br/1580249210152521" target="_blank">João Henrique dos Santos Queiroz</a>
-        <br>Bacharelando em Ciência da Computação</br>
+        <br>Bacharel em Ciência da Computação</br>
         <br>
         <address>
           <abbr title="Email">Email:</abbr>

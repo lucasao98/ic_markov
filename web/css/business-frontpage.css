@@ -9,6 +9,13 @@
   background-color: #337ab7;
   height: 50px;
   border-bottom: solid 2px #4faddb;
+  margin-top: 5px;
+  align-items: center;
+}
+
+li {
+  list-style-type: none;
+  margin-left: 10px;
 }
 
 .navigation a {

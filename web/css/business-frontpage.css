@@ -11,6 +11,7 @@
   border-bottom: solid 2px #4faddb;
   margin-top: 5px;
   align-items: center;
+  justify-content: end;
 }
 
 li {
@@ -22,8 +23,8 @@ li {
   color: white;
 }
 
-.navigation a:hover {
-  color: #337ab7;
+.navigation li{
+  margin-right: 10px;
 }
 
 .navbar-brand {

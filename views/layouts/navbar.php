@@ -36,10 +36,10 @@ TesteAsset::register($this);
     <div class="row">
       <ul class="navigation">
         <li>
-          <a class="btn btn-primary" href="home">Home</a>
+          <a href="home">Home</a>
         </li>
         <li>
-          <a class="btn btn-primary" href="steady-state-predict">Estado Estável</a>
+          <a href="steady-state-predict">Estado Estável</a>
         </li>
         <li>
         <?php
@@ -58,7 +58,7 @@ TesteAsset::register($this);
           ?>
         </li>
         <li>
-          <a class="btn btn-primary" href="first-passage-time">Tempo de primeira passagem</a>
+          <a href="first-passage-time">Tempo de primeira passagem</a>
         </li>
       </ul>
     </div>

@@ -298,11 +298,6 @@ class MainController extends Controller
                 $three_state_matrix = $model->transitionMatrix($cursor_by_price, $three_states, 3, "t_state");
                 $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state"); //função que constrói o vetor de predição
 
-                $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state"); //função que constrói a matriz de transição
-                $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state"); //função que constrói o vetor de predição
-
-                // $matrix_avg = $model->transitionMatrix($cursor_by_price_avg, $states_avg, $model->states_number, "state"); //função que constrói a matriz de transição
-                // $vector_avg = $model->predictVector($matrix_avg, $cursor_by_price_avg, $model->states_number, "state"); //função que constrói o vetor de predição
                 /* Validação ----------------------------------------------------------------- */
 
                 $last_day = $cursor_by_price[count($cursor_by_price) - 1];
@@ -537,11 +532,19 @@ class MainController extends Controller
             Yii::debug("Inicio");
             $start = $model->inicio;
             $consultas = 0;
+            $acertou = 0;
+            $errou = 0;
+            $acertou_avg = 0;
+            $errou_avg = 0;
             $t_acertou = 0;
             $t_errou = 0;
             $next = array();
             $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->format('U'));
             $next_day = new Paper();
+            $client1 = ['cash' => 100, 'actions' => 0];
+            $client2 = ['cash' => 100, 'actions' => 0];
+            $client3 = ['cash' => 100, 'actions' => 0];
+            $client4 = ['cash' => 100, 'actions' => 0];
             $clientDatas = [];
             $t_client1 = ['cash' => 100, 'actions' => 0];
             $t_client2 = ['cash' => 100, 'actions' => 0];
@@ -550,47 +553,31 @@ class MainController extends Controller
             $t_client5 = ['cash' => 100, 'actions' => 0];
             $t_clientDatas = [];
             $t_datas = [];
-
-            $model->states_number = 3;
+            $base = $model->base;
 
             $final = $start;
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
+            $start = $start->modify("-$model->periodo $model->metric"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
+            /* -------------------------------------------------------------------- */
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
 
-            //Dia de início do conjunto de treinamento
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
-
-            //O conjunto de treinamento será definido n meses antes do dia a ser previsto
-            $start = $start->modify("-$model->periodo $model->metric");
-
-            //Dia final do conjunto de treinamento
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');
-
-            //Passando para o padrão de datas do banco
-            $start = Paper::toIsoDate($start->format('U'));
-
-            //Passando para o padrão de datas do banco
-            $final = Paper::toIsoDate($final->format('U'));
+            $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
+            $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
 
             $stock = $model->nome;
-
-            //Setup inicial do conjunto de treinamento
-            $cursor_by_price = $model->getData($stock, $start, $final);
+            $cursor_by_price = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
 
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
-
-            //Busca no banco os dias que serão previstos
-            $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux);
-
+            $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos\
             $consultas = count($next_days);
             Yii::debug("Conjunto de treinamento pronto");
-            $next_day = array_shift($next_days);
 
             while (1) {
 
                 if (count($next_days) == 0)
                     break;
 
-                //busca o dia seguinte no banco
-                $next_day = array_shift($next_days);
+                $next_day = array_shift($next_days); //busca o dia seguinte no banco
 
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 if ($next_day['date'] > $aux || $next_day['date'] == null)
@@ -599,18 +586,17 @@ class MainController extends Controller
                 $premin = $model->definePremin($cursor_by_price);
                 $premax = $model->definePremax($cursor_by_price);
 
-                //vetor que contem a quantidade de elementos em cada estado
-                $states = [];
-
+                $states = []; //vetor que contem a quantidade de elementos em cada estado
+                $states_avg = []; //vetor que contem a quantidade de elementos em cada estado
                 for ($i = 0; $i < $model->states_number; $i++) {
                     $states[$i] = 0;
                 }
 
                 $cursor_by_price[0]["t_state"] = 2;
+
                 $three_states = [0, 0, 0];
 
-                //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                foreach ($cursor_by_price as $index => $cursor) {
+                foreach ($cursor_by_price as $index => $cursor) { //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
                     if ($index > 0) {
                         $cursor['t_state'] = $model->getThreeState($cursor['preult'], $cursor_by_price[$index - 1]['preult']);
                     }
@@ -619,22 +605,24 @@ class MainController extends Controller
                 }
 
                 $three_state_matrix = $model->transitionMatrix($cursor_by_price, $three_states, 3, "t_state");
+                $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state"); //função que constrói o vetor de predição
 
-                //função que constrói o vetor de predição
-                $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state");
+                /* Validação ----------------------------------------------------------------- */
 
                 $last_day = $cursor_by_price[count($cursor_by_price) - 1];
 
-                // calcula o estado do dia seguinte
-                $next_day['t_state'] = $model->getThreeState($next_day['preult'], $last_day['preult']);
+                $next_day['t_state'] = $model->getThreeState($next_day['preult'], $last_day['preult']); // calcula o estado do dia seguinte
 
                 array_push($next, $next_day);
                 $max = 0;
                 $t_max = 0;
                 $t_vector = $three_state_vector[0];
 
-                //calculando o estado com maior probabilidade no vetor de previsão
-                for ($i = 1; $i < 3; $i++) {
+                for ($i = 1; $i < $model->states_number; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
+                    $max_avg = $i;
+                }
+
+                for ($i = 1; $i < 3; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
                     if ($t_vector[$i] >= $t_vector[$t_max])
                         $t_max = $i;
                 }
@@ -651,6 +639,7 @@ class MainController extends Controller
                     $t_acertou++;
                 else
                     $t_errou++;
+
                 // Verifica qual dos 3 estados tem maior probabilidade e realiza compra/venda
                 switch ($t_max) {
                     case 0:
@@ -702,25 +691,86 @@ class MainController extends Controller
                         break;
                 }
 
+
+                if (($max + 1) > $last_day['state']) {
+                    $client1 = $model->handleBuy($client1, $last_day['preult']);
+                    $client2 = $model->handleBuy($client2, $last_day['preult']);
+                    $client3 = $model->handleBuy($client3, $last_day['preult']);
+                    $client4 = $model->handleBuy($client4, $last_day['preult']);
+
+                    if ($client4['actions'] * $last_day['preult'] > 100) {
+                        $client4 = $model->handleSell($client4, $last_day['preult']);
+                    }
+
+                    array_push($clientDatas, ['date' => $next_day['date'], 'client' => $client1]);
+                }
+
+                if (($max + 1) == $last_day['state']) {
+                    // $client1 = $model->handleBuy($client1, $last_day['preult']);
+
+                    if ($client2['cash'] > 100) {
+                        $client2 = $model->handleBuy($client2, $last_day['preult']);
+                    }
+                    if ($client2['actions'] * $last_day['preult'] > 100) {
+                        $client2 = $model->handleSell($client2, $last_day['preult']);
+                    }
+
+                    $client3 = $model->handleBuy($client3, $last_day['preult']);
+                    $client3 = $model->handleSell($client3, $last_day['preult']);
+
+                    $client4 = $model->handleBuy($client4, $last_day['preult']);
+                    if ($client4['actions'] * $last_day['preult'] > 100) {
+                        $client4 = $model->handleSell($client4, $last_day['preult']);
+                    }
+                }
+
+                if (($max + 1) < $last_day['state']) {
+                    $client1 = $model->handleSell($client1, $last_day['preult']);
+                    $client2 = $model->handleSell($client2, $last_day['preult']);
+                    $client3 = $model->handleSell($client3, $last_day['preult']);
+
+                    if ($client4['actions'] * $last_day['preult'] > 100) {
+                        $client4 = $model->handleSell($client4, $last_day['preult']);
+                    }
+
+                    array_push($clientDatas, ['date' => $next_day['date'], 'client' => $client1]);
+                }
+
                 if (count($next_days) == $consultas - 1) {
                     $t_client5 = $model->handleBuy($t_client5, $last_day['preult']);
                     $t_client5['cash'] = 0;
                 } else if (empty($next_days)) {
                     $t_client5 = $model->handleSell($t_client5, $last_day['preult']);
+                    $client1 = $model->handleSell($client1, $last_day['preult']);
+                    $client2 = $model->handleSell($client2, $last_day['preult']);
+                    $client3 = $model->handleSell($client3, $last_day['preult']);
+                    $client4 = $model->handleSell($client4, $last_day['preult']);
                     $t_client1 = $model->handleSell($t_client1, $last_day['preult']);
                     $t_client2 = $model->handleSell($t_client2, $last_day['preult']);
                     $t_client3 = $model->handleSell($t_client3, $last_day['preult']);
                     $t_client4 = $model->handleSell($t_client4, $last_day['preult']);
                 }
 
-                //Preparação para a próxima iteração ----------------------------------------------------------------- 
+                /* Preparação para a próxima iteração ----------------------------------------------------------------- */
                 array_shift($cursor_by_price);
                 array_push($cursor_by_price, $next_day);
             }
-            return $this->render('result-three-states', [
+
+            $chart = $model->chartDataThreeStates($next, $t_clientDatas, $t_datas);
+
+
+            return $this->render('predict-result-three-states', [
+                'acertou_avg' => $acertou_avg,
+                'errou_avg' => $errou_avg,
                 't_acertou' => $t_acertou,
                 't_errou' => $t_errou,
                 'consultas' => $consultas,
+                'fechamentoData' => $chart['fechamentoData'],
+                'avgData' => $chart['avgData'],
+                'supData' => $chart['supData'],
+                'infData' => $chart['infData'],
+                'tendencia' => $chart['tendencia'],
+                't_data' => $chart['t_data'],
                 't_cliente1' => $t_client1,
                 't_cliente2' => $t_client2,
                 't_cliente3' => $t_client3,

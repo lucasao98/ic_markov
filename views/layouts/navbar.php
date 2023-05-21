@@ -50,8 +50,7 @@ TesteAsset::register($this);
             ],
             'dropdown' => [
               'items' => [
-                ['label' => 'Teste', 'url' => 'predict-three-states-test'],
-                ['label' => 'Predição', 'url' => 'predict-three-states'],
+                ['label' => 'Previsão de Grandes Intervalos', 'url' => 'predict-three-states-test'],
               ],
             ],
           ]);

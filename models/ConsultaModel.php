@@ -450,6 +450,62 @@ class ConsultaModel extends Model
         ]);
     }
 
+    public function chartDataThreeStates($next, $client, $t_datas)
+    {
+        //Dados para construção do gráfico
+        $fechamentoData = array();
+        $infData = array();
+        $supData = array();
+        $avgData = array();
+        $actionsData = array();
+        $cashData = array();
+        $t_data = array();
+        $tendencia = 0;
+
+        //Dados dos preço de fechamento para o gráfico
+        foreach ($next as $date) {
+            $formattedDate = intval(($date['date']->toDateTime())->format('U') . '000');
+            array_push($fechamentoData, [$formattedDate, $date['preult']]);
+        }
+
+
+        foreach ($t_datas as $i => $t) {
+            $formattedDate = intval(($next[$i]['date']->toDateTime())->format('U') . '000');
+            array_push($t_data, [$formattedDate, $t]);
+        }
+
+        for ($i = 0; $i < count($avgData) - 1; $i++) {
+            $avgAux = $avgData[$i + 1][1] - $avgData[$i][1];
+            $fechamentoAux = $fechamentoData[$i + 1][1] - $fechamentoData[$i][1];
+
+            if ($avgAux > 0 && $fechamentoAux > 0)
+                $tendencia++;
+
+            else if ($avgAux < 0 && $fechamentoAux < 0)
+                $tendencia++;
+
+            else if ($avgAux == 0 && $fechamentoAux == 0)
+                $tendencia++;
+        }
+
+        foreach ($client as $data) {
+            $formattedDate = intval(($data['date']->toDateTime())->format('U') . '000');
+            array_push($actionsData, [$formattedDate, $data['client']['actions']]);
+            array_push($cashData, [$formattedDate, $data['client']['cash']]);
+        }
+
+        return ([
+            'fechamentoData' => $fechamentoData,
+            'infData' => $infData,
+            'supData' => $supData,
+            'avgData' => $avgData,
+            'tendencia' => $tendencia,
+            'cashData' => $cashData,
+            'actionsData' => $actionsData,
+            't_data' => $t_data
+        ]);
+    }
+
     public function handleBuy($client, $price)
     {
         if ($client['cash'] >= $price) {

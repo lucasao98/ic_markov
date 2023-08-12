@@ -39,7 +39,20 @@ TesteAsset::register($this);
           <a href="home">Home</a>
         </li>
         <li>
-          <a href="steady-state-predict">Estado Estável</a>
+        <?php
+          echo ButtonDropdown::widget([
+            'label' => 'Estado Estável',
+            'options' => [
+              'class' => 'btn btn-primary',
+            ],
+            'dropdown' => [
+              'items' => [
+                ['label' => 'Previsão do dia seguinte', 'url' => 'steady-state-predict'],
+                ['label' => 'Previsão de maiores intervalos', 'url' => 'steady-state-test'],
+              ],
+            ],
+          ]);
+        ?>
         </li>
         <li>
         <?php
@@ -54,10 +67,13 @@ TesteAsset::register($this);
               ],
             ],
           ]);
-          ?>
+        ?>
         </li>
         <li>
           <a href="first-passage-time">Tempo de primeira passagem</a>
+        </li>
+        <li>
+          <a href="steady-state-automatic">Estado Estável Automátizado</a>
         </li>
       </ul>
     </div>

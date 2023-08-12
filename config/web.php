@@ -79,6 +79,7 @@ $config = [
                 'about' => 'main/about',
                 'steady-state-predict' => 'main/steady-state-predict',
                 'steady-state-test' => 'main/steady-state-test',
+                'steady-state-automatic' => 'main/steady-state-automatic',
                 'first-passage-time' => 'main/first-passage-time',
                 'first-passage-time-result' => 'main/first-passage-time-result',
                 'import' => 'import/import-form',

@@ -7,24 +7,27 @@ use app\assets\AppAsset;
 use app\models\ConsultaModel;
 
 $consultaModel = new ConsultaModel;
-
 AppAsset::register($this);
 ?>
 <div class="container">
-    <h2>Cálculo do tempo de primeira passagem</h2>
-    <p>Data Inicial: Primeira data do período a ser previsto</p>
-    <p>Data Final: Última data do período a ser previsto</p>
-    
+    <div class="row">
+        <div class="col">
+            <h2>Cálculo do Estado Estável Automáticos</h2>
+            <p>Data Inicial Previsão: Data inicial para a previsão</p>
+            <p>Data Final Previsão: Data final para a previsão</p>
+            <p>Período: Será o tempo utilizado para a criação da matriz de transição.</p>
+            <p>Métrica: Será o tempo utilizado para a criação da matriz de transição, em anos ou meses</p>
+        </div>
+    </div>
     <hr>
-
     <?php
     $session = Yii::$app->session;
-    if ($session->hasFlash('error')) :
+    if ($session->hasFlash('success')) :
     ?>
 
-        <div class="alert alert-danger alert-dismissible" role="alert">
+        <div class="alert alert-success alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <?= $session->getFlash('error'); ?>
+            <?= $session->getFlash('success'); ?>
         </div>
 
     <?php endif; ?>
@@ -381,7 +384,8 @@ AppAsset::register($this);
                 'WEGE3' => 'WEGE3',
                 'WHRL3' => 'WHRL3',
                 'WHRL4' => 'WHRL4'
-            ],[
+            ],
+            [
                 'style' => ['width' => '100px', 'height' => '30px']
             ]
         ) ?>
@@ -395,8 +399,21 @@ AppAsset::register($this);
             'language' => 'pt-BR',
             'dateFormat' => 'dd/MM/yyyy'
         ]) ?>
-    <hr>
-    
+        <?= $form->field($consultaModel, 'periodo')->textInput([
+            'style' => ['width' => '190px', 'height' => '30px']
+        ]) ?>
+
+        <?= $form->field($consultaModel, 'metric')->dropDownList(
+            [
+                'month' => 'Meses',
+                'year' => 'Anos'
+            ],
+            [
+                'style' => ['width' => '190px', 'height' => '30px']
+            ]
+        ) ?>
+        <hr>
+
         <div class="form-group">
             <div class="col-lg-offset-5">
                 <?= Html::submitButton('Enviar', ['class' => 'btn btn-primary']) ?>

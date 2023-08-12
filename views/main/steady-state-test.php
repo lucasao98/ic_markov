@@ -7,18 +7,23 @@ use app\assets\AppAsset;
 use app\models\ConsultaModel;
 
 $consultaModel = new ConsultaModel;
-
 AppAsset::register($this);
 ?>
 <div class="container">
-    <h2>Teste de verificação das ações</h2>
-    <p>Data Inicial: Primeira data do período a ser previsto</p>
-    <p>Data Final: Última data do período a ser previsto</p>
-    
+    <div class="row">
+        <div class="col">
+            <h2>Previsão do Estado Estável para Intervalos</h2>
+            <p>Data Inicial: Data inicial para a previsão</p>
+            <p>Data Final: Data final para a previsão</p>
+            <p>Período: Valor inteiro para informar o período em que será coletado para a montagem da matriz de transição.</p>
+            <p>Métrica: Se o valor de período será em meses ou em anos.</p>
+            <p>
+                Obs: Esse método irá construir a matriz de transição com base nas datas informadas, e
+                realizar a previsão para o próximo dia após o último dia selecionado.
+            </p>
+        </div>
+    </div>
     <hr>
-
-    
-
     <?php
     $session = Yii::$app->session;
     if ($session->hasFlash('success')) :
@@ -383,7 +388,8 @@ AppAsset::register($this);
                 'WEGE3' => 'WEGE3',
                 'WHRL3' => 'WHRL3',
                 'WHRL4' => 'WHRL4'
-            ],[
+            ],
+            [
                 'style' => ['width' => '100px', 'height' => '30px']
             ]
         ) ?>
@@ -397,8 +403,21 @@ AppAsset::register($this);
             'language' => 'pt-BR',
             'dateFormat' => 'dd/MM/yyyy'
         ]) ?>
-    <hr>
-    
+        <?= $form->field($consultaModel, 'periodo')->textInput([
+            'style' => ['width' => '190px', 'height' => '30px']
+        ]) ?>
+
+        <?= $form->field($consultaModel, 'metric')->dropDownList(
+            [
+                'month' => 'Meses',
+                'year' => 'Anos'
+            ],
+            [
+                'style' => ['width' => '190px', 'height' => '30px']
+            ]
+        ) ?>
+        <hr>
+
         <div class="form-group">
             <div class="col-lg-offset-5">
                 <?= Html::submitButton('Enviar', ['class' => 'btn btn-primary']) ?>

@@ -3,6 +3,8 @@
 namespace app\models;
 
 use app\models\Paper;
+use DateTime;
+use Exception;
 use MathPHP\LinearAlgebra\MatrixFactory;
 use MathPHP\LinearAlgebra\Vector;
 use yii\base\Model;
@@ -551,7 +553,7 @@ class ConsultaModel extends Model
         return $cursors_avg;
     }
 
-    public static function readFile($file,$header=True,$separeted_by=',')
+    public function readFile($file,$header=True,$separeted_by=',')
     {
         //Verifica se o arquivo existe
         if(!file_exists($file)){
@@ -559,7 +561,9 @@ class ConsultaModel extends Model
         }
 
         $data = [];
-
+        $total_hits = 0;
+        $total_errors = 0;
+        $total_actions = 0;
         // Abre o arquivo
         $csv = fopen($file,'r');
 
@@ -568,25 +572,92 @@ class ConsultaModel extends Model
 
         // Lê todas as linhas do arquivo
         while ($line = fgetcsv($csv,0,$separeted_by)){
-            $data[] = $line;
+            if($line[11] == 1){
+                $total_hits ++;
+            }else if($line[11] == 0){
+                $total_errors ++;
+            }
+            $total_actions ++;
         }
 
         fclose($csv);
 
-        return $data;
+        return [$total_hits, $total_errors, $total_actions];
 
     }
 
     public function writeInFile($file,$data,$separeted_by=',')
     {
         $csv = fopen($file,'a');
-
-        foreach($data as $line){
-            fputcsv($csv,$line,$separeted_by);
-        }
+        fputcsv($csv,$data,$separeted_by,$eol=PHP_EOL);
+        
+        fclose($csv);
+        
+        return 1;
+    }
+    
+    public function createFile($filename,$separeted_by=',')
+    {
+        $csv = fopen($filename, 'w');
+        fputcsv($csv,[
+            'Ação',
+            'Data de Previsão',
+            'Preço na Data de Previsão',
+            'Dia Inicial da matriz de transição',
+            'Dia Final da matriz de transição',
+            'Preço na Data Após n dias',
+            'Dia após n iterações',
+            'Iterações',
+            'Probabilidade de Subir',
+            'Probabilidade de Permanecer o Valor',
+            'Probabilidade de Cair',
+            'Acerto'
+        ],$separeted_by);
 
         fclose($csv);
+        
+    }
 
-        return 1;
+    public function getActionAfterIterations($action_name, $first_day, $string_format_final_date, $iteractions)
+    {
+        $final = \DateTime::createFromFormat('d/m/YH:i:s', $string_format_final_date . '24:00:00')->modify('+90 days'); 
+        $last_day = Paper::toIsoDate($final->format('U')); 
+
+        $interval = Paper::find()->orderBy('date')->where(
+            ['=', 'codneg', $action_name],
+            ['=', 'tpmerc', '010']
+        )->andWhere(['>=', 'date', $first_day])->andWhere(['<=', 'date', $last_day])->addOrderBy('date ASC')->all();
+        
+            $date = $interval[$iteractions];
+            return $date;    
+    }
+
+    public function hits($price_now, $price_after, $up, $down)
+    {
+        if($up > $down){
+            $diff = $up - $down;
+            if($diff > 0.05){
+                if($price_after > $price_now){
+                    return 1;
+                }else{
+                    return 0;
+                }
+            }else{
+                return -1;
+            }
+        }else if($up == $down){
+            return -1;
+        }else{
+            $diff = $down - $up;
+            if($diff > 0.05){
+                if($price_after < $price_now){
+                    return 1;
+                }else{
+                    return 0;
+                }
+            }else{
+                return -1;
+            }
+        }
     }
 }

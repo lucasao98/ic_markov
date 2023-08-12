@@ -11,10 +11,13 @@ $consultaModel = new ConsultaModel;
 AppAsset::register($this);
 ?>
 <div class="container">
-    <h2>Predição do Estado Estável</h2>
-    <p>Data Inicial: Primeira data do período a ser previsto</p>
-    <p>Data Final: Última data do período a ser previsto</p>
-    
+    <h2>Previsão do Estado Estável para o Dia Seguinte</h2>
+    <p>Data Inicial: Data inicial para a construção da matriz de transição</p>
+    <p>Data Final: Data final para a construção da matriz de transição</p>
+    <p>
+        Obs: Esse método irá construir a matriz de transição com base nas datas informadas, e
+        realizar a previsão para o próximo dia após o último dia selecionado.
+    </p>
     <hr>
 
     <?php

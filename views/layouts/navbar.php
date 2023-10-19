@@ -73,7 +73,13 @@ TesteAsset::register($this);
           <a href="first-passage-time">Tempo de primeira passagem</a>
         </li>
         <li>
-          <a href="steady-state-automatic">Estado Estável Automátizado</a>
+          <a href="steady-state-automatic">Estado Estável Automatizado</a>
+        </li>
+        <li>
+          <a href="calculo-media-desvio">Cálculo das Médias</a>
+        </li>
+        <li>
+          <a href="annual-analysis">Análise Estado Estável</a>
         </li>
       </ul>
     </div>

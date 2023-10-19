@@ -30,18 +30,18 @@ class MainController extends Controller
         if ($model->load($post) && $model->validate()) {
             $start = $model->inicio;
             $final = $model->final;
-            
+
             //Dia de início do conjunto de treinamento
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
-            
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
+
             //Dia final do conjunto de treinamento
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00'); 
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00');
 
             //Passando para o padrão de datas do banco
-            $start = Paper::toIsoDate($start->getTimestamp()); 
-            
+            $start = Paper::toIsoDate($start->getTimestamp());
+
             //Passando para o padrão de datas do banco
-            $final = Paper::toIsoDate($final->getTimestamp()); 
+            $final = Paper::toIsoDate($final->getTimestamp());
 
             $stock = $model->nome;
 
@@ -51,10 +51,10 @@ class MainController extends Controller
             $premax = $model->definePremax($cursor_by_price);
 
             //calculo do intervalo
-            $interval = abs($premin['preult'] - $premax['preult']) / $model->states_number; 
+            $interval = abs($premin['preult'] - $premax['preult']) / $model->states_number;
 
             //vetor que contem a quantidade de elementos em cada estado
-            $states = []; 
+            $states = [];
 
             for ($i = 0; $i < $model->states_number; $i++) {
                 $states[$i] = 0;
@@ -65,7 +65,7 @@ class MainController extends Controller
             $three_states = [0, 0, 0];
 
             //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-            foreach ($cursor_by_price as $index => $cursor) {         
+            foreach ($cursor_by_price as $index => $cursor) {
                 if ($index > 0) {
                     $cursor['t_state'] = $model->getThreeState($cursor['preult'], $cursor_by_price[$index - 1]['preult']);
                 }
@@ -77,12 +77,12 @@ class MainController extends Controller
                     $states[$cursor['state'] - 1] += 1;
             }
             //função que constrói a matriz de transição
-            $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state"); 
+            $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state");
 
             //função que constrói o vetor de predição
-            $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state"); 
-            
-            
+            $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state");
+
+
             return $this->render('predict-result-interval', [
                 'vector' => $vector,
                 'last' => $cursor_by_price[count($cursor_by_price) - 1],
@@ -566,11 +566,11 @@ class MainController extends Controller
 
             $stock = $model->nome;
             //Setup inicial do conjunto de treinamento
-            $cursor_by_price = $model->getData($stock, $start, $final); 
+            $cursor_by_price = $model->getData($stock, $start, $final);
 
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
             //Busca no banco os dias que serão previstos\
-            $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux); 
+            $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux);
             $consultas = count($next_days);
             Yii::debug("Conjunto de treinamento pronto");
 
@@ -580,7 +580,7 @@ class MainController extends Controller
                     break;
 
                 //busca o dia seguinte no banco
-                $next_day = array_shift($next_days); 
+                $next_day = array_shift($next_days);
 
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 if ($next_day['date'] > $aux || $next_day['date'] == null)
@@ -590,9 +590,9 @@ class MainController extends Controller
                 $premax = $model->definePremax($cursor_by_price);
 
                 //vetor que contem a quantidade de elementos em cada estado
-                $states = []; 
+                $states = [];
                 //vetor que contem a quantidade de elementos em cada estado
-                $states_avg = []; 
+                $states_avg = [];
                 for ($i = 0; $i < $model->states_number; $i++) {
                     $states[$i] = 0;
                 }
@@ -602,7 +602,7 @@ class MainController extends Controller
                 $three_states = [0, 0, 0];
 
                 //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                foreach ($cursor_by_price as $index => $cursor) { 
+                foreach ($cursor_by_price as $index => $cursor) {
                     if ($index > 0) {
                         $cursor['t_state'] = $model->getThreeState($cursor['preult'], $cursor_by_price[$index - 1]['preult']);
                     }
@@ -612,14 +612,14 @@ class MainController extends Controller
 
                 $three_state_matrix = $model->transitionMatrix($cursor_by_price, $three_states, 3, "t_state");
                 //função que constrói o vetor de predição
-                $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state"); 
+                $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state");
 
                 /* Validação ----------------------------------------------------------------- */
 
                 $last_day = $cursor_by_price[count($cursor_by_price) - 1];
 
                 // calcula o estado do dia seguinte
-                $next_day['t_state'] = $model->getThreeState($next_day['preult'], $last_day['preult']); 
+                $next_day['t_state'] = $model->getThreeState($next_day['preult'], $last_day['preult']);
 
                 array_push($next, $next_day);
                 $max = 0;
@@ -803,21 +803,21 @@ class MainController extends Controller
             $model->states_number = 3;
 
             //Dia de início do conjunto de treinamento
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
 
             //Dia final do conjunto de treinamento
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00'); 
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00');
 
             //Passando para o padrão de datas do banco
-            $start = Paper::toIsoDate($start->getTimestamp()); 
-            $final = Paper::toIsoDate($final->getTimestamp()); 
+            $start = Paper::toIsoDate($start->getTimestamp());
+            $final = Paper::toIsoDate($final->getTimestamp());
 
             $stock = $model->nome;
 
             $cursor_by_price = $model->getData($stock, $start, $final);
 
             //vetor que contem a quantidade de elementos em cada estado
-            $states = []; 
+            $states = [];
 
             for ($i = 0; $i < $model->states_number; $i++) {
                 $states[$i] = 0;
@@ -828,7 +828,7 @@ class MainController extends Controller
             $three_states = [0, 0, 0];
 
             //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-            foreach ($cursor_by_price as $index => $cursor) {         
+            foreach ($cursor_by_price as $index => $cursor) {
                 if ($index > 0) {
                     $cursor['t_state'] = $model->getThreeState($cursor['preult'], $cursor_by_price[$index - 1]['preult']);
                 }
@@ -839,8 +839,8 @@ class MainController extends Controller
             $three_state_matrix = $model->transitionMatrix($cursor_by_price, $three_states, 3, "t_state");
 
             //função que constrói o vetor de predição
-            $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state"); 
-            
+            $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state");
+
             return $this->render('predict-result-three-states', [
                 't_vector' => $three_state_vector,
                 'last_price' => $cursor_by_price[count($cursor_by_price) - 1]['preult'],
@@ -861,29 +861,29 @@ class MainController extends Controller
         $model = new ConsultaModel;
         $post = $_POST;
 
-        if ($model->load($post) && $model->validate()){
+        if ($model->load($post) && $model->validate()) {
             $start = $model->inicio;
             $final = $model->final;
-            
+
             //Dia de início do conjunto de treinamento
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day');
 
             //Dia final do conjunto de treinamento
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00'); 
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00');
 
             //Passando para o padrão de datas do banco
-            $start = Paper::toIsoDate($start->getTimestamp()); 
-            $final = Paper::toIsoDate($final->getTimestamp()); 
+            $start = Paper::toIsoDate($start->getTimestamp());
+            $final = Paper::toIsoDate($final->getTimestamp());
 
             $action_name = $model->nome;
-            
+
             $actions_by_date = $model->getData($action_name, $start, $final);
 
             $actions_by_date[0]["t_state"] = 2;
 
             $three_states = [0, 0, 0];
             //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-            foreach ($actions_by_date as $index => $cursor) {   
+            foreach ($actions_by_date as $index => $cursor) {
                 if ($index > 0) {
                     $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_by_date[$index - 1]['preult']);
                 }
@@ -892,15 +892,17 @@ class MainController extends Controller
             $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
 
             $Matrix = MatrixFactory::create($three_state_matrix);
-            
+
             $result = $model->getSteadyState($Matrix);
 
-            if($result === 0){
+            if ($result === 0) {
                 $session = Yii::$app->session;
-                $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo, ou existem mais de um limite. '. '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');
+                $alert = $session->setFlash('error', 'A matriz de probabilidades não possui um limite de distribuição para esse intervalo, ou existem mais de um limite. ' . '<strong> Por favor troque o intervalo ou escolha outra ação.</strong>');
                 return $this->render('steady-state-predict');
             }
+
             $day_after_iteractions = $model->getActionAfterIterations($model->nome, $final, $model->final,  $result[1]);
+
             return $this->render('steady-state-result', [
                 'up' => $result[0][0],
                 'the_same' => $result[0][1],
@@ -909,9 +911,9 @@ class MainController extends Controller
                 'times' => $result[1],
                 'initial_date' => $model->inicio,
                 'final_date' => $model->final,
-                'data_pos_iteracao' => $day_after_iteractions['date']->toDateTime()->format('d/m/Y')
+                'data_pos_iteracao' => $day_after_iteractions[0]['date']->toDateTime()->format('d/m/Y')
             ]);
-        }else{
+        } else {
             return $this->render('steady-state-predict');
         }
     }
@@ -923,54 +925,67 @@ class MainController extends Controller
         $model = new ConsultaModel;
         $post = $_POST;
 
-        if($model->load($post) && $model->validate() && $model->periodo){
+        if ($model->load($post) && $model->validate() && $model->periodo) {
             $start = $model->inicio;
             $final = $model->final;
             $next_day = new Paper();
             $aux_data_final = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->format('U'));
             $final = $start;
             //Dia de início do conjunto de treinamento
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day');
             //O conjunto de treinamento será definido n meses antes do dia a ser previsto
             $start = $start->modify("-$model->periodo $model->metric");
 
             $ano_inicio = explode('/', $start->format('d/m/Y'));
             //Dia final do conjunto de treinamento
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); 
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');
             //Passando para o padrão de datas do banco
-            $start = Paper::toIsoDate($start->format('U')); 
+            $start = Paper::toIsoDate($start->format('U'));
             $final = Paper::toIsoDate($final->format('U'));
 
             $action_name = $model->nome;
-            
+
             $actions_to_train = $model->getData($action_name, $start, $final);
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
             $predictEnd = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00');
             //Busca no banco os dias que serão previstos\
-            $next_days = $model->getData($action_name, Paper::toIsoDate($predictStart->format('U')), $aux_data_final); 
+            $next_days = $model->getData($action_name, Paper::toIsoDate($predictStart->format('U')), $aux_data_final);
             $ano_fim = explode('/', $predictStart->format('d/m/Y'));
-            $model->createFile("../assets/".$action_name." _ ".$ano_inicio[2]." - ".$ano_fim[2].".csv");
+            $model->createFile("../assets/" . $action_name . " _ " . $ano_inicio[2] . " - " . $ano_fim[2] . ".csv", ",", [
+                'Ação',
+                'Data de Previsão',
+                'Preço na Data de Previsão',
+                'Dia Inicial da matriz de transição',
+                'Dia Final da matriz de transição',
+                'Preço na Data Após n dias',
+                'Dia após n iterações',
+                'Iterações',
+                'Probabilidade de Subir',
+                'Probabilidade de Permanecer o Valor',
+                'Probabilidade de Cair',
+                'Acerto'
+            ]);
             // Converter de timestamp no formato do MongoDb para formato d/m/Y string
             //var_dump($actions_to_train[count($actions_to_train)-1]['date']->toDateTime()->format('d/m/Y'));
 
             while ($actions_to_train[0]['date']->toDateTime()->format('d/m/Y') != $predictEnd) {
 
                 // Guarda o proximo dia que será previsto na varaivel $next_day
-                $next_day = array_shift($next_days); 
+                $next_day = array_shift($next_days);
 
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 try {
                     if ($next_day['date'] > $aux_data_final || $next_day['date'] == null)
-                    break;
+                        break;
                 } catch (\Throwable $th) {
                     break;
                 }
-                
+
 
                 //vetor que contem a quantidade de elementos em cada estado
-                $states = []; 
+                $states = [];
                 //vetor que contem a quantidade de elementos em cada estado
-                $states_avg = []; 
+                $states_avg = [];
                 for ($i = 0; $i < $model->states_number; $i++) {
                     $states[$i] = 0;
                 }
@@ -980,7 +995,7 @@ class MainController extends Controller
                 $three_states = [0, 0, 0];
 
                 //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                foreach ($actions_to_train as $index => $cursor) { 
+                foreach ($actions_to_train as $index => $cursor) {
                     if ($index > 0) {
                         $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_to_train[$index - 1]['preult']);
                     }
@@ -989,7 +1004,7 @@ class MainController extends Controller
                 }
 
                 $three_state_matrix = $model->transitionMatrix($actions_to_train, $three_states, 3, "t_state");
-                
+
                 $Matrix = MatrixFactory::create($three_state_matrix);
 
                 $result = $model->getSteadyState($Matrix);
@@ -997,26 +1012,27 @@ class MainController extends Controller
                 $day_after_iteractions = $model->getActionAfterIterations(
                     $action_name,
                     $next_day['date'],
-                    $next_day['date']->toDateTime()->format('d/m/Y'), 
+                    $next_day['date']->toDateTime()->format('d/m/Y'),
                     $result[1]
                 );
-                
+
                 $model->writeInFile(
-                    "../assets/".$action_name." _ ".$ano_inicio[2]." - ".$ano_fim[2].".csv",
+                    "../assets/" . $action_name . " _ " . $ano_inicio[2] . " - " . $ano_fim[2] . ".csv",
                     [
                         $action_name,
                         $next_day['date']->toDateTime()->format('d/m/Y'),
                         $next_day['preult'],
                         $actions_to_train[0]['date']->toDateTime()->format('d/m/Y'),
-                        $actions_to_train[count($actions_to_train)-1]['date']->toDateTime()->format('d/m/Y'),
-                        $day_after_iteractions['preult'],
-                        $day_after_iteractions['date']->toDateTime()->format('d/m/Y'),
+                        $actions_to_train[count($actions_to_train) - 1]['date']->toDateTime()->format('d/m/Y'),
+                        $day_after_iteractions[0]['preult'],
+                        $day_after_iteractions[0]['date']->toDateTime()->format('d/m/Y'),
                         $result[1],
                         $result[0][0],
                         $result[0][1],
                         $result[0][2],
-                        $model->hits($next_day['preult'], $day_after_iteractions['preult'], $result[0][0], $result[0][2])
-                    ]);
+                        $model->hits($next_day['preult'], $day_after_iteractions[0]['preult'], $result[0][0], $result[0][2])
+                    ]
+                );
 
                 //Preparação para a próxima iteração -----------------------------------------------------------------
                 array_shift($actions_to_train);
@@ -1024,13 +1040,14 @@ class MainController extends Controller
                 $actions_to_train = $model->getData($action_name, $actions_to_train[0]['date'], $next_day['date']);
             }
 
-            $hits = $model->readFile("../assets/".$action_name." _ ".$ano_inicio[2]." - ".$ano_fim[2].".csv")[0];
-            $errors = $model->readFile("../assets/".$action_name." _ ".$ano_inicio[2]." - ".$ano_fim[2].".csv")[1];
-            $total_actions = $model->readFile("../assets/".$action_name." _ ".$ano_inicio[2]." - ".$ano_fim[2].".csv")[2];
-            $mean_hits = number_format((($hits/$total_actions)* 100),2);
-            unlink("../assets/".$action_name." _ ".$ano_inicio[2]." - ".$ano_fim[2].".csv");
-            
-            return $this->render('steady-state-result-test',[
+            $hits = $model->readFile("../assets/" . $action_name . " _ " . $ano_inicio[2] . " - " . $ano_fim[2] . ".csv")[0];
+            $errors = $model->readFile("../assets/" . $action_name . " _ " . $ano_inicio[2] . " - " . $ano_fim[2] . ".csv")[1];
+            //$total_actions = $model->readFile("../assets/" . $action_name . " _ " . $ano_inicio[2] . " - " . $ano_fim[2] . ".csv")[2];
+            $total_actions = $hits + $errors;
+            $mean_hits = number_format((($hits / $total_actions) * 100), 2);
+            unlink("../assets/" . $action_name . " _ " . $ano_inicio[2] . " - " . $ano_fim[2] . ".csv");
+
+            return $this->render('steady-state-result-test', [
                 'hits' => $hits,
                 'errors' => $errors,
                 'total_actions' => $total_actions,
@@ -1041,50 +1058,51 @@ class MainController extends Controller
         return $this->render('steady-state-test');
     }
 
-    public function actionFirstPassageTime(){
+    public function actionFirstPassageTime()
+    {
         $this->layout = 'navbar';
 
         $model = new ConsultaModel;
         $post = $_POST;
 
-        if ($model->load($post) && $model->validate()){
+        if ($model->load($post) && $model->validate()) {
             $start = $model->inicio;
             $final = $model->final;
 
             //Dia de início do conjunto de treinamento
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
 
             //Dia final do conjunto de treinamento
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00'); 
-            $total_days = date_diff($final,$start);
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00');
+            $total_days = date_diff($final, $start);
             //Passando para o padrão de datas do banco
-            $start = Paper::toIsoDate($start->getTimestamp()); 
-            $final = Paper::toIsoDate($final->getTimestamp()); 
+            $start = Paper::toIsoDate($start->getTimestamp());
+            $final = Paper::toIsoDate($final->getTimestamp());
 
             $action_name = $model->nome;
-            
+
             $actions_by_date = $model->getData($action_name, $start, $final);
 
             $actions_by_date[0]["t_state"] = 2;
 
             $three_states = [0, 0, 0];
-            
+
             //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-            foreach ($actions_by_date as $index => $cursor) {         
+            foreach ($actions_by_date as $index => $cursor) {
                 if ($index > 0) {
                     $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_by_date[$index - 1]['preult']);
                 }
-                
+
                 $three_states[$cursor['t_state'] - 1] += 1;
             }
-            
+
             $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
-            
+
             $Matrix = MatrixFactory::create($three_state_matrix);
-            
+
             $first_passage_vector = $model->firstPassageTime($Matrix);
 
-            if($first_passage_vector == 0){
+            if ($first_passage_vector == 0) {
                 $session = Yii::$app->session;
                 $alert = $session->setFlash('error', 'Alguma probabilidade da conversão foi zero 
                 e ocorreu um erro no cálculo de primeira passagem. Por Favor 
@@ -1095,65 +1113,124 @@ class MainController extends Controller
             return $this->render('first-passage-time-result', [
                 'first_passage' => $first_passage_vector
             ]);
-        }else{
+        } else {
             return $this->render('first-passage-time');
         }
     }
 
-    public function actionSteadyStateAutomatic(){
+    public function actionSteadyStateAutomatic()
+    {
         $this->layout = 'navbar';
 
         $model = new ConsultaModel;
         $post = $_POST;
+        $actions = [
+            "CESP6",
+            "CIEL3",
+            "CMIG4",
+            "COCE5",
+            "CPFE3",
+            "CPLE6",
+            "CSNA3",
+            "CYRE3",
+            "DIRR3",
+            "ENBR3",
+            "ENGI11",
+            "EQTL3",
+            "EVEN3",
+            "EZTC3",
+            "FLRY3",
+            "GGBR4",
+            "GOAU4",
+            "HYPE3",
+            "IGTA3",
+            "ITSA4",
+            "ITUB3",
+            "ITUB4",
+            "JBSS3",
+            "JHSF3",
+            "LAME3",
+            "LAME4",
+            "LREN3",
+            "MRFG3",
+            "MRVE3",
+            "MULT3",
+            "ODPV3",
+            "PSSA3",
+            "RENT3",
+            "SANB11",
+            "SMTO3",
+            "SULA11",
+            "TRIS3",
+            "TRPL4",
+            "WEGE3",
+        ];
 
-        if($model->load($post) && $model->validate() && $model->periodo){
+        if ($model->load($post) && $model->validate()) {
             $start = $model->inicio;
             $final = $model->final;
             $next_day = new Paper();
             $aux_data_final = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->format('U'));
             $final = $start;
             //Dia de início do conjunto de treinamento
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); 
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
             //O conjunto de treinamento será definido n meses antes do dia a ser previsto
             $start = $start->modify("-$model->periodo $model->metric");
 
             $ano_inicio = explode('/', $start->format('d/m/Y'));
             //Dia final do conjunto de treinamento
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); 
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');
             //Passando para o padrão de datas do banco
-            $start = Paper::toIsoDate($start->format('U')); 
+            $start = Paper::toIsoDate($start->format('U'));
             $final = Paper::toIsoDate($final->format('U'));
 
-            $action_name = $model->nome;
-            
-            $actions_to_train = $model->getData($action_name, $start, $final);
+            $actions_to_train = $model->getData($model->nome, $start, $final);
             $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
             $predictEnd = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00');
             //Busca no banco os dias que serão previstos\
-            $next_days = $model->getData($action_name, Paper::toIsoDate($predictStart->format('U')), $aux_data_final); 
+            $next_days = $model->getData($model->nome, Paper::toIsoDate($predictStart->format('U')), $aux_data_final);
             $ano_fim = explode('/', $predictStart->format('d/m/Y'));
-            $model->createFile("../assets/".$ano_inicio[2]." - ".$ano_fim[2]."/".$action_name." _ ".$ano_inicio[2]." - ".$ano_fim[2].".csv");
+            if (!file_exists("../assets/" . $ano_inicio[2] . "-" . $ano_fim[2] . "- 2 meses - 2 dias/")) {
+                mkdir("../assets/" . $ano_inicio[2] . "-" . $ano_fim[2] . "- 2 meses - 2 dias/");
+            }
+
+            $model->createFile("../assets/" . $ano_inicio[2] . "-" . $ano_fim[2] . "- 2 meses - 2 dias/" . $model->nome . " _ " . $ano_inicio[2] . " - " . $ano_fim[2] . ".csv", ",", [
+                'Ação',
+                'Data de Previsão',
+                'Preço na Data de Previsão',
+                'Dia Inicial da matriz de transição',
+                'Dia Final da matriz de transição',
+                'Preço na Data Após n dias',
+                'Dia após n iterações',
+                'Iterações',
+                'Probabilidade de Subir',
+                'Probabilidade de Permanecer o Valor',
+                'Probabilidade de Cair',
+                'Acerto',
+                'Acerto 1 dia depois de n iterações',
+                'Acerto 2 dias depois de n iterações',
+            ]);
             // Converter de timestamp no formato do MongoDb para formato d/m/Y string
             //var_dump($actions_to_train[count($actions_to_train)-1]['date']->toDateTime()->format('d/m/Y'));
 
             while ($actions_to_train[0]['date']->toDateTime()->format('d/m/Y') != $predictEnd) {
 
                 // Guarda o proximo dia que será previsto na varaivel $next_day
-                $next_day = array_shift($next_days); 
+                $next_day = array_shift($next_days);
 
                 try {
                     //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                     if ($next_day['date'] > $aux_data_final || $next_day['date'] == null)
                         break;
                 } catch (\Throwable $th) {
-                    return $this->render('steady-state-automatic');
+                    break;
                 }
-                
+
 
                 //vetor que contem a quantidade de elementos em cada estado
-                $states = []; 
+                $states = [];
                 //vetor que contem a quantidade de elementos em cada estado
-                $states_avg = []; 
+                $states_avg = [];
                 for ($i = 0; $i < $model->states_number; $i++) {
                     $states[$i] = 0;
                 }
@@ -1163,7 +1240,7 @@ class MainController extends Controller
                 $three_states = [0, 0, 0];
 
                 //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                foreach ($actions_to_train as $index => $cursor) { 
+                foreach ($actions_to_train as $index => $cursor) {
                     if ($index > 0) {
                         $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_to_train[$index - 1]['preult']);
                     }
@@ -1172,43 +1249,254 @@ class MainController extends Controller
                 }
 
                 $three_state_matrix = $model->transitionMatrix($actions_to_train, $three_states, 3, "t_state");
-                
+
                 $Matrix = MatrixFactory::create($three_state_matrix);
 
                 $result = $model->getSteadyState($Matrix);
                 $last_day = $actions_to_train[count($actions_to_train) - 1];
+
                 $day_after_iteractions = $model->getActionAfterIterations(
-                    $action_name,
+                    $model->nome,
                     $next_day['date'],
-                    $next_day['date']->toDateTime()->format('d/m/Y'), 
+                    $next_day['date']->toDateTime()->format('d/m/Y'),
                     $result[1]
                 );
-                
+
+                if ($day_after_iteractions == null) {
+                    break;
+                }
+
                 $model->writeInFile(
-                    "../assets/".$ano_inicio[2]." - ".$ano_fim[2]."/".$action_name." _ ".$ano_inicio[2]." - ".$ano_fim[2].".csv",
+                    "../assets/" . $ano_inicio[2] . "-" . $ano_fim[2] . "- 2 meses - 2 dias/" . $model->nome . " _ " . $ano_inicio[2] . " - " . $ano_fim[2] . ".csv",
                     [
-                        $action_name,
+                        $model->nome,
                         $next_day['date']->toDateTime()->format('d/m/Y'),
                         $next_day['preult'],
                         $actions_to_train[0]['date']->toDateTime()->format('d/m/Y'),
-                        $actions_to_train[count($actions_to_train)-1]['date']->toDateTime()->format('d/m/Y'),
-                        $day_after_iteractions['preult'],
-                        $day_after_iteractions['date']->toDateTime()->format('d/m/Y'),
+                        $actions_to_train[count($actions_to_train) - 1]['date']->toDateTime()->format('d/m/Y'),
+                        $day_after_iteractions[0]['preult'],
+                        $day_after_iteractions[0]['date']->toDateTime()->format('d/m/Y'),
                         $result[1],
                         $result[0][0],
                         $result[0][1],
                         $result[0][2],
-                        $model->hits($next_day['preult'], $day_after_iteractions['preult'], $result[0][0], $result[0][2])
-                    ]);
+                        $model->hits($next_day['preult'], $day_after_iteractions[0]['preult'], $result[0][0], $result[0][2]),
+                        $model->hits($next_day['preult'], $day_after_iteractions[1]['preult'], $result[0][0], $result[0][2]),
+                        $model->hits($next_day['preult'], $day_after_iteractions[2]['preult'], $result[0][0], $result[0][2]),
+                    ]
+                );
 
                 //Preparação para a próxima iteração -----------------------------------------------------------------
                 array_shift($actions_to_train);
                 array_push($actions_to_train, $next_day);
-                $actions_to_train = $model->getData($action_name, $actions_to_train[0]['date'], $next_day['date']);
+                $actions_to_train = $model->getData($model->nome, $actions_to_train[0]['date'], $next_day['date']);
             }
         }
 
 
         return $this->render('steady-state-automatic');
+    }
+
+    public function actionCalculoMediaDesvio()
+    {
+        $this->layout = 'navbar';
+        $model = new ConsultaModel();
+
+        $actions = [
+            "ALPA4",
+            "BBAS3",
+            "BBDC3",
+            "BBDC4",
+            "BRFS3",
+            "BRKM5",
+            "BRML3",
+            "BTOW3",
+            "CESP6",
+            "CIEL3",
+            "CMIG4",
+            "COCE5",
+            "CPFE3",
+            "CPLE6",
+            "CSNA3",
+            "CYRE3",
+            "DIRR3",
+            "ENBR3",
+            "ENGI11",
+            "EQTL3",
+            "EVEN3",
+            "EZTC3",
+            "FLRY3",
+            "GGBR4",
+            "GOAU4",
+            "HYPE3",
+            "IGTA3",
+            "ITSA4",
+            "ITUB3",
+            "ITUB4",
+            "JBSS3",
+            "JHSF3",
+            "LAME3",
+            "LAME4",
+            "LREN3",
+            "MRFG3",
+            "MRVE3",
+            "MULT3",
+            "ODPV3",
+            "PSSA3",
+            "RENT3",
+            "SANB11",
+            "SMTO3",
+            "SULA11",
+            "TRIS3",
+            "TRPL4",
+            "WEGE3",
+        ];
+        $path = "../assets/mean/";
+
+        if (!file_exists($path)) {
+            mkdir($path);
+        }
+
+        foreach ($actions as $action) {
+            $total_hits_from_file = $model->readFile("../assets/2020-2021- 2 meses - 2 dias/" . $action . " _ " . "2020 - 2021.csv");
+            try {
+                $mean = $total_hits_from_file[0] / ($total_hits_from_file[0] + $total_hits_from_file[1]);
+            } catch (\ErrorException $th) {
+                $mean = 0;
+            }
+
+            $model->writeInFile("../assets/mean/mean_2020-2021- 2 meses - 2 dias.csv", [$action, $mean]);
+        }
+
+        $stats = $model->statsFromFile("../assets/mean/mean_2020-2021- 2 meses - 2 dias.csv");
+
+        return $this->render('calculo-media-desvio', [
+            'mean' => $stats[0] * 100,
+            'sd' => $stats[1],
+            'actions_informative' => $stats[2],
+            'total_actions' => 47,
+        ]);
+    }
+
+    public function actionAnnualAnalysis()
+    {
+        $this->layout = 'navbar';
+
+        $model = new ConsultaModel;
+
+        $post = $_POST;
+        if ($model->load($post)) {
+            $start = $model->inicio;
+
+            //Dia de início do conjunto de treinamento
+            $start_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('-3 months');
+            $start_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('-3 months');
+
+            //Dia final do conjunto de treinamento
+            $final_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 day');
+            $final_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 day');
+
+            //Passando para o padrão de datas do banco
+            $start_matrix_transition = Paper::toIsoDate($start_matrix_transition->getTimestamp());
+            $final_matrix_transition = Paper::toIsoDate($final_matrix_transition->getTimestamp());
+
+
+            $actions = [
+                "ALPA4",
+                "BBAS3",
+                "BBDC3",
+                "BBDC4",
+                "BRFS3",
+                "BRKM5",
+                "BRML3",
+                "BTOW3",
+                "CESP6",
+                "CIEL3",
+                "CMIG4",
+                "COCE5",
+                "CPFE3",
+                "CPLE6",
+                "CSNA3",
+                "CYRE3",
+                "DIRR3",
+                "ENBR3",
+                "ENGI11",
+                "EQTL3",
+                "EVEN3",
+                "EZTC3",
+                "FLRY3",
+                "GGBR4",
+                "GOAU4",
+                "HYPE3",
+                "IGTA3",
+                "ITSA4",
+                "ITUB3",
+                "ITUB4",
+                "JBSS3",
+                "JHSF3",
+                "LAME3",
+                "LAME4",
+                "LREN3",
+                "MRFG3",
+                "MRVE3",
+                "MULT3",
+                "ODPV3",
+                "PSSA3",
+                "RENT3",
+                "SANB11",
+                "SMTO3",
+                "SULA11",
+                "TRIS3",
+                "TRPL4",
+                "WEGE3",
+            ];
+            
+            $table_actions = [];
+
+            foreach ($actions as $action_name) {
+                $actions_by_date = $model->getData($action_name, $start_matrix_transition, $final_matrix_transition);
+
+                $actions_by_date[0]["t_state"] = 2;
+
+                $three_states = [0, 0, 0];
+
+                foreach ($actions_by_date as $index => $cursor) {
+                    if ($index > 0) {
+                        $cursor['t_state'] = $model->getThreeState($cursor['preult'], $actions_by_date[$index - 1]['preult']);
+                    }
+                    $three_states[$cursor['t_state'] - 1] += 1;
+                }
+                $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
+    
+                $Matrix = MatrixFactory::create($three_state_matrix);
+    
+                $result = $model->getSteadyState($Matrix);
+                // Verifica se a probabilidade de aumentar é maior que a probabilidade de diminuir
+                if($result[0][0] > $result[0][2]){
+                    array_push($table_actions, [
+                        $action_name,
+                        number_format(100/$actions_by_date[count($actions_by_date) -1]['preult'], 2),
+                        $actions_by_date[count($actions_by_date) -1]['preult'],
+                        $start_matrix_transition_string,
+                        $final_matrix_transition_string,
+                    ]);
+                }else{
+                    continue;
+                }
+            }
+
+            $total_gasto = 0;
+            foreach ($table_actions as $result_action) {
+                $total_gasto += ($result_action[1]*$result_action[2]);
+            }
+
+            return $this->render('analysis-result', [
+                'table_results' => $table_actions,
+                'total_purchased' => number_format($total_gasto,2)
+            ]);
+            
+        } else {
+            return $this->render('annual-analysis');
+        }
     }
 }

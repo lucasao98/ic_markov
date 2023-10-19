@@ -82,8 +82,10 @@ $config = [
                 'steady-state-automatic' => 'main/steady-state-automatic',
                 'first-passage-time' => 'main/first-passage-time',
                 'first-passage-time-result' => 'main/first-passage-time-result',
+                'calculo-media-desvio' => 'main/calculo-media-desvio',
                 'import' => 'import/import-form',
-                'import-data' => 'import/import-data'
+                'import-data' => 'import/import-data',
+                'annual-analysis' => 'main/annual-analysis'
             ],
         ],
         

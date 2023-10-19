@@ -20,6 +20,7 @@ class ConsultaModel extends Model
     public $periodo;
     public $metric;
     public $base;
+    public $initial_year;
 
     public function rules()
     {
@@ -39,6 +40,7 @@ class ConsultaModel extends Model
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
             'metric' => 'Métrica',
+            'initial_year' => 'Ano'
         ];
     }
 
@@ -103,62 +105,62 @@ class ConsultaModel extends Model
         $tried_values = 1;
         $contador = 2;
 
-        if($this->isErgodicAndisIrreducible($matrix) === 0){
+        if ($this->isErgodicAndisIrreducible($matrix) === 0) {
             return 0;
         }
 
-        if($this->haveOnlyOneLimiting($matrix) === 0){
+        if ($this->haveOnlyOneLimiting($matrix) === 0) {
             return 0;
         }
 
-        if($this->validateMatrix($R) === 0){
-            while($stop_loop != 1){
-                for($i=1;$i<=$tried_values;$i++){
+        if ($this->validateMatrix($R) === 0) {
+            while ($stop_loop != 1) {
+                for ($i = 1; $i <= $tried_values; $i++) {
                     $R = $R->multiply($matrix);
                 }
 
-                if($this->isErgodicAndisIrreducible($matrix) === 0){
+                if ($this->isErgodicAndisIrreducible($matrix) === 0) {
                     return 0;
                 }
-        
-                if($this->haveOnlyOneLimiting($matrix) === 0){
+
+                if ($this->haveOnlyOneLimiting($matrix) === 0) {
                     return 0;
                 }
 
                 $contador += $tried_values;
 
-                if($this->validateMatrix($R) === 0){
+                if ($this->validateMatrix($R) === 0) {
                     $tried_values += 1;
-                }else{
+                } else {
                     $stop_loop = 1;
                 }
             }
         }
-        return [$this->validateMatrix($R),$contador];
+        return [$this->validateMatrix($R), $contador];
     }
 
     private function validateMatrix($Matrix)
     {
-        if(number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[1][0], 4, '.', ' ') && number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ') && number_format($Matrix[1][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ')){
-            if(number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[1][1], 4, '.', ' ') && number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ') && number_format($Matrix[1][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ')){
-                if(number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[1][2], 4, '.', ' ') && number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ') && number_format($Matrix[1][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ')){
+        if (number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[1][0], 4, '.', ' ') && number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ') && number_format($Matrix[1][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ')) {
+            if (number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[1][1], 4, '.', ' ') && number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ') && number_format($Matrix[1][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ')) {
+                if (number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[1][2], 4, '.', ' ') && number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ') && number_format($Matrix[1][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ')) {
                     $pi_one = number_format($Matrix[0][0], 4, '.', ' ');
                     $pi_two = number_format($Matrix[0][1], 4, '.', ' ');
                     $pi_three = number_format($Matrix[0][2], 4, '.', ' ');
 
-                    $vector_stable = new Vector([$pi_one,$pi_two,$pi_three]);
+                    $vector_stable = new Vector([$pi_one, $pi_two, $pi_three]);
                     return $vector_stable;
                 }
             }
         }
-        
+
         return 0;
     }
 
     private function isErgodicAndisIrreducible($matrix)
     {
-        if($matrix[0][0] == 0 && $matrix[1][1] == 0 && $matrix[2][2] == 0){
-            if($matrix[0][2] == 0 && $matrix[1][1] == 0 && $matrix[2][0] == 0){
+        if ($matrix[0][0] == 0 && $matrix[1][1] == 0 && $matrix[2][2] == 0) {
+            if ($matrix[0][2] == 0 && $matrix[1][1] == 0 && $matrix[2][0] == 0) {
                 return 0;
             }
         }
@@ -168,7 +170,7 @@ class ConsultaModel extends Model
 
     private function haveOnlyOneLimiting($matrix)
     {
-        if($matrix[0][2] == 0 && $matrix[1][2] == 0 && $matrix[2][0] == 0 && $matrix[2][1] == 0){
+        if ($matrix[0][2] == 0 && $matrix[1][2] == 0 && $matrix[2][0] == 0 && $matrix[2][1] == 0) {
             return 0;
         }
         return 1;
@@ -178,21 +180,21 @@ class ConsultaModel extends Model
     public function transitionMatrix($paper, $states, $states_number, $state_type)
     {
         $matrix = [[]];
-        
+
         for ($i = 0; $i < $states_number; $i++)
             for ($j = 0; $j < $states_number; $j++)
                 $matrix[$i][$j] = 0;
-        
+
 
         //calculando a quantidade de elementos em cada transição da matriz
 
-        for ($i = 0; $i < count($paper) - 1; $i++) { 
+        for ($i = 0; $i < count($paper) - 1; $i++) {
             $j = $i + 1;
             $matrix[$paper[$i][$state_type] - 1][$paper[$j][$state_type] - 1] += 1;
         }
 
         //contagem do ultimo valor do conjunto de treinamento
-        
+
         $matrix[$paper[count($paper) - 1][$state_type] - 1][$paper[count($paper) - 1][$state_type] - 1] += 1;
 
         //construção da matriz de transição $states contem a quantidade de elementos total em cada estado
@@ -206,16 +208,16 @@ class ConsultaModel extends Model
         return $matrix;
     }
 
-    public function firstPassageTime($matrix){
-        
+    public function firstPassageTime($matrix)
+    {
+
         // Retorna o vetor com os valores que a matriz converge
         $steady_states = $this->getSteadyState($matrix);
-        
-       
+
+
         try {
             // Up to up
-            $m0_0 = 1/$steady_states[0][0]; 
-
+            $m0_0 = 1 / $steady_states[0][0];
         } catch (ErrorException $err) {
             Yii::warning("Divisão por zero");
             return 0;
@@ -223,7 +225,7 @@ class ConsultaModel extends Model
 
         try {
             //Same to same
-            $m1_1 = 1/$steady_states[0][1];
+            $m1_1 = 1 / $steady_states[0][1];
         } catch (ErrorException $err) {
             Yii::warning("Divisão por zero");
             return 0;
@@ -231,7 +233,7 @@ class ConsultaModel extends Model
 
         try {
             //Down to down
-            $m2_2 = 1/$steady_states[0][2];
+            $m2_2 = 1 / $steady_states[0][2];
         } catch (ErrorException $err) {
             Yii::warning("Divisão por zero");
             return 0;
@@ -269,7 +271,7 @@ class ConsultaModel extends Model
          * 
          * Formando os sistemas lineares
          * 
-        */
+         */
 
         // Up to same
         //$m0_1 = 1 + $matrix[0][0] . 'm0_1' . $matrix[0][2] . 'm2_1';
@@ -300,7 +302,7 @@ class ConsultaModel extends Model
          * 
          * Criando matriz de cada sistema para resolução
          * 
-        */
+         */
 
         // Up to same
         // -1 = $matrix[0][0] - 1$m0_1 . 'm0_1' . $matrix[0][2] . 'm2_1';
@@ -321,28 +323,28 @@ class ConsultaModel extends Model
 
         // Down to up
         // -1 = $matrix[2][1] . 'm1_0' . $matrix[2][2] - 1$m2_0 . 'm2_0';
-        
-        
+
+
         $matrix_0 = [
             [($matrix[0][0] - 1), $matrix[0][2]],
-            [$matrix[2][0], ($matrix[2][2] -1)]
+            [$matrix[2][0], ($matrix[2][2] - 1)]
         ];
 
         $matrix_1 = [
-            [($matrix[0][0] -1),  $matrix[0][1]],
-            [$matrix[1][0], ($matrix[1][1] -1)]
+            [($matrix[0][0] - 1),  $matrix[0][1]],
+            [$matrix[1][0], ($matrix[1][1] - 1)]
         ];
 
         $matrix_2 = [
-            [($matrix[1][1] -1), $matrix[1][2]],
+            [($matrix[1][1] - 1), $matrix[1][2]],
             [$matrix[2][1], ($matrix[2][2] - 1)]
         ];
-        
+
         $matrix_0 = MatrixFactory::create($matrix_0);
         $matrix_1 = MatrixFactory::create($matrix_1);
         $matrix_2 = MatrixFactory::create($matrix_2);
 
-        $vector_result = [-1 , -1];
+        $vector_result = [-1, -1];
 
         $result_0 = $matrix_0->solve($vector_result);
         $result_1 = $matrix_1->solve($vector_result);
@@ -355,7 +357,6 @@ class ConsultaModel extends Model
         ];
 
         return $matrix_result;
-
     }
 
     //Constroi o vetor de previsão
@@ -553,109 +554,171 @@ class ConsultaModel extends Model
         return $cursors_avg;
     }
 
-    public function readFile($file,$header=True,$separeted_by=',')
+    public function returnHitsAndErrorsfromFile($file, $header = True)
     {
         //Verifica se o arquivo existe
-        if(!file_exists($file)){
+        if (!file_exists($file)) {
             return 0;
         }
 
-        $data = [];
-        $total_hits = 0;
-        $total_errors = 0;
-        $total_actions = 0;
         // Abre o arquivo
-        $csv = fopen($file,'r');
+        $csv = fopen($file, 'r');
+        $data = [];
 
         // Cabeçalho dos dados
-        $header_data = $header ? fgetcsv($csv,0,$separeted_by) : [];
+        $header_data = $header ? fgetcsv($csv, 0, ',') : [];
 
         // Lê todas as linhas do arquivo
-        while ($line = fgetcsv($csv,0,$separeted_by)){
-            if($line[11] == 1){
-                $total_hits ++;
-            }else if($line[11] == 0){
-                $total_errors ++;
-            }
-            $total_actions ++;
+        while ($line = fgetcsv($csv, 0, ',')) {
+            $data[] = $line[11];
         }
 
         fclose($csv);
 
-        return [$total_hits, $total_errors, $total_actions];
-
+        return $data;
     }
 
-    public function writeInFile($file,$data,$separeted_by=',')
+    public function readFile($file, $header = True, $separeted_by = ',')
     {
-        $csv = fopen($file,'a');
-        fputcsv($csv,$data,$separeted_by,$eol=PHP_EOL);
-        
+        //Verifica se o arquivo existe
+        if (!file_exists($file)) {
+            return 0;
+        }
+
+        $total_hits = 0;
+        $total_errors = 0;
+        // Abre o arquivo
+        $csv = fopen($file, 'r');
+
+        // Cabeçalho dos dados
+        $header_data = $header ? fgetcsv($csv, 0, $separeted_by) : [];
+
+        // Lê todas as linhas do arquivo
+        while ($line = fgetcsv($csv, 0, $separeted_by)) {
+            if ($line[11] == 1) {
+                $total_hits++;
+            } else if ($line[11] == 0) {
+                $total_errors++;
+            }
+        }
         fclose($csv);
-        
+
+        return [$total_hits, $total_errors];
+    }
+
+    private function stand_deviation($arr)
+    {
+        $num_of_elements = count($arr);
+
+        $variance = 0.0;
+
+        // calculating mean using array_sum() method
+        $average = array_sum($arr) / $num_of_elements;
+
+        foreach ($arr as $i) {
+            // sum of squares of differences between 
+            // all numbers and means.
+            $variance += pow(($i - $average), 2);
+        }
+
+        return (float)sqrt($variance / $num_of_elements);
+    }
+
+    public function statsFromFile($file)
+    {
+        //Verifica se o arquivo existe
+        if (!file_exists($file)) {
+            return 0;
+        }
+
+        $total = 0;
+        $total_valid_actions = 0;
+        $means = [];
+        // Abre o arquivo
+        $csv = fopen($file, 'r');
+
+        // Lê todas as linhas do arquivo
+        while ($line = fgetcsv($csv, 0, ",")) {
+            if(floatval($line[1]) != 0){
+                $total += floatval($line[1]);
+                $total_valid_actions++;
+                $means[] = $line[1];
+            }
+            continue;
+        }
+
+        fclose($csv);
+
+        $mean = $total / $total_valid_actions;
+        $sd = $this->stand_deviation($means);
+
+        return [$mean, $sd, $total_valid_actions];
+    }
+
+    public function writeInFile($file, $data)
+    {
+        $csv = fopen($file, 'a');
+        fputcsv($csv, $data);
+        fclose($csv);
+
         return 1;
     }
-    
-    public function createFile($filename,$separeted_by=',')
+
+    public function createFile($filename, $separeted_by = ',', $headers)
     {
         $csv = fopen($filename, 'w');
-        fputcsv($csv,[
-            'Ação',
-            'Data de Previsão',
-            'Preço na Data de Previsão',
-            'Dia Inicial da matriz de transição',
-            'Dia Final da matriz de transição',
-            'Preço na Data Após n dias',
-            'Dia após n iterações',
-            'Iterações',
-            'Probabilidade de Subir',
-            'Probabilidade de Permanecer o Valor',
-            'Probabilidade de Cair',
-            'Acerto'
-        ],$separeted_by);
+        fputcsv($csv, $headers, $separeted_by);
 
         fclose($csv);
-        
     }
 
     public function getActionAfterIterations($action_name, $first_day, $string_format_final_date, $iteractions)
     {
-        $final = \DateTime::createFromFormat('d/m/YH:i:s', $string_format_final_date . '24:00:00')->modify('+90 days'); 
-        $last_day = Paper::toIsoDate($final->format('U')); 
+        $final = \DateTime::createFromFormat('d/m/YH:i:s', $string_format_final_date . '24:00:00')->modify('+60 days');
+        $last_day = Paper::toIsoDate($final->format('U'));
+        $one_day_after_iteraction = $iteractions + 1;
+        $two_days_after_iteraction = $iteractions + 2;
 
         $interval = Paper::find()->orderBy('date')->where(
             ['=', 'codneg', $action_name],
             ['=', 'tpmerc', '010']
         )->andWhere(['>=', 'date', $first_day])->andWhere(['<=', 'date', $last_day])->addOrderBy('date ASC')->all();
-        
+
+        try {
             $date = $interval[$iteractions];
-            return $date;    
+            $one_day_after = $interval[$one_day_after_iteraction];
+            $two_days_after = $interval[$two_days_after_iteraction];
+
+            return [$date, $one_day_after, $two_days_after];
+        } catch (\Throwable $th) {
+            return null;
+        }
     }
 
     public function hits($price_now, $price_after, $up, $down)
     {
-        if($up > $down){
+        if ($up > $down) {
             $diff = $up - $down;
-            if($diff > 0.05){
-                if($price_after > $price_now){
+            if ($diff > 0.05) {
+                if ($price_after > $price_now) {
                     return 1;
-                }else{
+                } else {
                     return 0;
                 }
-            }else{
+            } else {
                 return -1;
             }
-        }else if($up == $down){
+        } else if ($up == $down) {
             return -1;
-        }else{
+        } else {
             $diff = $down - $up;
-            if($diff > 0.05){
-                if($price_after < $price_now){
+            if ($diff > 0.05) {
+                if ($price_after < $price_now) {
                     return 1;
-                }else{
+                } else {
                     return 0;
                 }
-            }else{
+            } else {
                 return -1;
             }
         }

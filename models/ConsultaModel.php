@@ -40,7 +40,6 @@ class ConsultaModel extends Model
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
             'metric' => 'Métrica',
-            'initial_year' => 'Ano'
         ];
     }
 

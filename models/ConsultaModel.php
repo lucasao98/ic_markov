@@ -51,6 +51,14 @@ class ConsultaModel extends Model
         )->andWhere(['>=', 'date', $start])->andWhere(['<=', 'date', $final])->addOrderBy('date ASC')->all();
     }
 
+    public function getDataByMonth($stock, $start)
+    {
+        return Paper::find()->orderBy('date')->where(
+            ['=', 'codneg', $stock],
+            ['=', 'tpmerc', '010']
+        )->andWhere(['<=', 'date', $start])->addOrderBy('date DESC')->one();
+    }
+
     public function definePremin($cursor_by_price)
     {
         $premin = $cursor_by_price[0]; //array com o menor preço do conjunto

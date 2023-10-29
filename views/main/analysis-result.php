@@ -27,10 +27,10 @@ AppAsset::register($this);
                 <tr>
                     <th>Ação</th>
                     <th>Quantidade De Ações Compradas</th>
-                    <th>Preço de Fechamento no último dia da matriz de transição</th>
+                    <th>Preço de Fechamento no último dia da matriz de transição (R$)</th>
                     <th>Data Inicial Da Matriz de Transição</th>
                     <th>Data Final Da Matriz de Transição</th>
-                    <th>Preço mês seguinte</th>
+                    <th>Preço mês seguinte (R$)</th>
                     <th>Data da venda no mês seguinte</th>
                 </tr>
                 <?php

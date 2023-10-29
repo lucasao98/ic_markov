@@ -1390,26 +1390,28 @@ class MainController extends Controller
             $start = $model->inicio;
 
             //Dia de início do conjunto de treinamento
-            $start_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('-3 months');
-            $start_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('-3 months');
+            // 31/10/2010
+            $start_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+29 day')->modify('- 3 months');
+            $start_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+29 day')->modify('- 3 months');
 
             //Dia final do conjunto de treinamento
+            // 31/12/2010
             $final_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 day');
             $final_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 day');
             
             // Dia final do mês de previsão
-            $start_day_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 days')->modify('+ 1 month');
-            $start_day_predict_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 days')->modify('+ 1 month');
+            $start_day_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 days');
+            $start_day_predict_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 days');
+            $final_month_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 days')->modify('+ 1 month');
             $final_day_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+ 29 days')->modify('+ 1 month');
             $final_day_predict_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+ 29 days')->modify('+ 1 month');
 
-      
             //Passando para o padrão de datas do banco
             $start_matrix_transition = Paper::toIsoDate($start_matrix_transition->getTimestamp());
             $final_matrix_transition = Paper::toIsoDate($final_matrix_transition->getTimestamp());
             $start_day_predict = Paper::toIsoDate($start_day_predict->getTimestamp());
             $final_day_predict = Paper::toIsoDate($final_day_predict->getTimestamp());
-
+            $final_month_predict = Paper::toIsoDate($final_month_predict->getTimestamp());
 
             $actions = [
                 "ALPA4",
@@ -1465,7 +1467,7 @@ class MainController extends Controller
 
             foreach ($actions as $action_name) {
                 $actions_by_date = $model->getData($action_name, $start_matrix_transition, $final_matrix_transition);
-                $actions_predict = $model->getData($action_name, $start_day_predict, $final_day_predict);
+                $action_predict =  $model->getDataByMonth($action_name,$final_month_predict);
 
                 $actions_by_date[0]["t_state"] = 2;
 
@@ -1490,8 +1492,8 @@ class MainController extends Controller
                         $actions_by_date[count($actions_by_date) -1]['preult'],
                         $start_matrix_transition_string,
                         $final_matrix_transition_string,
-                        $start_day_predict_string,
-                        $actions_predict[0]['preult']
+                        $action_predict['date']->toDateTime(),
+                        $action_predict['preult']
                     ]);
                 }else{
                     continue;

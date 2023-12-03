@@ -26,6 +26,7 @@ AppAsset::register($this);
             <tbody>
                 <tr>
                     <th>Ação</th>
+                    <th>Grupo</th>
                     <th>Quantidade De Ações Compradas</th>
                     <th>Preço de Fechamento no último dia da matriz de transição (R$)</th>
                     <th>Data Inicial Da Matriz de Transição</th>
@@ -39,10 +40,11 @@ AppAsset::register($this);
                         '<td>' . $result_action[0] . '</td>' .
                         '<td>' . $result_action[1] . '</td>' .
                         '<td>' . $result_action[2] . '</td>' .
-                        '<td>' . $formatter->asDate($result_action[3]) . '</td>' .
+                        '<td>' . $result_action[3] . '</td>' .
                         '<td>' . $formatter->asDate($result_action[4]) . '</td>' .
-                        '<td>' . $result_action[6] . '</td>' .
-                        '<td>' . $formatter->asDate($result_action[5]) . '</td>' .
+                        '<td>' . $result_action[5] . '</td>' .
+                        '<td>' . $formatter->asDate($result_action[6]) . '</td>' .
+                        '<td>' . $result_action[7] . '</td>' .
                         '</tr>';
                 }
                 ?>

@@ -1384,6 +1384,8 @@ class MainController extends Controller
         $this->layout = 'navbar';
 
         $model = new ConsultaModel;
+        $actions_selected = 0;
+        $current_group = 1;
 
         $post = $_POST;
         if ($model->load($post)) {
@@ -1391,37 +1393,59 @@ class MainController extends Controller
 
             //Dia de início do conjunto de treinamento
             // 31/10/2010
-            $start_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+29 day')->modify('- 3 months');
-            $start_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+29 day')->modify('- 3 months');
+            $start_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('- 3 months')->modify('last day of this month');
+            $start_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('- 3 months')->modify('last day of this month');
 
             //Dia final do conjunto de treinamento
             // 31/12/2010
-            $final_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 day');
-            $final_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 day');
+            $final_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 month')->modify('last day of this month');
+            $final_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 month')->modify('last day of this month');
             
-            // Dia final do mês de previsão
-            $start_day_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 days');
-            $start_day_predict_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 days');
-            $final_month_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-2 days')->modify('+ 1 month');
-            $final_day_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+ 29 days')->modify('+ 1 month');
-            $final_day_predict_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+ 29 days')->modify('+ 1 month');
+
+            // Dia inicial do mês de previsão
+            $start_day_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('- 1 day');
+            $start_day_predict_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('- 1 day');
+
+            $final_month_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+1 day')->modify('last day of this month');
+            $final_month_predict_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+1 day')->modify('last day of this month');
+            
+            $final_next_month = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+ 1 month')->modify('last day of this month');
+            $final_next_month_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+ 1 month')->modify('last day of this month');
 
             //Passando para o padrão de datas do banco
             $start_matrix_transition = Paper::toIsoDate($start_matrix_transition->getTimestamp());
             $final_matrix_transition = Paper::toIsoDate($final_matrix_transition->getTimestamp());
             $start_day_predict = Paper::toIsoDate($start_day_predict->getTimestamp());
-            $final_day_predict = Paper::toIsoDate($final_day_predict->getTimestamp());
+            $final_next_month = Paper::toIsoDate($final_next_month->getTimestamp());
             $final_month_predict = Paper::toIsoDate($final_month_predict->getTimestamp());
 
+            $inicio_jan = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 12 months');
+            $inicio_fev = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 11 months');
+            $inicio_mar = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 10 months');
+            $inicio_abr = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 9 months');
+            $inicio_mai = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 8 months');
+            $inicio_jun = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 7 months');
+            $inicio_jul = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 6 months');
+            $inicio_ago = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 5 months');
+            $inicio_set = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 4 months');
+            $inicio_out = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 3 months');
+            $inicio_nov = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 2 months');
+            $inicio_dez = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 day')->modify('- 1 months');
+            $inicio_jan_next_year = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('- 1 day');
 
-            $final_out = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+29 day')->modify('- 3 months');
-            $final_out = Paper::toIsoDate($final_out->getTimestamp());
-            
-            $final_nov = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+28 day')->modify('- 2 months');
-            $final_nov = Paper::toIsoDate($final_nov->getTimestamp());
-            
-            $final_dez = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+28 day')->modify('- 1 months');
-            $final_dez = Paper::toIsoDate($final_dez->getTimestamp());
+            $inicio_jan = Paper::toIsoDate($inicio_jan->getTimestamp());
+            $inicio_fev = Paper::toIsoDate($inicio_fev->getTimestamp());
+            $inicio_mar = Paper::toIsoDate($inicio_mar->getTimestamp());
+            $inicio_abr = Paper::toIsoDate($inicio_abr->getTimestamp());
+            $inicio_mai = Paper::toIsoDate($inicio_mai->getTimestamp());
+            $inicio_jun = Paper::toIsoDate($inicio_jun->getTimestamp());
+            $inicio_jul = Paper::toIsoDate($inicio_jul->getTimestamp());
+            $inicio_ago = Paper::toIsoDate($inicio_ago->getTimestamp());
+            $inicio_set = Paper::toIsoDate($inicio_set->getTimestamp());
+            $inicio_out = Paper::toIsoDate($inicio_out->getTimestamp());
+            $inicio_nov = Paper::toIsoDate($inicio_nov->getTimestamp());
+            $inicio_dez = Paper::toIsoDate($inicio_dez->getTimestamp());
+            $inicio_jan_next_year = Paper::toIsoDate($inicio_jan_next_year->getTimestamp());
 
             $actions = [
                 "ALPA4",
@@ -1472,41 +1496,60 @@ class MainController extends Controller
                 "TRPL4",
                 "WEGE3",
             ];
-            
-            $table_actions = [];
-
-            $model->createFile("../assets/teste_matriz_mensal.csv", ",", [
+            /*
+            $model->createFile("../assets/teste_matriz_mensal_12.csv", ",", [
                 'Ação',
+                'Grupo',
                 'Quantidade de Ações Compradas',
                 'Preço de Fechamento no último dia da matriz de transição (R$)',
                 'Data Inicial Da Matriz de Transição',
                 'Data Final Da Matriz de Transição',
                 'Data da venda no mês seguinte',
                 'Preço mês seguinte (R$)',
+            ]);
+
+            $model->createFile("../assets/teste_valores_mensal_12.csv", ",", [
                 'Valor Total Disponível',
                 'Valor Total Utilizado na Compra',
                 'Valor Total na Venda',
             ]);
+            */
 
-            $model->createFile("../assets/teste_valores_mensal.csv", ",", [
-                'Valor Total Disponível',
-                'Valor Total Utilizado na Compra',
-                'Valor Total na Venda',
-            ]);
-
+            $table_actions = [];
             
             foreach ($actions as $action_name) {
                 //$actions_by_date = $model->getData($action_name, $start_matrix_transition, $final_matrix_transition);
+                
                 $action_predict =  $model->getDataByMonth($action_name,$final_month_predict);
 
-                $actions_by_date  = [];
+                $actions_by_date = [];
                 
-                // Mês de outubro 31/10/2010
-                array_push($actions_by_date, $model->getDataByMonth($action_name, $final_out));
-                // Mês de novembro 31/11/2010
-                array_push($actions_by_date, $model->getDataByMonth($action_name, $final_nov));
-                // Mês de novembro 31/12/2010
-                array_push($actions_by_date, $model->getDataByMonth($action_name, $final_dez));
+                
+                $final_jan = $model->getData($action_name, $inicio_jan,$inicio_fev);
+                $final_fev = $model->getData($action_name, $inicio_fev,$inicio_mar);
+                $final_mar = $model->getData($action_name, $inicio_mar,$inicio_abr);
+                $final_abr = $model->getData($action_name, $inicio_abr,$inicio_mai);
+                $final_mai = $model->getData($action_name, $inicio_mai,$inicio_jun);
+                $final_jun = $model->getData($action_name, $inicio_jun,$inicio_jul);
+                $final_jul = $model->getData($action_name, $inicio_jul,$inicio_ago);
+                $final_ago = $model->getData($action_name, $inicio_ago,$inicio_set);
+                $final_set = $model->getData($action_name, $inicio_set,$inicio_out);
+                $final_out = $model->getData($action_name, $inicio_out,$inicio_nov);
+                $final_nov = $model->getData($action_name, $inicio_nov,$inicio_dez);
+                $final_dez = $model->getData($action_name, $inicio_dez,$inicio_jan_next_year);
+
+                array_push($actions_by_date, $final_jan[count($final_jan)-1]);
+                array_push($actions_by_date, $final_fev[count($final_fev)-1]);
+                array_push($actions_by_date, $final_mar[count($final_mar)-1]);
+                array_push($actions_by_date, $final_abr[count($final_abr)-1]);
+                array_push($actions_by_date, $final_mai[count($final_mai)-1]);
+                array_push($actions_by_date, $final_jun[count($final_jun)-1]);
+                array_push($actions_by_date, $final_jul[count($final_jul)-1]);
+                array_push($actions_by_date, $final_ago[count($final_ago)-1]);
+                array_push($actions_by_date, $final_set[count($final_set)-1]);
+                array_push($actions_by_date, $final_out[count($final_out)-1]);
+                array_push($actions_by_date, $final_nov[count($final_nov)-1]);
+                array_push($actions_by_date, $final_dez[count($final_dez)-1]);
 
                 $actions_by_date[0]["t_state"] = 2;
 
@@ -1520,33 +1563,36 @@ class MainController extends Controller
                 }
                 
                 $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
-    
+                
                 $Matrix = MatrixFactory::create($three_state_matrix);
 
                 $result = $model->getSteadyState($Matrix);
+
                 // Verifica se a probabilidade de aumentar é maior que a probabilidade de diminuir
                 if($result[0][0] > $result[0][2]){
-                    
+                    $actions_selected += 1;
                     array_push($table_actions, [
                         $action_name,
-                        number_format(100/$actions_by_date[count($actions_by_date) -1]['preult'], 2),
+                        ($actions_selected - 15) <= 0 ? $current_group : $current_group+1,
+                        number_format(100/$actions_by_date[count($actions_by_date) -1]['preult'], 0),
                         $actions_by_date[count($actions_by_date) -1]['preult'],
-                        $start_matrix_transition_string,
-                        $final_matrix_transition_string,
-                        $action_predict['date']->toDateTime()->format('Y-M-d'),
-                        $action_predict['preult']
-                    ]);
-
-                    $model->writeInFile("../assets/teste_matriz_mensal.csv", [
-                        $action_name,
-                        number_format(100/$actions_by_date[count($actions_by_date) -1]['preult'], 2),
-                        $actions_by_date[count($actions_by_date) -1]['preult'],
-                        $start_matrix_transition_string->format('d/M/Y'),
-                        $final_matrix_transition_string->format('d/M/Y'),
-                        $action_predict['date']->toDateTime()->format('Y-M-d'),
+                        $start_matrix_transition_string->format('Y-M-d'),
+                        $final_matrix_transition_string->format('Y-M-d'),
+                        $final_next_month_string->format('Y-M-d'),
                         $action_predict['preult'],
-                        
                     ]);
+                    /*
+                    $model->writeInFile("../assets/teste_matriz_mensal_12.csv", [
+                        $action_name,
+                        ($actions_selected - 15) <= 0 ? $current_group : $current_group+1,
+                        number_format(100/$actions_by_date[count($actions_by_date) -1]['preult'], 0),
+                        $actions_by_date[count($actions_by_date) -1]['preult'],
+                        $start_matrix_transition_string->format('Y-M-d'),
+                        $final_matrix_transition_string->format('Y-M-d'),
+                        $final_next_month_string->format('Y-M-d'),
+                        $action_predict['preult'],
+                    ]);
+                    */
                 }else{
                     continue;
                 }
@@ -1555,15 +1601,16 @@ class MainController extends Controller
             $total_gasto = 0;
             $total_selled = 0;
             foreach ($table_actions as $result_action) {
-                $total_gasto += ($result_action[1]*$result_action[2]);
-                $total_selled += ($result_action[6]*$result_action[1]);
+                $total_gasto += ($result_action[2]*$result_action[3]);
+                $total_selled += ($result_action[7]*$result_action[2]);
             }
-
-            $model->writeInFile("../assets/teste_valores_mensal.csv", [
+            /*
+            $model->writeInFile("../assets/teste_valores_mensal_12.csv", [
                 100*count($table_actions),
                 number_format($total_gasto,2),
                 number_format($total_selled,2),             
             ]);
+            */
 
             return $this->render('analysis-result', [
                 'table_results' => $table_actions,

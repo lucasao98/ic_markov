@@ -56,7 +56,7 @@ class ConsultaModel extends Model
         return Paper::find()->orderBy('date')->where(
             ['=', 'codneg', $stock],
             ['=', 'tpmerc', '010']
-        )->andWhere(['<=', 'date', $start])->addOrderBy('date DESC')->one();
+        )->andWhere(['>=', 'date', $start])->addOrderBy('date ASC')->one();
     }
 
     public function definePremin($cursor_by_price)
@@ -120,7 +120,7 @@ class ConsultaModel extends Model
             return 0;
         }
 
-        if ($this->validateMatrix($R) === 0) {
+        if ($this->validateMatrix($R, 4) === 0) {
             while ($stop_loop != 1) {
                 for ($i = 1; $i <= $tried_values; $i++) {
                     $R = $R->multiply($matrix);
@@ -136,24 +136,24 @@ class ConsultaModel extends Model
 
                 $contador += $tried_values;
 
-                if ($this->validateMatrix($R) === 0) {
+                if ($this->validateMatrix($R, 4) === 0) {
                     $tried_values += 1;
                 } else {
                     $stop_loop = 1;
                 }
             }
         }
-        return [$this->validateMatrix($R), $contador];
+        return [$this->validateMatrix($R, 4), $contador];
     }
 
-    private function validateMatrix($Matrix)
+    private function validateMatrix($Matrix, $decimal_places)
     {
-        if (number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[1][0], 4, '.', ' ') && number_format($Matrix[0][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ') && number_format($Matrix[1][0], 4, '.', ' ') == number_format($Matrix[2][0], 4, '.', ' ')) {
-            if (number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[1][1], 4, '.', ' ') && number_format($Matrix[0][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ') && number_format($Matrix[1][1], 4, '.', ' ') == number_format($Matrix[2][1], 4, '.', ' ')) {
-                if (number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[1][2], 4, '.', ' ') && number_format($Matrix[0][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ') && number_format($Matrix[1][2], 4, '.', ' ') == number_format($Matrix[2][2], 4, '.', ' ')) {
-                    $pi_one = number_format($Matrix[0][0], 4, '.', ' ');
-                    $pi_two = number_format($Matrix[0][1], 4, '.', ' ');
-                    $pi_three = number_format($Matrix[0][2], 4, '.', ' ');
+        if (number_format($Matrix[0][0], $decimal_places, '.', ' ') == number_format($Matrix[1][0], $decimal_places, '.', ' ') && number_format($Matrix[0][0], $decimal_places, '.', ' ') == number_format($Matrix[2][0], $decimal_places, '.', ' ') && number_format($Matrix[1][0], $decimal_places, '.', ' ') == number_format($Matrix[2][0], $decimal_places, '.', ' ')) {
+            if (number_format($Matrix[0][1], $decimal_places, '.', ' ') == number_format($Matrix[1][1], $decimal_places, '.', ' ') && number_format($Matrix[0][1], $decimal_places, '.', ' ') == number_format($Matrix[2][1], $decimal_places, '.', ' ') && number_format($Matrix[1][1], $decimal_places, '.', ' ') == number_format($Matrix[2][1], $decimal_places, '.', ' ')) {
+                if (number_format($Matrix[0][2], $decimal_places, '.', ' ') == number_format($Matrix[1][2], $decimal_places, '.', ' ') && number_format($Matrix[0][2], $decimal_places, '.', ' ') == number_format($Matrix[2][2], $decimal_places, '.', ' ') && number_format($Matrix[1][2], $decimal_places, '.', ' ') == number_format($Matrix[2][2], $decimal_places, '.', ' ')) {
+                    $pi_one = number_format($Matrix[0][0], $decimal_places, '.', ' ');
+                    $pi_two = number_format($Matrix[0][1], $decimal_places, '.', ' ');
+                    $pi_three = number_format($Matrix[0][2], $decimal_places, '.', ' ');
 
                     $vector_stable = new Vector([$pi_one, $pi_two, $pi_three]);
                     return $vector_stable;

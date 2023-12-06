@@ -57,6 +57,7 @@
                         <th>Data</th>
                         <th>Limite Superior</th>
                         <th>Limite Inferior</th>
+                        <th>Data após</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,6 +66,7 @@
                             <th><?= $data['date'] ?></th>
                             <th><?= $data['sup'] ?></th>
                             <th><?= $data['inf'] ?></th>
+                            <th><?= $data['after_inflection'] ?></th>
                         </tr>
                     <?php } ?>
                 </tbody>

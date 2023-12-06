@@ -737,58 +737,63 @@ class ConsultaModel extends Model
     public function checkVariation($next, $intervals, $qtde_variacoes)
     {
         $constant_intervals = 0;
-        $inflexion_dots = [];
-        $dates_inflexion_dots = [];
+        $inflection_dots = [];
 
         //$inf_limit = round($intervals[0][0]);
         //$upper_limit = round($intervals[0][1]);
 
         for ($i = 1; $i < count($intervals) - 1; $i++) {
             // Verifica se a quantidade de intervalos constantes é menor que a quantidade de intervalos dado pelo usuário
-            if ($constant_intervals <= $qtde_variacoes) {
-                if ((round($intervals[$i][0]) == round($intervals[$i - 1][0])) && (round($intervals[$i][1]) == round($intervals[$i - 1][1]))) {
+            if ($constant_intervals < $qtde_variacoes) {
+                if ($intervals[$i][0] == $intervals[$i - 1][0] && $intervals[$i][1] == $intervals[$i - 1][1]) {
                     $constant_intervals++;
                 } else {
-                    continue;
+                    $constant_intervals = 0;
                 }
                 // Verifica se a quantidade de intervalos constantes é maior que a quantidade de intervalos dado pelo usuário
-            } else  if ($constant_intervals > $qtde_variacoes) {
+            } else if ($constant_intervals >= $qtde_variacoes) {
                 // Verifica se o limite superior e o inferior aumentaram
-                if ((round($intervals[$i][0]) > round($intervals[$i - 1][0])) && (round($intervals[$i][1]) > round($intervals[$i - 1][1]))) {
-                    array_push($inflexion_dots, [
+                if ($intervals[$i][0] > $intervals[$i - 1][0] && $intervals[$i][1] > $intervals[$i - 1][1]) {
+                    array_push($inflection_dots, [
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
-                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y')
+                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
+                        'after_inflection' => $next[$i+1]['date']->toDateTime()->format('d/m/Y')
                     ]);
                     $constant_intervals = 0;
                     // Verifica se o limite superior e o inferior abaixaram
-                } else if ((round($intervals[$i][0]) < round($intervals[$i - 1][0])) && (round($intervals[$i][1]) < round($intervals[$i - 1][1]))) {
-                    array_push($inflexion_dots, [
+                } else if ($intervals[$i][0] < $intervals[$i - 1][0] && $intervals[$i][1] < $intervals[$i - 1][1]) {
+                    array_push($inflection_dots, [
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
-                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y')
+                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
+                        'after_inflection' => $next[$i+1]['date']->toDateTime()->format('d/m/Y')
                     ]);
                     $constant_intervals = 0;
                     // Verifica se o limite superior aumentou e o inferior abaixou
-                } else if ((round($intervals[$i][0]) > round($intervals[$i - 1][0])) && (round($intervals[$i][1]) < round($intervals[$i - 1][1]))) {
-                    array_push($inflexion_dots, [
+                } else if ($intervals[$i][0] > $intervals[$i - 1][0] && $intervals[$i][1] < $intervals[$i - 1][1]) {
+                    array_push($inflection_dots, [
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
-                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y')
+                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
+                        'after_inflection' => $next[$i+1]['date']->toDateTime()->format('d/m/Y')
                     ]);
                     $constant_intervals = 0;
                     // Verifica se o limite superior abaixou e o inferior aumentou
-                } else if ((round($intervals[$i][0]) < round($intervals[$i - 1][0])) && (round($intervals[$i][1]) > round($intervals[$i - 1][1]))) {
-                    array_push($inflexion_dots, [
+                } else if ($intervals[$i][0] < $intervals[$i - 1][0] && $intervals[$i][1] > $intervals[$i - 1][1]) {
+                    array_push($inflection_dots, [
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
-                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y')
+                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
+                        'after_inflection' => $next[$i+1]['date']->toDateTime()->format('d/m/Y')
                     ]);
                     $constant_intervals = 0;
+                }else{
+                    $constant_intervals++;
                 }
             }
         }
 
-        return $inflexion_dots;
+        return $inflection_dots;
     }
 }

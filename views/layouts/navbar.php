@@ -39,7 +39,7 @@ TesteAsset::register($this);
           <a href="home">Home</a>
         </li>
         <li>
-        <?php
+          <?php
           echo ButtonDropdown::widget([
             'label' => 'Estado Estável',
             'options' => [
@@ -52,10 +52,10 @@ TesteAsset::register($this);
               ],
             ],
           ]);
-        ?>
+          ?>
         </li>
         <li>
-        <?php
+          <?php
           echo ButtonDropdown::widget([
             'label' => 'Método com 3 estados',
             'options' => [
@@ -67,19 +67,28 @@ TesteAsset::register($this);
               ],
             ],
           ]);
-        ?>
+          ?>
         </li>
         <li>
           <a href="first-passage-time">Tempo de primeira passagem</a>
         </li>
+        <!--
         <li>
           <a href="steady-state-automatic">Estado Estável Automatizado</a>
         </li>
+        -->
+        <!--
         <li>
           <a href="calculo-media-desvio">Cálculo das Médias</a>
         </li>
+        -->
+        <!--
         <li>
           <a href="annual-analysis">Análise Estado Estável</a>
+        </li>
+        -->
+        <li>
+          <a href="join-methods">Intervalos Fixos e Método de 3 estados</a>
         </li>
       </ul>
     </div>

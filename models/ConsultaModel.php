@@ -17,6 +17,7 @@ class ConsultaModel extends Model
     public $inicio;
     public $final;
     public $states_number;
+    public $qtde_obs;
     public $periodo;
     public $metric;
     public $base;
@@ -29,6 +30,7 @@ class ConsultaModel extends Model
             [['states_number', 'periodo'], 'integer'],
             [['metric'], 'string'],
             [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy'],
+            ['qtde_obs','integer']
         ];
     }
 
@@ -40,6 +42,7 @@ class ConsultaModel extends Model
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
             'metric' => 'Métrica',
+            'qtde_obs' => 'Quantidade de observações'
         ];
     }
 
@@ -646,7 +649,7 @@ class ConsultaModel extends Model
 
         // Lê todas as linhas do arquivo
         while ($line = fgetcsv($csv, 0, ",")) {
-            if(floatval($line[1]) != 0){
+            if (floatval($line[1]) != 0) {
                 $total += floatval($line[1]);
                 $total_valid_actions++;
                 $means[] = $line[1];
@@ -729,5 +732,63 @@ class ConsultaModel extends Model
                 return -1;
             }
         }
+    }
+
+    public function checkVariation($next, $intervals, $qtde_variacoes)
+    {
+        $constant_intervals = 0;
+        $inflexion_dots = [];
+        $dates_inflexion_dots = [];
+
+        //$inf_limit = round($intervals[0][0]);
+        //$upper_limit = round($intervals[0][1]);
+
+        for ($i = 1; $i < count($intervals) - 1; $i++) {
+            // Verifica se a quantidade de intervalos constantes é menor que a quantidade de intervalos dado pelo usuário
+            if ($constant_intervals <= $qtde_variacoes) {
+                if ((round($intervals[$i][0]) == round($intervals[$i - 1][0])) && (round($intervals[$i][1]) == round($intervals[$i - 1][1]))) {
+                    $constant_intervals++;
+                } else {
+                    continue;
+                }
+                // Verifica se a quantidade de intervalos constantes é maior que a quantidade de intervalos dado pelo usuário
+            } else  if ($constant_intervals > $qtde_variacoes) {
+                // Verifica se o limite superior e o inferior aumentaram
+                if ((round($intervals[$i][0]) > round($intervals[$i - 1][0])) && (round($intervals[$i][1]) > round($intervals[$i - 1][1]))) {
+                    array_push($inflexion_dots, [
+                        'sup' => $intervals[$i][1],
+                        'inf' => $intervals[$i][0],
+                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y')
+                    ]);
+                    $constant_intervals = 0;
+                    // Verifica se o limite superior e o inferior abaixaram
+                } else if ((round($intervals[$i][0]) < round($intervals[$i - 1][0])) && (round($intervals[$i][1]) < round($intervals[$i - 1][1]))) {
+                    array_push($inflexion_dots, [
+                        'sup' => $intervals[$i][1],
+                        'inf' => $intervals[$i][0],
+                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y')
+                    ]);
+                    $constant_intervals = 0;
+                    // Verifica se o limite superior aumentou e o inferior abaixou
+                } else if ((round($intervals[$i][0]) > round($intervals[$i - 1][0])) && (round($intervals[$i][1]) < round($intervals[$i - 1][1]))) {
+                    array_push($inflexion_dots, [
+                        'sup' => $intervals[$i][1],
+                        'inf' => $intervals[$i][0],
+                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y')
+                    ]);
+                    $constant_intervals = 0;
+                    // Verifica se o limite superior abaixou e o inferior aumentou
+                } else if ((round($intervals[$i][0]) < round($intervals[$i - 1][0])) && (round($intervals[$i][1]) > round($intervals[$i - 1][1]))) {
+                    array_push($inflexion_dots, [
+                        'sup' => $intervals[$i][1],
+                        'inf' => $intervals[$i][0],
+                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y')
+                    ]);
+                    $constant_intervals = 0;
+                }
+            }
+        }
+
+        return $inflexion_dots;
     }
 }

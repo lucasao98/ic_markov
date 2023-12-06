@@ -5,7 +5,6 @@ namespace app\controllers;
 use yii\web\Controller;
 use app\models\ConsultaModel;
 use app\models\Paper;
-use Exception;
 use Yii;
 use MathPHP\LinearAlgebra\MatrixFactory;
 

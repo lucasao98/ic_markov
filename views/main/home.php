@@ -19,7 +19,7 @@
           <abbr title="Email">Email:</abbr>
           <p>jhsqueiroz.cic@uesc.br</p>
         </address>
-        <strong>Voluntario</strong>
+        <strong>Bolsista</strong>
         <br><a href="http://lattes.cnpq.br/7198524375865048" target="_blank">Luca Sacramento de Oliveira</a> 
         <br>Bacharelando em Ciência da Computação<br>
         <br>

@@ -85,7 +85,8 @@ $config = [
                 'calculo-media-desvio' => 'main/calculo-media-desvio',
                 'import' => 'import/import-form',
                 'import-data' => 'import/import-data',
-                'annual-analysis' => 'main/annual-analysis'
+                'annual-analysis' => 'main/annual-analysis',
+                'join-methods' => 'join/index'
             ],
         ],
         

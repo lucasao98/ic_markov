@@ -41,25 +41,43 @@ class JoinController extends Controller
             $t_clientDatas = [];
             $t_datas = [];
             $base = $model->base;
-            
 
+            $prob_by_day = [];
+            $prev_heuristica = [];
 
             $final = $start;
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00'); //Dia de início do conjunto de treinamento
-            $start = $start->modify("-$model->periodo $model->metric"); //O conjunto de treinamento será definido n meses antes do dia a ser previsto
-            /* -------------------------------------------------------------------- */
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day'); //Dia final do conjunto de treinamento
+            //Dia de início do conjunto de treinamento
+            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
 
-            $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
-            $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
+            //O conjunto de treinamento será definido n meses antes do dia a ser previsto
+            $start = $start->modify("-$model->periodo $model->metric");
+
+            /* -------------------------------------------------------------------- */
+            //Dia final do conjunto de treinamento
+            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');
+
+            //Passando para o padrão de datas do banco
+            $start = Paper::toIsoDate($start->format('U'));
+
+            //Passando para o padrão de datas do banco
+            $final = Paper::toIsoDate($final->format('U'));
 
             $stock = $model->nome;
-            $cursor_by_price = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento, contém as ações do intervalo passado pelo usuário
-            // $cursor_by_price_avg_aux = $model->getData($stock, $start, $final); //Setup inicial do conjunto de treinamento
-            // $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux, $base); //Calculando médias e tirando as diferenças
 
-            $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00'); // Data da predição
-            $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux); //Busca no banco os dias que serão previstos
+            //Setup inicial do conjunto de treinamento, contém as ações do intervalo passado pelo usuário
+            $cursor_by_price = $model->getData($stock, $start, $final);
+
+            //Setup inicial do conjunto de treinamento
+            // $cursor_by_price_avg_aux = $model->getData($stock, $start, $final);
+
+            //Calculando médias e tirando as diferenças
+            // $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux, $base);
+
+            // Data da predição
+            $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
+
+            //Busca no banco os dias que serão previstos
+            $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux);
             $consultas = count($next_days);
 
             while (1) {
@@ -67,7 +85,9 @@ class JoinController extends Controller
                 if (count($next_days) == 0)
                     break;
 
-                $next_day = array_shift($next_days); //busca no array a ação do dia seguinte
+                //busca no array a ação do dia seguinte
+                $next_day = array_shift($next_days);
+
 
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 if ($next_day['date'] > $aux || $next_day['date'] == null)
@@ -77,7 +97,8 @@ class JoinController extends Controller
                 $premin = $model->definePremin($cursor_by_price);
                 $premax = $model->definePremax($cursor_by_price);
 
-                $interval = ($premax['preult'] - $premin['preult']) / $model->states_number; //calculo do intervalo
+                //calculo do intervalo
+                $interval = ($premax['preult'] - $premin['preult']) / $model->states_number;
 
                 // foreach ($cursor_by_price_avg as $avg) {
                 //     $avg['preult'] += $last_day['preult'];
@@ -86,7 +107,8 @@ class JoinController extends Controller
                 // $premin_avg = $model->definePremin($cursor_by_price_avg);
                 // $premax_avg = $model->definePremax($cursor_by_price_avg);
 
-                // $interval_avg = abs($premin_avg['preult'] - $premax_avg['preult']) / $model->states_number; //calculo do intervalo
+                //calculo do intervalo
+                // $interval_avg = abs($premin_avg['preult'] - $premax_avg['preult']) / $model->states_number;
 
 
 
@@ -101,7 +123,8 @@ class JoinController extends Controller
 
                 $three_states = [0, 0, 0];
 
-                foreach ($cursor_by_price as $index => $cursor) { //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+                //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+                foreach ($cursor_by_price as $index => $cursor) {
                     if ($index > 0) {
                         $cursor['t_state'] = $model->getThreeState($cursor['preult'], $cursor_by_price[$index - 1]['preult']);
                     }
@@ -120,10 +143,21 @@ class JoinController extends Controller
                 // }
 
                 $three_state_matrix = $model->transitionMatrix($cursor_by_price, $three_states, 3, "t_state");
-                $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state"); //função que constrói o vetor de predição
 
-                $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state"); //função que constrói a matriz de transição
-                $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state"); //função que constrói o vetor de predição
+                //função que constrói o vetor de predição
+                $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state");
+
+                array_push($prob_by_day, [
+                    'day' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                    'prob_next_day' => $three_state_vector[0]
+                ]);
+
+                //função que constrói a matriz de transição
+                $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state");
+
+
+                //função que constrói o vetor de predição
+                $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state");
 
                 // $matrix_avg = $model->transitionMatrix($cursor_by_price_avg, $states_avg, $model->states_number, "state"); //função que constrói a matriz de transição
                 // $vector_avg = $model->predictVector($matrix_avg, $cursor_by_price_avg, $model->states_number, "state"); //função que constrói o vetor de predição
@@ -131,29 +165,38 @@ class JoinController extends Controller
 
                 $last_day = $cursor_by_price[count($cursor_by_price) - 1];
 
-                $next_day['state'] = $model->getState($next_day['preult'], $premin['preult'], $interval, $model->states_number); // calcula o estado do dia seguinte
-                $next_day['t_state'] = $model->getThreeState($next_day['preult'], $last_day['preult']); // calcula o estado do dia seguinte
-                // $next_day['state_avg'] = $model->getState($next_day['preult'], $premin_avg['preult'], $interval_avg, $model->states_number); // calcula o estado do dia seguinte
+                // calcula o estado do dia seguinte
+                $next_day['state'] = $model->getState($next_day['preult'], $premin['preult'], $interval, $model->states_number);
+
+                // calcula o estado do dia seguinte
+                $next_day['t_state'] = $model->getThreeState($next_day['preult'], $last_day['preult']);
+
+                // calcula o estado do dia seguinte
+                // $next_day['state_avg'] = $model->getState($next_day['preult'], $premin_avg['preult'], $interval_avg, $model->states_number);
 
                 array_push($next, $next_day);
                 $max = 0;
                 // $max_avg = 0;
                 $t_max = 0;
                 $vector = $vector[0];
+
                 // $vector_avg = $vector_avg[0];
                 $t_vector = $three_state_vector[0];
 
-                for ($i = 1; $i < $model->states_number; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
+                //calculando o estado com maior probabilidade no vetor de previsão
+                for ($i = 1; $i < $model->states_number; $i++) {
                     if ($vector[$i] >= $vector[$max])
                         $max = $i;
                 }
 
-                for ($i = 1; $i < $model->states_number; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
+                //calculando o estado com maior probabilidade no vetor de previsão
+                for ($i = 1; $i < $model->states_number; $i++) {
                     // if ($vector_avg[$i] >= $vector_avg[$max_avg])
                     $max_avg = $i;
                 }
 
-                for ($i = 1; $i < 3; $i++) { //calculando o estado com maior probabilidade no vetor de previsão
+                //calculando o estado com maior probabilidade no vetor de previsão
+                for ($i = 1; $i < 3; $i++) {
                     if ($t_vector[$i] >= $t_vector[$t_max])
                         $t_max = $i;
                 }
@@ -167,7 +210,9 @@ class JoinController extends Controller
 
 
                 array_push($intervals, $model->getInterval($premin['preult'], $interval, $max));
-                
+
+
+
                 if ($next_day['state'] == $max + 1)
                     $acertou++;
                 else
@@ -303,10 +348,12 @@ class JoinController extends Controller
             }
 
             $chart = $model->chartData($next, $intervals, $t_clientDatas, $t_datas);
-            $data_dots = $model->checkVariation($next,$intervals,$model->qtde_obs);
+
+            $data_dots = $model->checkVariation($next, $intervals, $model->qtde_obs, $prob_by_day);
 
             return $this->render('result', [
-                'data_dots' => $data_dots,
+                'data_dots' => $data_dots[0],
+                'data_dots_before' => $data_dots[1],
                 'acertou' => $acertou,
                 'errou' => $errou,
                 'acertou_avg' => $acertou_avg,

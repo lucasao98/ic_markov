@@ -73,7 +73,41 @@
             </table>
         </div>
 
-
+        <div class="row">
+            <table class="table">
+                <thead>
+                    <tr>
+                        Pontos Antes do Ponto de Inflexão
+                    </tr>
+                    <tr>
+                        <th>Dia Antes do Ponto de Inflexão</th>
+                        <th>Aumentar</th>
+                        <th>Permanecer Mesmo Valor</th>
+                        <th>Diminuir</th>
+                        <th>Dia do Ponto de Inflexão</th>
+                        <th>Aumentar</th>
+                        <th>Permanecer Mesmo Valor</th>
+                        <th>Diminuir</th>
+                        <th>Previsão Heurística</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($data_dots_before as $data) { ?>
+                        <tr>
+                            <th><?= $data['day_before_inflection'] ?></th>
+                            <th><?= $data['prob_day_before_inflection'][0] * 100 ?></th>
+                            <th><?= $data['prob_day_before_inflection'][1] * 100?></th>
+                            <th><?= $data['prob_day_before_inflection'][2] * 100?></th>
+                            <th><?= $data['day_inflection'] ?></th>
+                            <th><?= $data['prob_day_inflection'][0] * 100 ?></th>
+                            <th><?= $data['prob_day_inflection'][1] * 100 ?></th>
+                            <th><?= $data['prob_day_inflection'][2] * 100 ?></th>
+                            <th><?= $data['prev_heur'] ?></th>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
 
 
         <div style="margin-top: 3rem;" class="row">

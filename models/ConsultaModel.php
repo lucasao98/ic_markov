@@ -30,7 +30,7 @@ class ConsultaModel extends Model
             [['states_number', 'periodo'], 'integer'],
             [['metric'], 'string'],
             [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy'],
-            ['qtde_obs','integer']
+            ['qtde_obs', 'integer']
         ];
     }
 
@@ -734,10 +734,11 @@ class ConsultaModel extends Model
         }
     }
 
-    public function checkVariation($next, $intervals, $qtde_variacoes)
+    public function checkVariation($next, $intervals, $qtde_variacoes, $prob_by_day)
     {
         $constant_intervals = 0;
         $inflection_dots = [];
+        $before_inflection = [];
 
         //$inf_limit = round($intervals[0][0]);
         //$upper_limit = round($intervals[0][1]);
@@ -758,8 +759,17 @@ class ConsultaModel extends Model
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
                         'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i+1]['date']->toDateTime()->format('d/m/Y')
+                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y')
                     ]);
+
+                    array_push($before_inflection, [
+                        'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_before_inflection' => $this->searchProbInArray($prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
+                        'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_inflection' => $this->searchProbInArray($prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
+                        'prev_heur' => null
+                    ]);
+
                     $constant_intervals = 0;
                     // Verifica se o limite superior e o inferior abaixaram
                 } else if ($intervals[$i][0] < $intervals[$i - 1][0] && $intervals[$i][1] < $intervals[$i - 1][1]) {
@@ -767,8 +777,17 @@ class ConsultaModel extends Model
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
                         'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i+1]['date']->toDateTime()->format('d/m/Y')
+                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y')
                     ]);
+
+                    array_push($before_inflection, [
+                        'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_before_inflection' => $this->searchProbInArray($prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
+                        'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_inflection' => $this->searchProbInArray($prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
+                        'prev_heur' => null
+                    ]);
+
                     $constant_intervals = 0;
                     // Verifica se o limite superior aumentou e o inferior abaixou
                 } else if ($intervals[$i][0] > $intervals[$i - 1][0] && $intervals[$i][1] < $intervals[$i - 1][1]) {
@@ -776,8 +795,17 @@ class ConsultaModel extends Model
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
                         'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i+1]['date']->toDateTime()->format('d/m/Y')
+                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y')
                     ]);
+
+                    array_push($before_inflection, [
+                        'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_before_inflection' => $this->searchProbInArray($prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
+                        'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_inflection' => $this->searchProbInArray($prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
+                        'prev_heur' => null
+                    ]);
+
                     $constant_intervals = 0;
                     // Verifica se o limite superior abaixou e o inferior aumentou
                 } else if ($intervals[$i][0] < $intervals[$i - 1][0] && $intervals[$i][1] > $intervals[$i - 1][1]) {
@@ -785,15 +813,60 @@ class ConsultaModel extends Model
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
                         'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i+1]['date']->toDateTime()->format('d/m/Y')
+                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y')
                     ]);
+
+                    array_push($before_inflection, [
+                        'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_before_inflection' => $this->searchProbInArray($prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
+                        'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_inflection' => $this->searchProbInArray($prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
+                        'prev_heur' => null
+                    ]);
+
                     $constant_intervals = 0;
-                }else{
+                } else {
                     $constant_intervals++;
                 }
             }
         }
 
-        return $inflection_dots;
+        $index_maior_before = -1;
+        $index_maior_after = -1;
+
+        foreach ($before_inflection as $key => $value) {
+            if ($value['prob_day_before_inflection'][0] > $value['prob_day_before_inflection'][2]) {
+                $index_maior_before = 0;
+            } else {
+                $index_maior_before = 2;
+            }
+
+            if ($value['prob_day_inflection'][0] > $value['prob_day_inflection'][2]) {
+                $index_maior_after = 0;
+            } else {
+                $index_maior_after = 2;
+            }
+
+            if ($index_maior_before == 0 && $index_maior_after == 0) {
+                $prev_heur = "Diminuir";
+            } else if ($index_maior_before == 2 && $index_maior_after == 2) {
+                $prev_heur = "Aumentar";
+            }
+
+            $value['prev_heur'] = $prev_heur;
+
+            $before_inflection[$key] = $value;
+        }
+
+        return [$inflection_dots, $before_inflection];
+    }
+
+    private function searchProbInArray($arr_with_days_prob, $searching_value)
+    {
+        foreach ($arr_with_days_prob as $value) {
+            if (strcmp($value['day'], $searching_value) == 0) {
+                return $value["prob_next_day"];
+            }
+        }
     }
 }

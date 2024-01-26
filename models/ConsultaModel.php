@@ -834,6 +834,9 @@ class ConsultaModel extends Model
         $index_maior_before = -1;
         $index_maior_after = -1;
 
+        //var_dump($before_inflection[0]);
+        //exit(1);
+
         foreach ($before_inflection as $key => $value) {
             if ($value['prob_day_before_inflection'][0] > $value['prob_day_before_inflection'][2]) {
                 $index_maior_before = 0;
@@ -850,6 +853,10 @@ class ConsultaModel extends Model
             if ($index_maior_before == 0 && $index_maior_after == 0) {
                 $prev_heur = "Diminuir";
             } else if ($index_maior_before == 2 && $index_maior_after == 2) {
+                $prev_heur = "Aumentar";
+            } else if($index_maior_after == 2 && $index_maior_before == 0){
+                $prev_heur = "Diminuir";
+            }else if($index_maior_after == 0 && $index_maior_before == 2){
                 $prev_heur = "Aumentar";
             }
 

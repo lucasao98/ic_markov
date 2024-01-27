@@ -833,9 +833,8 @@ class ConsultaModel extends Model
 
         $index_maior_before = -1;
         $index_maior_after = -1;
+        $indexes_same = false;
 
-        //var_dump($before_inflection[0]);
-        //exit(1);
 
         foreach ($before_inflection as $key => $value) {
             if ($value['prob_day_before_inflection'][0] > $value['prob_day_before_inflection'][2]) {
@@ -850,14 +849,51 @@ class ConsultaModel extends Model
                 $index_maior_after = 2;
             }
 
+            if (
+                ($value['prob_day_before_inflection'][0] == $value['prob_day_inflection'][0])
+                &&
+                ($value['prob_day_before_inflection'][1] == $value['prob_day_inflection'][1])
+                &&
+                ($value['prob_day_before_inflection'][2] == $value['prob_day_inflection'][2])
+            ) {
+                $index_maior_before = 0;
+                $index_maior_after = 0;
+                $indexes_same = true;
+            }
+
+            if (
+                ($value['prob_day_inflection'][0] == $value['prob_day_inflection'][1])
+                &&
+                ($value['prob_day_inflection'][0] == $value['prob_day_inflection'][2])
+                &&
+                ($value['prob_day_inflection'][1] == $value['prob_day_inflection'][2])
+                &&
+                ($value['prob_day_inflection'][1] == $value['prob_day_inflection'][0])
+                &&
+                ($value['prob_day_inflection'][2] == $value['prob_day_inflection'][0])
+                &&
+                ($value['prob_day_inflection'][2] == $value['prob_day_inflection'][1])
+            ) {
+                $index_maior_after = 0;
+                $indexes_same = true;
+            }
+
             if ($index_maior_before == 0 && $index_maior_after == 0) {
-                $prev_heur = "Diminuir";
+                if ($indexes_same) {
+                    $prev_heur = "Diminuir " . "(Up)";
+                } else {
+                    $prev_heur = "Diminuir";
+                }
             } else if ($index_maior_before == 2 && $index_maior_after == 2) {
                 $prev_heur = "Aumentar";
-            } else if($index_maior_after == 2 && $index_maior_before == 0){
+            } else if ($index_maior_after == 2 && $index_maior_before == 0) {
                 $prev_heur = "Diminuir";
-            }else if($index_maior_after == 0 && $index_maior_before == 2){
-                $prev_heur = "Aumentar";
+            } else if ($index_maior_after == 0 && $index_maior_before == 2) {
+                if ($indexes_same) {
+                    $prev_heur = "Aumentar " . "(Up)";
+                }else{
+                    $prev_heur = "Aumentar";
+                }
             }
 
             $value['prev_heur'] = $prev_heur;

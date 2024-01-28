@@ -351,6 +351,7 @@ class JoinController extends Controller
 
             $data_dots = $model->checkVariation($next, $intervals, $model->qtde_obs, $prob_by_day);
 
+
             return $this->render('result', [
                 'data_dots' => $data_dots[0],
                 'data_dots_before' => $data_dots[1],

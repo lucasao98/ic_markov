@@ -74,6 +74,15 @@
         </div>
 
         <div class="row">
+            <div class="col-12">
+                <h4>Quantidade de Acertos: <?= $acertos_heuristica ?></h4>
+                <h4>Total de Previsões: <?php echo count($data_dots_inflection_before); ?></h4>
+                <h4>Média de acertos: <?= ($acertos_heuristica/count($data_dots_inflection_before)) * 100  ?>%</h4>
+            </div>
+        </div>
+        <hr/>
+
+        <div class="row">
             <table class="table">
                 <thead>
                     <tr>
@@ -88,12 +97,41 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($data_dots_before as $data) { ?>
+                    <?php foreach ($data_dots_inflection_before as $data) { ?>
                         <tr>
                             <th><?= $data['day_before_inflection'] ?></th>
                             <th><?= $data['prob_day_before_inflection'] ?></th>
                             <th><?= $data['day_inflection'] ?></th>
                             <th><?= $data['prob_day_inflection']?></th>
+                            <th><?= $data['prev_heur'] ?></th>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
+        
+
+        <div class="row">
+            <table class="table">
+                <thead>
+                    <tr>
+                        Pontos após o ponto de inflexão
+                    </tr>
+                    <tr>
+                        <th>Data do Ponto de Inflexão</th>
+                        <th>Previsão</th>
+                        <th>Data Após o Ponto de Inflexão</th>
+                        <th>Previsão</th>
+                        <th>Previsão Heurística</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($data_dots_inflection_after as $data) { ?>
+                        <tr>
+                            <th><?= $data['day_inflection'] ?></th>
+                            <th><?= $data['prob_day_inflection']?></th>
+                            <th><?= $data['day_after_inflection'] ?></th>
+                            <th><?= $data['prob_day_after_inflection'] ?></th>
                             <th><?= $data['prev_heur'] ?></th>
                         </tr>
                     <?php } ?>

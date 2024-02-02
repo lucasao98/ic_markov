@@ -734,12 +734,15 @@ class ConsultaModel extends Model
         }
     }
 
-    public function checkVariation($next, $intervals, $qtde_variacoes, $prob_by_day)
-    {
+    public function checkVariation($next, $intervals, $qtde_variacoes, $arr_with_prob_by_day, $arr_closing_data)
+    {   
+        //$a = $this->searchClosingPriceInArray($arr_closing_data, "05/01/2021");
+
         $constant_intervals = 0;
         $inflection_dots = [];
         $before_inflection = [];
-        $forecast_lines = [];
+        $after_inflection = [];
+        $hits = 0;
 
         //$inf_limit = round($intervals[0][0]);
         //$upper_limit = round($intervals[0][1]);
@@ -760,15 +763,25 @@ class ConsultaModel extends Model
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
                         'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y')
+                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i + 1]['date']->toDateTime()->format('d/m/Y'))
                     ]);
+
+                   
 
                     array_push($before_inflection, [
                         'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
+                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
                         'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
+                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
                         'prev_heur' => null
+                    ]);
+
+                    array_push($after_inflection, [
+                        'day_inflection' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i]['date']->toDateTime()->format('d/m/Y')),
+                        'day_after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_after_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i + 1]['date']->toDateTime()->format('d/m/Y')),
                     ]);
 
                     $constant_intervals = 0;
@@ -778,15 +791,23 @@ class ConsultaModel extends Model
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
                         'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y')
+                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i + 1]['date']->toDateTime()->format('d/m/Y'))
                     ]);
 
                     array_push($before_inflection, [
                         'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
+                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
                         'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
+                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
                         'prev_heur' => null
+                    ]);
+
+                    array_push($after_inflection, [
+                        'day_inflection' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i]['date']->toDateTime()->format('d/m/Y')),
+                        'day_after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_after_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i + 1]['date']->toDateTime()->format('d/m/Y')),
                     ]);
 
                     $constant_intervals = 0;
@@ -796,15 +817,23 @@ class ConsultaModel extends Model
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
                         'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y')
+                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i + 1]['date']->toDateTime()->format('d/m/Y'))
                     ]);
 
                     array_push($before_inflection, [
                         'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
+                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
                         'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
+                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
                         'prev_heur' => null
+                    ]);
+
+                    array_push($after_inflection, [
+                        'day_inflection' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i]['date']->toDateTime()->format('d/m/Y')),
+                        'day_after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_after_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i + 1]['date']->toDateTime()->format('d/m/Y')),
                     ]);
 
                     $constant_intervals = 0;
@@ -814,15 +843,23 @@ class ConsultaModel extends Model
                         'sup' => $intervals[$i][1],
                         'inf' => $intervals[$i][0],
                         'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y')
+                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i + 1]['date']->toDateTime()->format('d/m/Y'))
                     ]);
 
                     array_push($before_inflection, [
                         'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
+                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
                         'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
+                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
                         'prev_heur' => null
+                    ]);
+
+                    array_push($after_inflection, [
+                        'day_inflection' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i]['date']->toDateTime()->format('d/m/Y')),
+                        'day_after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
+                        'prob_day_after_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i + 1]['date']->toDateTime()->format('d/m/Y')),
                     ]);
 
                     $constant_intervals = 0;
@@ -832,6 +869,7 @@ class ConsultaModel extends Model
             }
         }
 
+
         foreach ($before_inflection as $key => $value) {
             if ($value['prob_day_before_inflection'] == "Aumentar" && $value['prob_day_inflection'] == "Aumentar") {
                 $prev_heur = "Diminuir";
@@ -839,7 +877,7 @@ class ConsultaModel extends Model
                 $prev_heur = "Aumentar";
             } else if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_before_inflection'] == "Diminuir") {
                 $prev_heur = "Aumentar";
-            }else if($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_before_inflection'] == "Aumentar"){
+            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_before_inflection'] == "Aumentar") {
                 $prev_heur = "Diminuir";
             }
 
@@ -848,7 +886,25 @@ class ConsultaModel extends Model
             $before_inflection[$key] = $value;
         }
 
-        return [$inflection_dots, $before_inflection];
+        foreach ($after_inflection as $key => $value) {
+            if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_after_inflection'] == "Diminuir") {
+                $prev_heur = "Aumentar";
+            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_after_inflection'] == "Aumentar") {
+                $prev_heur = "Diminuir";
+            } else if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_after_inflection'] == "Aumentar") {
+                $prev_heur = "Aumentar";
+            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_after_inflection'] == "Diminuir") {
+                $prev_heur = "Diminuir";
+            }
+
+            $value['prev_heur'] = $prev_heur;
+
+            $after_inflection[$key] = $value;
+        }
+
+        $hits = $this->analyzeHits($arr_closing_data, $before_inflection);
+
+        return [$inflection_dots, $before_inflection, $after_inflection,$hits];
     }
 
     private function searchProbInArrayReturnGreaterProb($arr_with_days_prob, $searching_value)
@@ -864,5 +920,37 @@ class ConsultaModel extends Model
                 }
             }
         }
+    }
+
+    private function searchClosingPriceInArray($arr_closing_data, $searching_data)
+    {
+        foreach ($arr_closing_data as $value) {
+            if (strcmp($value['date'], $searching_data) == 0) {
+                return $value['closing_price'];
+            }
+        }
+    }
+
+    private function analyzeHits($arr_closing_price, $arr_inflection)
+    {
+        $hits = 0;
+        foreach ($arr_inflection as $key => $value) {
+            if($value['prev_heur'] == "Aumentar"){
+                $close_data_before_inflection = $this->searchClosingPriceInArray($arr_closing_price, $value['day_before_inflection']);
+                $close_data_inflection = $this->searchClosingPriceInArray($arr_closing_price, $value['day_inflection']);
+
+                if($close_data_before_inflection < $close_data_inflection){
+                  $hits++;  
+                }
+            }else if($value['prev_heur'] == "Diminuir"){
+                $close_data_before_inflection = $this->searchClosingPriceInArray($arr_closing_price, $value['day_before_inflection']);
+                $close_data_inflection = $this->searchClosingPriceInArray($arr_closing_price, $value['day_inflection']);
+
+                if($close_data_before_inflection > $close_data_inflection){
+                    $hits++;  
+                  }
+            }
+        }
+        return $hits;
     }
 }

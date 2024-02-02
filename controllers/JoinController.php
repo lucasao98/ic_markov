@@ -42,7 +42,7 @@ class JoinController extends Controller
             $t_datas = [];
             $base = $model->base;
 
-            $prob_by_day = [];
+            $arr_with_prob_by_day = [];
             $prev_heuristica = [];
 
             $final = $start;
@@ -147,7 +147,7 @@ class JoinController extends Controller
                 //função que constrói o vetor de predição
                 $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state");
 
-                array_push($prob_by_day, [
+                array_push($arr_with_prob_by_day, [
                     'day' => $next_day['date']->toDateTime()->format('d/m/Y'),
                     'prob_next_day' => $three_state_vector[0]
                 ]);
@@ -349,12 +349,22 @@ class JoinController extends Controller
 
             $chart = $model->chartData($next, $intervals, $t_clientDatas, $t_datas);
 
-            $data_dots = $model->checkVariation($next, $intervals, $model->qtde_obs, $prob_by_day);
+            $arr_data_closing_price = [];
 
+            foreach ($chart['fechamentoData'] as $key => $value) {
+                array_push($arr_data_closing_price, [
+                    'date' => $arr_with_prob_by_day[$key]['day'],
+                    'closing_price' => $chart['fechamentoData'][$key][1]
+                ]);
+            }
+
+            $data_dots = $model->checkVariation($next, $intervals, $model->qtde_obs, $arr_with_prob_by_day, $arr_data_closing_price);
 
             return $this->render('result', [
                 'data_dots' => $data_dots[0],
-                'data_dots_before' => $data_dots[1],
+                'data_dots_inflection_before' => $data_dots[1],
+                'data_dots_inflection_after' => $data_dots[2],
+                'acertos_heuristica' => $data_dots[3],
                 'acertou' => $acertou,
                 'errou' => $errou,
                 'acertou_avg' => $acertou_avg,

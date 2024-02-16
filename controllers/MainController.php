@@ -579,6 +579,8 @@ class MainController extends Controller
                 if (count($next_days) == 0)
                     break;
 
+
+
                 //busca o dia seguinte no banco
                 $next_day = array_shift($next_days);
 
@@ -617,7 +619,6 @@ class MainController extends Controller
                 /* Validação ----------------------------------------------------------------- */
 
                 $last_day = $cursor_by_price[count($cursor_by_price) - 1];
-
                 // calcula o estado do dia seguinte
                 $next_day['t_state'] = $model->getThreeState($next_day['preult'], $last_day['preult']);
 
@@ -643,11 +644,11 @@ class MainController extends Controller
                     array_push($t_datas, ($premin['preult'] + $last_day['preult']) / 2);
 
 
+
                 if ($next_day['t_state'] == $t_max + 1)
                     $t_acertou++;
                 else
                     $t_errou++;
-
                 // Verifica qual dos 3 estados tem maior probabilidade e realiza compra/venda
                 switch ($t_max) {
                     case 0:
@@ -1399,7 +1400,7 @@ class MainController extends Controller
             // 31/12/2010
             $final_matrix_transition = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 month')->modify('last day of this month');
             $final_matrix_transition_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('-1 month')->modify('last day of this month');
-            
+
 
             // Dia inicial do mês de previsão
             $start_day_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('- 1 day');
@@ -1407,7 +1408,7 @@ class MainController extends Controller
 
             $final_month_predict = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+1 day')->modify('last day of this month');
             $final_month_predict_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+1 day')->modify('last day of this month');
-            
+
             $final_next_month = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+ 1 month')->modify('last day of this month');
             $final_next_month_string = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00')->modify('+ 1 month')->modify('last day of this month');
 
@@ -1515,40 +1516,40 @@ class MainController extends Controller
             */
 
             $table_actions = [];
-            
+
             foreach ($actions as $action_name) {
                 //$actions_by_date = $model->getData($action_name, $start_matrix_transition, $final_matrix_transition);
-                
-                $action_predict =  $model->getDataByMonth($action_name,$final_month_predict);
+
+                $action_predict =  $model->getDataByMonth($action_name, $final_month_predict);
 
                 $actions_by_date = [];
-                
-                
-                $final_jan = $model->getData($action_name, $inicio_jan,$inicio_fev);
-                $final_fev = $model->getData($action_name, $inicio_fev,$inicio_mar);
-                $final_mar = $model->getData($action_name, $inicio_mar,$inicio_abr);
-                $final_abr = $model->getData($action_name, $inicio_abr,$inicio_mai);
-                $final_mai = $model->getData($action_name, $inicio_mai,$inicio_jun);
-                $final_jun = $model->getData($action_name, $inicio_jun,$inicio_jul);
-                $final_jul = $model->getData($action_name, $inicio_jul,$inicio_ago);
-                $final_ago = $model->getData($action_name, $inicio_ago,$inicio_set);
-                $final_set = $model->getData($action_name, $inicio_set,$inicio_out);
-                $final_out = $model->getData($action_name, $inicio_out,$inicio_nov);
-                $final_nov = $model->getData($action_name, $inicio_nov,$inicio_dez);
-                $final_dez = $model->getData($action_name, $inicio_dez,$inicio_jan_next_year);
 
-                array_push($actions_by_date, $final_jan[count($final_jan)-1]);
-                array_push($actions_by_date, $final_fev[count($final_fev)-1]);
-                array_push($actions_by_date, $final_mar[count($final_mar)-1]);
-                array_push($actions_by_date, $final_abr[count($final_abr)-1]);
-                array_push($actions_by_date, $final_mai[count($final_mai)-1]);
-                array_push($actions_by_date, $final_jun[count($final_jun)-1]);
-                array_push($actions_by_date, $final_jul[count($final_jul)-1]);
-                array_push($actions_by_date, $final_ago[count($final_ago)-1]);
-                array_push($actions_by_date, $final_set[count($final_set)-1]);
-                array_push($actions_by_date, $final_out[count($final_out)-1]);
-                array_push($actions_by_date, $final_nov[count($final_nov)-1]);
-                array_push($actions_by_date, $final_dez[count($final_dez)-1]);
+
+                $final_jan = $model->getData($action_name, $inicio_jan, $inicio_fev);
+                $final_fev = $model->getData($action_name, $inicio_fev, $inicio_mar);
+                $final_mar = $model->getData($action_name, $inicio_mar, $inicio_abr);
+                $final_abr = $model->getData($action_name, $inicio_abr, $inicio_mai);
+                $final_mai = $model->getData($action_name, $inicio_mai, $inicio_jun);
+                $final_jun = $model->getData($action_name, $inicio_jun, $inicio_jul);
+                $final_jul = $model->getData($action_name, $inicio_jul, $inicio_ago);
+                $final_ago = $model->getData($action_name, $inicio_ago, $inicio_set);
+                $final_set = $model->getData($action_name, $inicio_set, $inicio_out);
+                $final_out = $model->getData($action_name, $inicio_out, $inicio_nov);
+                $final_nov = $model->getData($action_name, $inicio_nov, $inicio_dez);
+                $final_dez = $model->getData($action_name, $inicio_dez, $inicio_jan_next_year);
+
+                array_push($actions_by_date, $final_jan[count($final_jan) - 1]);
+                array_push($actions_by_date, $final_fev[count($final_fev) - 1]);
+                array_push($actions_by_date, $final_mar[count($final_mar) - 1]);
+                array_push($actions_by_date, $final_abr[count($final_abr) - 1]);
+                array_push($actions_by_date, $final_mai[count($final_mai) - 1]);
+                array_push($actions_by_date, $final_jun[count($final_jun) - 1]);
+                array_push($actions_by_date, $final_jul[count($final_jul) - 1]);
+                array_push($actions_by_date, $final_ago[count($final_ago) - 1]);
+                array_push($actions_by_date, $final_set[count($final_set) - 1]);
+                array_push($actions_by_date, $final_out[count($final_out) - 1]);
+                array_push($actions_by_date, $final_nov[count($final_nov) - 1]);
+                array_push($actions_by_date, $final_dez[count($final_dez) - 1]);
 
                 $actions_by_date[0]["t_state"] = 2;
 
@@ -1560,21 +1561,21 @@ class MainController extends Controller
                     }
                     $three_states[$cursor['t_state'] - 1] += 1;
                 }
-                
+
                 $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
-                
+
                 $Matrix = MatrixFactory::create($three_state_matrix);
 
                 $result = $model->getSteadyState($Matrix);
 
                 // Verifica se a probabilidade de aumentar é maior que a probabilidade de diminuir
-                if($result[0][0] > $result[0][2]){
+                if ($result[0][0] > $result[0][2]) {
                     $actions_selected += 1;
                     array_push($table_actions, [
                         $action_name,
-                        ($actions_selected - 15) <= 0 ? $current_group : $current_group+1,
-                        number_format(100/$actions_by_date[count($actions_by_date) -1]['preult'], 0),
-                        $actions_by_date[count($actions_by_date) -1]['preult'],
+                        ($actions_selected - 15) <= 0 ? $current_group : $current_group + 1,
+                        number_format(100 / $actions_by_date[count($actions_by_date) - 1]['preult'], 0),
+                        $actions_by_date[count($actions_by_date) - 1]['preult'],
                         $start_matrix_transition_string->format('Y-M-d'),
                         $final_matrix_transition_string->format('Y-M-d'),
                         $final_next_month_string->format('Y-M-d'),
@@ -1592,7 +1593,7 @@ class MainController extends Controller
                         $action_predict['preult'],
                     ]);
                     */
-                }else{
+                } else {
                     continue;
                 }
             }
@@ -1600,8 +1601,8 @@ class MainController extends Controller
             $total_gasto = 0;
             $total_selled = 0;
             foreach ($table_actions as $result_action) {
-                $total_gasto += ($result_action[2]*$result_action[3]);
-                $total_selled += ($result_action[7]*$result_action[2]);
+                $total_gasto += ($result_action[2] * $result_action[3]);
+                $total_selled += ($result_action[7] * $result_action[2]);
             }
             /*
             $model->writeInFile("../assets/teste_valores_mensal_12.csv", [
@@ -1613,10 +1614,9 @@ class MainController extends Controller
 
             return $this->render('analysis-result', [
                 'table_results' => $table_actions,
-                'total_purchased' => number_format($total_gasto,2),
-                'total_selled' => number_format($total_selled,2)
+                'total_purchased' => number_format($total_gasto, 2),
+                'total_selled' => number_format($total_selled, 2)
             ]);
-            
         } else {
             return $this->render('annual-analysis');
         }

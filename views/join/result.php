@@ -16,23 +16,6 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <!-- Resultado -->
-                <h1>Previsão com estados fixos</h1>
-                <h3 class="result-acertou"><?= "Acertou: $acertou - " . round(($acertou / $consultas) * 100, 2) . '%' ?></h3>
-                <h3 class="result-errou"><?= "Errou: $errou - " . round(($errou / $consultas) * 100, 2) . '%' ?></h3>
-                <h3><?= "Compra e venda:" ?></h3>
-                <h3><?= "Quantia inicial: R$100" ?></h3>
-                <h3><?= "Método 1: Quantia final: R$" . $cliente1['cash'] . " e " . $cliente1['actions'] . " ações" ?></h3>
-                <h3><?= "Método 2: Quantia final: R$" . $cliente2['cash'] . " e " . $cliente2['actions'] . " ações" ?></h3>
-                <h3><?= "Método 3: Quantia final: R$" . $cliente3['cash'] . " e " . $cliente3['actions'] . " ações" ?></h3>
-                <h3><?= "Método 4: Quantia final: R$" . $cliente4['cash'] . " e " . $cliente4['actions'] . " ações" ?></h3>
-                <br />
-                <!-- <h1>Previsão com médias móveis</h1>
-                <h3 class="result-acertou"><?= "Acertou: $acertou_avg - " . round(($acertou_avg / $consultas) * 100, 2) . '%' ?></h3>
-                <h3 class="result-errou"><?= "Errou: $errou_avg - " . round(($errou_avg / $consultas) * 100, 2) . '%' ?></h3>
-                <br /> -->
-            </div>
-            <div class="col-md-6">
                 <h1>Previsão com 3 estados</h1>
                 <h3 class="result-acertou"><?= "Acertou: $t_acertou - " . round(($t_acertou / $consultas) * 100, 2) . '%' ?></h3>
                 <h3 class="result-errou"><?= "Errou: $t_errou - " . round(($t_errou / $consultas) * 100, 2) . '%' ?></h3>
@@ -45,6 +28,15 @@
                 <h3><?= "Método 4: Quantia final: R$" . $t_cliente4['cash'] . " e " . $t_cliente4['actions'] . " ações" ?></h3>
                 <h3><?= "Método 5: Quantia final: R$" . $t_cliente5['cash'] . " e " . $t_cliente5['actions'] . " ações" ?></h3>
             </div>
+
+
+            <div class="col-md-6">
+                <!-- Resultado -->
+                <h1>Previsão da heurística</h1>
+                <h3 class="result-acertou"><?= "Acertou: ". '%' ?></h3>
+                <h3 class="result-errou"><?= "Errou: $t_errou - " . round(($t_errou / $consultas) * 100, 2) . '%' ?></h3>
+            </div>
+
         </div>
 
         <div class="row">
@@ -73,14 +65,6 @@
             </table>
         </div>
 
-        <div class="row">
-            <div class="col-12">
-                <h4>Quantidade de Acertos: <?= $acertos_heuristica ?></h4>
-                <h4>Total de Previsões: <?php echo count($data_dots_inflection_before); ?></h4>
-                <h4>Média de acertos: <?= ($acertos_heuristica/count($data_dots_inflection_before)) * 100  ?>%</h4>
-            </div>
-        </div>
-        <hr/>
 
         <div class="row">
             <table class="table">
@@ -102,14 +86,14 @@
                             <th><?= $data['day_before_inflection'] ?></th>
                             <th><?= $data['prob_day_before_inflection'] ?></th>
                             <th><?= $data['day_inflection'] ?></th>
-                            <th><?= $data['prob_day_inflection']?></th>
+                            <th><?= $data['prob_day_inflection'] ?></th>
                             <th><?= $data['prev_heur'] ?></th>
                         </tr>
                     <?php } ?>
                 </tbody>
             </table>
         </div>
-        
+
 
         <div class="row">
             <table class="table">
@@ -129,7 +113,7 @@
                     <?php foreach ($data_dots_inflection_after as $data) { ?>
                         <tr>
                             <th><?= $data['day_inflection'] ?></th>
-                            <th><?= $data['prob_day_inflection']?></th>
+                            <th><?= $data['prob_day_inflection'] ?></th>
                             <th><?= $data['day_after_inflection'] ?></th>
                             <th><?= $data['prob_day_after_inflection'] ?></th>
                             <th><?= $data['prev_heur'] ?></th>

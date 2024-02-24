@@ -215,275 +215,268 @@ class JoinController extends Controller
 
                 array_push($intervals, $model->getInterval($premin['preult'], $interval, $max));
 
-                $current_interval = $intervals[count($intervals) - 1];
-
                 if (count($intervals) > 1) {
                     $last_interval = $intervals[count($intervals) - 2];
-                } else {
-                    $last_interval = -1;
-                }
+                    $current_interval = $intervals[count($intervals) - 1];
 
-                if ($score_equal_times < $model->qtde_obs) {
-                    if ($last_interval != -1) {
+                    if ($score_equal_times < $model->qtde_obs) {
                         if (($current_interval[0] == $last_interval[0]) && ($current_interval[1] == $last_interval[1])) {
                             $score_equal_times++;
                         } else {
                             $score_equal_times = 0;
                         }
-                    } else {
-                        continue;
-                    }
-                } else if ($score_equal_times >= $model->qtde_obs) {
-                    if ($current_interval[0] < $last_interval[0] && $current_interval[1] < $last_interval[1]) {
-                        array_push($inflection_dots, [
-                            'sup' => $current_interval[1],
-                            'inf' => $current_interval[0],
-                            'date' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                            'after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
-                        ]);
+                    } else if ($score_equal_times >= $model->qtde_obs) {
+                        if ($current_interval[0] < $last_interval[0] && $current_interval[1] < $last_interval[1]) {
+                            array_push($inflection_dots, [
+                                'sup' => $current_interval[1],
+                                'inf' => $current_interval[0],
+                                'date' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
+                            ]);
 
-                        array_push($before_inflection, [
-                            'day_before_inflection' => $before_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_before_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 3]['prob_next_day']),
-                            'day_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 2]['prob_next_day']),
-                            'prev_heur' => null
-                        ]);
+                            array_push($before_inflection, [
+                                'day_before_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_before_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 3]['prob_next_day']),
+                                'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_inflection' => $t_max,
+                                'prev_heur' => null
+                            ]);
 
-                        $days_to_create_matrix = [];
+                            $days_to_create_matrix = [];
 
-                        foreach ($cursor_by_price as $day) {
-                            array_push($days_to_create_matrix, $day);
-                        }
-
-                        array_shift($days_to_create_matrix);
-                        array_push($days_to_create_matrix, $next_day);
-
-                        //vetor que contem a quantidade de elementos em cada estado
-                        $states_after = [];
-                        for ($i = 0; $i < $model->states_number; $i++) {
-                            $states_after[$i] = 0;
-                        }
-
-                        $days_to_create_matrix[0]["t_state"] = 2;
-
-                        $three_states_after_inflection = [0, 0, 0];
-
-                        //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                        foreach ($days_to_create_matrix as $index => $cursor) {
-                            if ($index > 0) {
-                                $cursor['t_state'] = $model->getThreeState($cursor['preult'], $days_to_create_matrix[$index - 1]['preult']);
+                            foreach ($cursor_by_price as $day) {
+                                array_push($days_to_create_matrix, $day);
                             }
 
-                            $three_states_after_inflection[$cursor['t_state'] - 1] += 1;
+                            array_shift($days_to_create_matrix);
+                            array_push($days_to_create_matrix, $next_day);
 
-                            $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
-                            if ($cursor['state'] != 0)
-                                $states_after[$cursor['state'] - 1] += 1;
-                        }
-
-
-                        $three_state_matrix_after = $model->transitionMatrix($days_to_create_matrix, $three_states, 3, "t_state");
-
-                        //função que constrói o vetor de predição
-                        $three_state_vector_after_inflection = $model->predictVector($three_state_matrix_after, $days_to_create_matrix, 3, "t_state");
-
-                        array_push($after_inflection, [
-                            'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector[0]),
-                            'day_after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_after_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector_after_inflection[0]),
-                        ]);
-
-                        $score_equal_times = 0;
-                    } else if ($current_interval[0] > $last_interval[0] && $current_interval[1] < $last_interval[1]) {
-                        array_push($inflection_dots, [
-                            'sup' => $current_interval[1],
-                            'inf' => $current_interval[0],
-                            'date' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                            'after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
-                        ]);
-
-                        array_push($before_inflection, [
-                            'day_before_inflection' => $before_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_before_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 3]['prob_next_day']),
-                            'day_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 2]['prob_next_day']),
-                            'prev_heur' => null
-                        ]);
-
-                        $days_to_create_matrix = [];
-
-                        foreach ($cursor_by_price as $day) {
-                            array_push($days_to_create_matrix, $day);
-                        }
-
-                        array_shift($days_to_create_matrix);
-                        array_push($days_to_create_matrix, $next_day);
-
-                        //vetor que contem a quantidade de elementos em cada estado
-                        $states_after = [];
-                        for ($i = 0; $i < $model->states_number; $i++) {
-                            $states_after[$i] = 0;
-                        }
-
-                        $days_to_create_matrix[0]["t_state"] = 2;
-
-                        $three_states_after_inflection = [0, 0, 0];
-
-                        //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                        foreach ($days_to_create_matrix as $index => $cursor) {
-                            if ($index > 0) {
-                                $cursor['t_state'] = $model->getThreeState($cursor['preult'], $days_to_create_matrix[$index - 1]['preult']);
+                            //vetor que contem a quantidade de elementos em cada estado
+                            $states_after = [];
+                            for ($i = 0; $i < $model->states_number; $i++) {
+                                $states_after[$i] = 0;
                             }
 
-                            $three_states_after_inflection[$cursor['t_state'] - 1] += 1;
+                            $days_to_create_matrix[0]["t_state"] = 2;
 
-                            $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
-                            if ($cursor['state'] != 0)
-                                $states_after[$cursor['state'] - 1] += 1;
-                        }
+                            $three_states_after_inflection = [0, 0, 0];
 
+                            //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+                            foreach ($days_to_create_matrix as $index => $cursor) {
+                                if ($index > 0) {
+                                    $cursor['t_state'] = $model->getThreeState($cursor['preult'], $days_to_create_matrix[$index - 1]['preult']);
+                                }
 
-                        $three_state_matrix_after = $model->transitionMatrix($days_to_create_matrix, $three_states, 3, "t_state");
+                                $three_states_after_inflection[$cursor['t_state'] - 1] += 1;
 
-                        //função que constrói o vetor de predição
-                        $three_state_vector_after_inflection = $model->predictVector($three_state_matrix_after, $days_to_create_matrix, 3, "t_state");
-
-                        array_push($after_inflection, [
-                            'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector[0]),
-                            'day_after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_after_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector_after_inflection[0]),
-                        ]);
-
-                        $score_equal_times = 0;
-                    } else if ($current_interval[0] > $last_interval[0] && $current_interval[1] > $last_interval[1]) {
-                        array_push($inflection_dots, [
-                            'sup' => $current_interval[1],
-                            'inf' => $current_interval[0],
-                            'date' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                            'after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
-                        ]);
-
-                        array_push($before_inflection, [
-                            'day_before_inflection' => $before_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_before_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 3]['prob_next_day']),
-                            'day_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 2]['prob_next_day']),
-                            'prev_heur' => null
-                        ]);
-
-                        $days_to_create_matrix = [];
-
-                        foreach ($cursor_by_price as $day) {
-                            array_push($days_to_create_matrix, $day);
-                        }
-
-                        array_shift($days_to_create_matrix);
-                        array_push($days_to_create_matrix, $next_day);
-
-                        //vetor que contem a quantidade de elementos em cada estado
-                        $states_after = [];
-                        for ($i = 0; $i < $model->states_number; $i++) {
-                            $states_after[$i] = 0;
-                        }
-
-                        $days_to_create_matrix[0]["t_state"] = 2;
-
-                        $three_states_after_inflection = [0, 0, 0];
-
-                        //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                        foreach ($days_to_create_matrix as $index => $cursor) {
-                            if ($index > 0) {
-                                $cursor['t_state'] = $model->getThreeState($cursor['preult'], $days_to_create_matrix[$index - 1]['preult']);
+                                $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
+                                if ($cursor['state'] != 0)
+                                    $states_after[$cursor['state'] - 1] += 1;
                             }
 
-                            $three_states_after_inflection[$cursor['t_state'] - 1] += 1;
 
-                            $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
-                            if ($cursor['state'] != 0)
-                                $states_after[$cursor['state'] - 1] += 1;
-                        }
+                            $three_state_matrix_after = $model->transitionMatrix($days_to_create_matrix, $three_states, 3, "t_state");
 
+                            //função que constrói o vetor de predição
+                            $three_state_vector_after_inflection = $model->predictVector($three_state_matrix_after, $days_to_create_matrix, 3, "t_state");
 
-                        $three_state_matrix_after = $model->transitionMatrix($days_to_create_matrix, $three_states, 3, "t_state");
+                            array_push($after_inflection, [
+                                'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector[0]),
+                                'day_after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_after_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector_after_inflection[0]),
+                            ]);
 
-                        //função que constrói o vetor de predição
-                        $three_state_vector_after_inflection = $model->predictVector($three_state_matrix_after, $days_to_create_matrix, 3, "t_state");
+                            $score_equal_times = 0;
+                        } else if ($current_interval[0] > $last_interval[0] && $current_interval[1] < $last_interval[1]) {
+                            array_push($inflection_dots, [
+                                'sup' => $current_interval[1],
+                                'inf' => $current_interval[0],
+                                'date' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
+                            ]);
 
-                        array_push($after_inflection, [
-                            'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector[0]),
-                            'day_after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_after_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector_after_inflection[0]),
-                        ]);
+                            array_push($before_inflection, [
+                                'day_before_inflection' => $before_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_before_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 3]['prob_next_day']),
+                                'day_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_inflection' => $t_max,
+                                'prev_heur' => null
+                            ]);
 
-                        $score_equal_times = 0;
-                    } else if ($current_interval[0] < $last_interval[0] && $current_interval[1] > $last_interval[1]) {
-                        array_push($inflection_dots, [
-                            'sup' => $current_interval[1],
-                            'inf' => $current_interval[0],
-                            'date' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                            'after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
-                        ]);
+                            $days_to_create_matrix = [];
 
-                        array_push($before_inflection, [
-                            'day_before_inflection' => $before_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_before_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 3]['prob_next_day']),
-                            'day_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 2]['prob_next_day']),
-                            'prev_heur' => null
-                        ]);
-                        
-                        $days_to_create_matrix = [];
-
-                        foreach ($cursor_by_price as $day) {
-                            array_push($days_to_create_matrix, $day);
-                        }
-
-                        array_shift($days_to_create_matrix);
-                        array_push($days_to_create_matrix, $next_day);
-
-                        //vetor que contem a quantidade de elementos em cada estado
-                        $states_after = [];
-                        for ($i = 0; $i < $model->states_number; $i++) {
-                            $states_after[$i] = 0;
-                        }
-
-                        $days_to_create_matrix[0]["t_state"] = 2;
-
-                        $three_states_after_inflection = [0, 0, 0];
-
-                        //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
-                        foreach ($days_to_create_matrix as $index => $cursor) {
-                            if ($index > 0) {
-                                $cursor['t_state'] = $model->getThreeState($cursor['preult'], $days_to_create_matrix[$index - 1]['preult']);
+                            foreach ($cursor_by_price as $day) {
+                                array_push($days_to_create_matrix, $day);
                             }
 
-                            $three_states_after_inflection[$cursor['t_state'] - 1] += 1;
+                            array_shift($days_to_create_matrix);
+                            array_push($days_to_create_matrix, $next_day);
 
-                            $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
-                            if ($cursor['state'] != 0)
-                                $states_after[$cursor['state'] - 1] += 1;
+                            //vetor que contem a quantidade de elementos em cada estado
+                            $states_after = [];
+                            for ($i = 0; $i < $model->states_number; $i++) {
+                                $states_after[$i] = 0;
+                            }
+
+                            $days_to_create_matrix[0]["t_state"] = 2;
+
+                            $three_states_after_inflection = [0, 0, 0];
+
+                            //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+                            foreach ($days_to_create_matrix as $index => $cursor) {
+                                if ($index > 0) {
+                                    $cursor['t_state'] = $model->getThreeState($cursor['preult'], $days_to_create_matrix[$index - 1]['preult']);
+                                }
+
+                                $three_states_after_inflection[$cursor['t_state'] - 1] += 1;
+
+                                $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
+                                if ($cursor['state'] != 0)
+                                    $states_after[$cursor['state'] - 1] += 1;
+                            }
+
+
+                            $three_state_matrix_after = $model->transitionMatrix($days_to_create_matrix, $three_states, 3, "t_state");
+
+                            //função que constrói o vetor de predição
+                            $three_state_vector_after_inflection = $model->predictVector($three_state_matrix_after, $days_to_create_matrix, 3, "t_state");
+
+                            array_push($after_inflection, [
+                                'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector[0]),
+                                'day_after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_after_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector_after_inflection[0]),
+                            ]);
+
+                            $score_equal_times = 0;
+                        } else if ($current_interval[0] > $last_interval[0] && $current_interval[1] > $last_interval[1]) {
+                            array_push($inflection_dots, [
+                                'sup' => $current_interval[1],
+                                'inf' => $current_interval[0],
+                                'date' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
+                            ]);
+
+                            array_push($before_inflection, [
+                                'day_before_inflection' => $before_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_before_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 3]['prob_next_day']),
+                                'day_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_inflection' => $t_max,
+                                'prev_heur' => null
+                            ]);
+
+                            $days_to_create_matrix = [];
+
+                            foreach ($cursor_by_price as $day) {
+                                array_push($days_to_create_matrix, $day);
+                            }
+
+                            array_shift($days_to_create_matrix);
+                            array_push($days_to_create_matrix, $next_day);
+
+                            //vetor que contem a quantidade de elementos em cada estado
+                            $states_after = [];
+                            for ($i = 0; $i < $model->states_number; $i++) {
+                                $states_after[$i] = 0;
+                            }
+
+                            $days_to_create_matrix[0]["t_state"] = 2;
+
+                            $three_states_after_inflection = [0, 0, 0];
+
+                            //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+                            foreach ($days_to_create_matrix as $index => $cursor) {
+                                if ($index > 0) {
+                                    $cursor['t_state'] = $model->getThreeState($cursor['preult'], $days_to_create_matrix[$index - 1]['preult']);
+                                }
+
+                                $three_states_after_inflection[$cursor['t_state'] - 1] += 1;
+
+                                $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
+                                if ($cursor['state'] != 0)
+                                    $states_after[$cursor['state'] - 1] += 1;
+                            }
+
+
+                            $three_state_matrix_after = $model->transitionMatrix($days_to_create_matrix, $three_states, 3, "t_state");
+
+                            //função que constrói o vetor de predição
+                            $three_state_vector_after_inflection = $model->predictVector($three_state_matrix_after, $days_to_create_matrix, 3, "t_state");
+
+                            array_push($after_inflection, [
+                                'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector[0]),
+                                'day_after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_after_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector_after_inflection[0]),
+                            ]);
+
+                            $score_equal_times = 0;
+                        } else if ($current_interval[0] < $last_interval[0] && $current_interval[1] > $last_interval[1]) {
+                            array_push($inflection_dots, [
+                                'sup' => $current_interval[1],
+                                'inf' => $current_interval[0],
+                                'date' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
+                            ]);
+
+                            array_push($before_inflection, [
+                                'day_before_inflection' => $before_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_before_inflection' => $model->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day[count($arr_with_prob_by_day) - 3]['prob_next_day']),
+                                'day_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_inflection' => $t_max,
+                                'prev_heur' => null
+                            ]);
+
+                            $days_to_create_matrix = [];
+
+                            foreach ($cursor_by_price as $day) {
+                                array_push($days_to_create_matrix, $day);
+                            }
+
+                            array_shift($days_to_create_matrix);
+                            array_push($days_to_create_matrix, $next_day);
+
+                            //vetor que contem a quantidade de elementos em cada estado
+                            $states_after = [];
+                            for ($i = 0; $i < $model->states_number; $i++) {
+                                $states_after[$i] = 0;
+                            }
+
+                            $days_to_create_matrix[0]["t_state"] = 2;
+
+                            $three_states_after_inflection = [0, 0, 0];
+
+                            //atribui um estado a partir do preço de fechamento para cada data no conjunto de treinamento
+                            foreach ($days_to_create_matrix as $index => $cursor) {
+                                if ($index > 0) {
+                                    $cursor['t_state'] = $model->getThreeState($cursor['preult'], $days_to_create_matrix[$index - 1]['preult']);
+                                }
+
+                                $three_states_after_inflection[$cursor['t_state'] - 1] += 1;
+
+                                $cursor['state'] = $model->getState($cursor['preult'], $premin['preult'], $interval, $model->states_number);
+                                if ($cursor['state'] != 0)
+                                    $states_after[$cursor['state'] - 1] += 1;
+                            }
+
+
+                            $three_state_matrix_after = $model->transitionMatrix($days_to_create_matrix, $three_states, 3, "t_state");
+
+                            //função que constrói o vetor de predição
+                            $three_state_vector_after_inflection = $model->predictVector($three_state_matrix_after, $days_to_create_matrix, 3, "t_state");
+
+                            array_push($after_inflection, [
+                                'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector[0]),
+                                'day_after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
+                                'prob_day_after_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector_after_inflection[0]),
+                            ]);
+
+                            $score_equal_times = 0;
+                        } else {
+                            $score_equal_times++;
                         }
-
-
-                        $three_state_matrix_after = $model->transitionMatrix($days_to_create_matrix, $three_states, 3, "t_state");
-
-                        //função que constrói o vetor de predição
-                        $three_state_vector_after_inflection = $model->predictVector($three_state_matrix_after, $days_to_create_matrix, 3, "t_state");
-
-                        array_push($after_inflection, [
-                            'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector[0]),
-                            'day_after_inflection' => $next_days[0]['date']->toDateTime()->format('d/m/Y'),
-                            'prob_day_after_inflection' => $model->searchProbInArrayReturnGreaterProb($three_state_vector_after_inflection[0]),
-                        ]);
-
-                        $score_equal_times = 0;
-                    } else {
-                        $score_equal_times++;
                     }
                 }
 

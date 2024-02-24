@@ -737,14 +737,14 @@ class ConsultaModel extends Model
     public function forecastHeuristicBeforeInflection($arr_before_inflection)
     {
         foreach ($arr_before_inflection as $key => $value) {
-            if ($value['prob_day_before_inflection'] == "Aumentar" && $value['prob_day_inflection'] == "Aumentar") {
-                $prev_heur = "Diminuir";
-            } else if ($value['prob_day_before_inflection'] == "Diminuir" && $value['prob_day_inflection'] == "Diminuir") {
-                $prev_heur = "Aumentar";
-            } else if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_before_inflection'] == "Diminuir") {
-                $prev_heur = "Aumentar";
-            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_before_inflection'] == "Aumentar") {
-                $prev_heur = "Diminuir";
+            if ($value['prob_day_before_inflection'] == 0 && $value['prob_day_inflection'] == 0) {
+                $prev_heur = 2;
+            } else if ($value['prob_day_before_inflection'] == 2 && $value['prob_day_inflection'] == 2) {
+                $prev_heur = 0;
+            } else if ($value['prob_day_inflection'] == 0 && $value['prob_day_before_inflection'] == 2) {
+                $prev_heur = 0;
+            } else if ($value['prob_day_inflection'] == 2 && $value['prob_day_before_inflection'] == 0) {
+                $prev_heur = 2;
             }
 
             $value['prev_heur'] = $prev_heur;
@@ -759,14 +759,14 @@ class ConsultaModel extends Model
     public function forecastHeuristicAfterInflection($arr_after_inflection)
     {
         foreach ($arr_after_inflection as $key => $value) {
-            if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_after_inflection'] == "Diminuir") {
-                $prev_heur = "Aumentar";
-            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_after_inflection'] == "Aumentar") {
-                $prev_heur = "Diminuir";
-            } else if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_after_inflection'] == "Aumentar") {
-                $prev_heur = "Aumentar";
-            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_after_inflection'] == "Diminuir") {
-                $prev_heur = "Diminuir";
+            if ($value['prob_day_inflection'] == 0 && $value['prob_day_after_inflection'] == 2) {
+                $prev_heur = 0;
+            } else if ($value['prob_day_inflection'] == 2 && $value['prob_day_after_inflection'] == 0) {
+                $prev_heur = 2;
+            } else if ($value['prob_day_inflection'] == 0 && $value['prob_day_after_inflection'] == 0) {
+                $prev_heur = 0;
+            } else if ($value['prob_day_inflection'] == 2 && $value['prob_day_after_inflection'] == 2) {
+                $prev_heur = 2;
             }
 
             $value['prev_heur'] = $prev_heur;
@@ -781,11 +781,11 @@ class ConsultaModel extends Model
     public function searchProbInArrayReturnGreaterProb($arr_three_states_vector)
     {
         if($arr_three_states_vector[0] > $arr_three_states_vector[2]){
-            return "Aumentar";
+            return 0;
         }else if($arr_three_states_vector[2] > $arr_three_states_vector[0]){
-            return "Diminuir";
+            return 2;
         }else if($arr_three_states_vector[0] == $arr_three_states_vector[2]){
-            return "Aumentar";
+            return 0;
         }
     }
 }

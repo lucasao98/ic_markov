@@ -734,48 +734,48 @@ class ConsultaModel extends Model
         }
     }
 
-    public function forecastHeuristicBeforeInflection($arr_before_inflection)
+    public function forecastHeuristicBeforeInflection($before_forecast, $current_forecast)
     {
-        foreach ($arr_before_inflection as $key => $value) {
-            if ($value['prob_day_before_inflection'] == 0 && $value['prob_day_inflection'] == 0) {
-                $prev_heur = 2;
-            } else if ($value['prob_day_before_inflection'] == 2 && $value['prob_day_inflection'] == 2) {
-                $prev_heur = 0;
-            } else if ($value['prob_day_inflection'] == 0 && $value['prob_day_before_inflection'] == 2) {
-                $prev_heur = 0;
-            } else if ($value['prob_day_inflection'] == 2 && $value['prob_day_before_inflection'] == 0) {
-                $prev_heur = 2;
+        if($before_forecast == $current_forecast){
+            if($before_forecast == 1){
+                return 3;
+            }else if($before_forecast == 3){
+                return 1;
             }
-
-            $value['prev_heur'] = $prev_heur;
-
-            $arr_before_inflection[$key] = $value;
-
+        }else{
+            return $current_forecast;
         }
-
-        return $arr_before_inflection;
+        /*
+        if ($before_forecast == 1 && $current_forecast == 1) {
+            return 3;
+        } else if ($before_forecast == 3 && $current_forecast == 3) {
+            return 1;
+        } else if ($current_forecast == 1 && $before_forecast == 3) {
+            return 1;
+        } else if ($current_forecast == 3 && $before_forecast == 1) {
+            return 3;
+        }
+        */
     }
 
-    public function forecastHeuristicAfterInflection($arr_after_inflection)
+    public function forecastHeuristicAfterInflection($current_forecast, $after_forecast)
     {
-        foreach ($arr_after_inflection as $key => $value) {
-            if ($value['prob_day_inflection'] == 0 && $value['prob_day_after_inflection'] == 2) {
-                $prev_heur = 0;
-            } else if ($value['prob_day_inflection'] == 2 && $value['prob_day_after_inflection'] == 0) {
-                $prev_heur = 2;
-            } else if ($value['prob_day_inflection'] == 0 && $value['prob_day_after_inflection'] == 0) {
-                $prev_heur = 0;
-            } else if ($value['prob_day_inflection'] == 2 && $value['prob_day_after_inflection'] == 2) {
-                $prev_heur = 2;
-            }
-
-            $value['prev_heur'] = $prev_heur;
-
-            $arr_after_inflection[$key] = $value;
-
+        if($current_forecast != $after_forecast){
+            return $current_forecast;
+        }else{
+            return $after_forecast;
         }
-
-        return $arr_after_inflection;
+        /*
+        if ($current_forecast == 1 && $after_forecast == 3) {
+            return 1;
+        } else if ($current_forecast == 3 && $after_forecast == 1) {
+            return 3;
+        } else if ($current_forecast == 1 && $after_forecast == 1) {
+            return 1;
+        } else if ($current_forecast == 3 && $after_forecast == 3) {
+            return 3;
+        }
+        */
     }
 
     public function searchProbInArrayReturnGreaterProb($arr_three_states_vector)

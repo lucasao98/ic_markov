@@ -33,7 +33,7 @@
             <div class="col-md-6">
                 <!-- Resultado -->
                 <h1>Previsão da heurística</h1>
-                <h3 class="result-acertou"><?= "Acertou: ". '%' ?></h3>
+                <h3 class="result-acertou"><?= "Acertou: $quantidade_acertos_heuristica - ".$acerto_heuristica. '%' ?></h3>
                 <h3 class="result-errou"><?= "Errou: $t_errou - " . round(($t_errou / $consultas) * 100, 2) . '%' ?></h3>
             </div>
 
@@ -49,7 +49,6 @@
                         <th>Data</th>
                         <th>Limite Superior</th>
                         <th>Limite Inferior</th>
-                        <th>Data após</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,7 +57,6 @@
                             <th><?= $data['date'] ?></th>
                             <th><?= $data['sup'] ?></th>
                             <th><?= $data['inf'] ?></th>
-                            <th><?= $data['after_inflection'] ?></th>
                         </tr>
                     <?php } ?>
                 </tbody>
@@ -112,10 +110,10 @@
                 <tbody>
                     <?php foreach ($data_dots_inflection_after as $data) { ?>
                         <tr>
-                            <th><?= $data['day_inflection'] ?></th>
-                            <th><?= $data['prob_day_inflection'] ?></th>
-                            <th><?= $data['day_after_inflection'] ?></th>
-                            <th><?= $data['prob_day_after_inflection'] ?></th>
+                            <th><?= $data['day'] ?></th>
+                            <th><?= $data['prob'] ?></th>
+                            <th><?= $data['after_inflection_day'] ?></th>
+                            <th><?= $data['after_inflection_prob'] ?></th>
                             <th><?= $data['prev_heur'] ?></th>
                         </tr>
                     <?php } ?>

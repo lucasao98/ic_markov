@@ -5,6 +5,8 @@ namespace app\controllers;
 use yii\base\Controller;
 use app\models\ConsultaModel;
 use app\models\Paper;
+use Exception;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 
 class JoinController extends Controller
 {
@@ -23,6 +25,7 @@ class JoinController extends Controller
             $acertou_avg = 0;
             $errou_avg = 0;
             $t_acertou = 0;
+            $acertos_heuristica = 0;
             $t_errou = 0;
             $next = array();
             $intervals = array();
@@ -41,9 +44,17 @@ class JoinController extends Controller
             $t_clientDatas = [];
             $t_datas = [];
             $base = $model->base;
+            $current_interval = 0;
+            $score_equal_times = 0;
 
             $arr_with_prob_by_day = [];
-            $prev_heuristica = [];
+            $inflection_dots = [];
+            $before_inflection = [];
+            $after_inflection = [];
+            $inter_test = [];
+            $arr_forecast = [];
+            $last_day_inflection_day = false;
+            $cont_total_actions = 0;
 
             $final = $start;
             //Dia de início do conjunto de treinamento
@@ -79,7 +90,8 @@ class JoinController extends Controller
             //Busca no banco os dias que serão previstos
             $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux);
             $consultas = count($next_days);
-
+            $file = fopen("arquivo_teste_days.txt", "w");
+            fwrite($file,"Dia "."Previsão"."\n");
             while (1) {
 
                 if (count($next_days) == 0)
@@ -87,7 +99,6 @@ class JoinController extends Controller
 
                 //busca no array a ação do dia seguinte
                 $next_day = array_shift($next_days);
-
 
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 if ($next_day['date'] > $aux || $next_day['date'] == null)
@@ -147,14 +158,10 @@ class JoinController extends Controller
                 //função que constrói o vetor de predição
                 $three_state_vector = $model->predictVector($three_state_matrix, $cursor_by_price, 3, "t_state");
 
-                array_push($arr_with_prob_by_day, [
-                    'day' => $next_day['date']->toDateTime()->format('d/m/Y'),
-                    'prob_next_day' => $three_state_vector[0]
-                ]);
+
 
                 //função que constrói a matriz de transição
                 $matrix = $model->transitionMatrix($cursor_by_price, $states, $model->states_number, "state");
-
 
                 //função que constrói o vetor de predição
                 $vector = $model->predictVector($matrix, $cursor_by_price, $model->states_number, "state");
@@ -163,6 +170,7 @@ class JoinController extends Controller
                 // $vector_avg = $model->predictVector($matrix_avg, $cursor_by_price_avg, $model->states_number, "state"); //função que constrói o vetor de predição
                 /* Validação ----------------------------------------------------------------- */
 
+                $before_day = $cursor_by_price[count($cursor_by_price) - 2];
                 $last_day = $cursor_by_price[count($cursor_by_price) - 1];
 
                 // calcula o estado do dia seguinte
@@ -201,6 +209,14 @@ class JoinController extends Controller
                         $t_max = $i;
                 }
 
+                array_push($arr_with_prob_by_day, [
+                    'day' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                    'prob_day' => $next_day['t_state']
+                    //'prob_day' => $t_max + 1,
+                ]);
+
+                fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y')." ".$next_day['t_state']."\n");
+
                 if ($t_max === 0)
                     array_push($t_datas, ($last_day['preult'] + $premax['preult']) / 2);
                 elseif ($t_max === 1)
@@ -208,20 +224,129 @@ class JoinController extends Controller
                 else
                     array_push($t_datas, ($premin['preult'] + $last_day['preult']) / 2);
 
-
                 array_push($intervals, $model->getInterval($premin['preult'], $interval, $max));
+                array_push($arr_forecast, [
+                    $t_max
+                ]);
+                //fwrite($file,"Dia Atual ". $next_day['date']->toDateTime()->format('d/m/Y') ." Inf ".$model->getInterval($premin['preult'], $interval, $max)[0]." Sup ".$model->getInterval($premin['preult'], $interval, $max)[1]." Dia anterior ".$last_day['date']->toDateTime()->format('d/m/Y')." Inferior Dia Anterior ".$intervals[0][0]." Superior Dia Anterior ".$intervals[0][1]. "\n");
 
 
+                /*
+                    Guarda o dia e o index do vetor de probabilidade com maor probabilidade.
+                    Ex: se a maior probabilidade de previsão for aumentar $t_max é igual a 0, se for permanecer o mesmo valor é 1 e se for diminuir é 2.
+                */
+               
+                /*
+                $last_interval = end($intervals); // Intervalo anterior
+                $current_interval = $model->getInterval($premin['preult'], $interval, $max);
+                
+                if($current_interval[0] != $last_interval[0]){
+                    print_r($current_interval);
+                }
+
+                
+                if($current_interval[0] != $last_interval[0]){
+                    fwrite($file,$current_interval[0]." ".$current_interval[1]."\n");
+                    $score_equal_times++;
+                }
+                */
+                
+                // Começa a verificar quando o array intervals tiver mais de uma posição, no caso o intervalo n e n+1.
+                if (count($intervals) > 1) {
+
+                    $current_interval = $intervals[count($intervals) - 1]; // Intervalo atual
+                    $last_interval = $intervals[count($intervals) - 2]; // Intervalo atual
+
+                    // Verifica se a contagem de intervalos se manteve igual. Se for maior ou igual ao valor digitado entra no else if.
+                    if ($score_equal_times < $model->qtde_obs) {
+                        if ($last_day_inflection_day) {
+                            $inter_test[count($inter_test) - 1]['after_inflection_day'] = $next_day['date']->toDateTime()->format('d/m/Y');
+                            $inter_test[count($inter_test) - 1]['after_inflection_prob'] = $arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'];
+                            $inter_test[count($inter_test) - 1]['prev_heur'] = $model->forecastHeuristicAfterInflection($arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'],$t_max + 1,);
+                            $inter_test[count($inter_test) - 1]['price_after_inflection'] = $next_day['preult'];
+
+                            if ($next_day['t_state'] == (end($inter_test)['prev_heur'])) {
+                                //fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y')." testando"."\n");
+                                $acertos_heuristica++;
+                            }else{
+                                //fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y')."\n");
+                            }
+
+                            $last_day_inflection_day = false;
+                        } else {
+                            if ($next_day['t_state'] == $t_max + 1) {
+                                $acertos_heuristica++;
+                                //fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y') . "\n");
+                            }
+                        }
+
+                        if (($current_interval[0] == $last_interval[0]) && ($current_interval[1] == $last_interval[1])) {
+                            $score_equal_times++;
+                        } else {
+                            $score_equal_times = 0;
+                        }
+                    } else if ($score_equal_times >= $model->qtde_obs) {
+                        // Nessa parte são guardados os pontos de inflexão e os dias antes e depois.
+                        // Verifica se o proximo intervalo é igual ao anterior, se for, continua somando até achar intervalos diferentes
+                        if ($current_interval[0] == $last_interval[0] && $current_interval[1] == $last_interval[1]) {
+                            $score_equal_times++;
+                            if ($next_day['t_state'] == $t_max + 1) {
+                                $acertos_heuristica++;
+                                //fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y'). "\n");
+                            }
+                        } else {
+                            // Se os intervalos forem diferentes guardamos os valores do ponto de inflexão, um dia antes e um dia após.
+                            array_push($inflection_dots, [
+                                'sup' => $current_interval[1], // Intervalo Superior
+                                'inf' => $current_interval[0], // Intervalo Inferior
+                                'date' => $next_day['date']->toDateTime()->format('d/m/Y'), // Dia do Ponto de Inflexão
+                            ]);
+
+                            array_push($inter_test, [
+                                'day' => $next_day['date']->toDateTime()->format('d/m/Y'),
+                                'prob' => $t_max + 1,
+                                'price_inflection' => $next_day['preult'],
+                            ]);
+
+                            $last_day_inflection_day = true;
+
+                            array_push($before_inflection, [
+                                'day_before_inflection' => $last_day['date']->toDateTime()->format('d/m/Y'), // Dia antes do ponto de inflexão
+                                'prob_day_before_inflection' =>$arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'], // Maior probabilidade no vetor de previsão do dia anterior
+                                'day_inflection' => $next_day['date']->toDateTime()->format('d/m/Y'), // Dia do ponto de inflexão
+                                'prob_day_inflection' => $t_max + 1, // Maior probabilidade no vetor de previsão do dia atual,
+                                'prev_heur' => $model->forecastHeuristicBeforeInflection($arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'], $t_max + 1)
+                            ]);
+
+                            //$heur_state = $model->getThreeState($last_day['preult'], $before_day['preult']);
+                            if ($next_day['t_state'] == (end($before_inflection)['prev_heur'])) {
+                                //fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y') . " antes do ponto" . "\n");
+                                $acertos_heuristica++;
+                            }
+
+
+                            $score_equal_times = 0;
+                        }
+                    }
+                } else {
+                    if ($next_day['t_state'] == $t_max + 1) {
+                        $acertos_heuristica++;
+                        //fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y') . "\n");
+                    }
+
+                    //var_dump($next_day['date']->toDateTime()->format('d/m/Y'));
+                }
 
                 if ($next_day['state'] == $max + 1)
                     $acertou++;
-                else
-                    $errou++;
+                $errou++;
 
-                if ($next_day['t_state'] == $t_max + 1)
+                if ($next_day['t_state'] == $t_max + 1) {
                     $t_acertou++;
-                else
+                } else {
                     $t_errou++;
+                }
+
 
                 // if ($next_day['state_avg'] == $max_avg + 1)
                 //     $acertou_avg++;
@@ -338,33 +463,25 @@ class JoinController extends Controller
                     $t_client3 = $model->handleSell($t_client3, $last_day['preult']);
                     $t_client4 = $model->handleSell($t_client4, $last_day['preult']);
                 }
-
                 /* Preparação para a próxima iteração ----------------------------------------------------------------- */
                 array_shift($cursor_by_price);
                 array_push($cursor_by_price, $next_day);
+                $cont_total_actions++;
                 // array_shift($cursor_by_price_avg_aux);
                 // array_push($cursor_by_price_avg_aux, clone $next_day);
                 // $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux, $base); //Calculando médias e tirando as diferenças
             }
 
             $chart = $model->chartData($next, $intervals, $t_clientDatas, $t_datas);
-
-            $arr_data_closing_price = [];
-
-            foreach ($chart['fechamentoData'] as $key => $value) {
-                array_push($arr_data_closing_price, [
-                    'date' => $arr_with_prob_by_day[$key]['day'],
-                    'closing_price' => $chart['fechamentoData'][$key][1]
-                ]);
-            }
-
-            $data_dots = $model->checkVariation($next, $intervals, $model->qtde_obs, $arr_with_prob_by_day, $arr_data_closing_price);
+            $percentage_heuristica = ($acertos_heuristica / $consultas) * 100;
+            fclose($file);
 
             return $this->render('result', [
-                'data_dots' => $data_dots[0],
-                'data_dots_inflection_before' => $data_dots[1],
-                'data_dots_inflection_after' => $data_dots[2],
-                'acertos_heuristica' => $data_dots[3],
+                'data_dots' => $inflection_dots,
+                'data_dots_inflection_before' => $before_inflection,
+                'data_dots_inflection_after' => $inter_test,
+                'acerto_heuristica' => round($percentage_heuristica, 2),
+                'quantidade_acertos_heuristica' => $acertos_heuristica,
                 'acertou' => $acertou,
                 'errou' => $errou,
                 'acertou_avg' => $acertou_avg,

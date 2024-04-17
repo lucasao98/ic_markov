@@ -734,223 +734,58 @@ class ConsultaModel extends Model
         }
     }
 
-    public function checkVariation($next, $intervals, $qtde_variacoes, $arr_with_prob_by_day, $arr_closing_data)
-    {   
-        //$a = $this->searchClosingPriceInArray($arr_closing_data, "05/01/2021");
-
-        $constant_intervals = 0;
-        $inflection_dots = [];
-        $before_inflection = [];
-        $after_inflection = [];
-        $hits = 0;
-
-        //$inf_limit = round($intervals[0][0]);
-        //$upper_limit = round($intervals[0][1]);
-
-        for ($i = 1; $i < count($intervals) - 1; $i++) {
-            // Verifica se a quantidade de intervalos constantes é menor que a quantidade de intervalos dado pelo usuário
-            if ($constant_intervals < $qtde_variacoes) {
-                if ($intervals[$i][0] == $intervals[$i - 1][0] && $intervals[$i][1] == $intervals[$i - 1][1]) {
-                    $constant_intervals++;
-                } else {
-                    $constant_intervals = 0;
-                }
-                // Verifica se a quantidade de intervalos constantes é maior que a quantidade de intervalos dado pelo usuário
-            } else if ($constant_intervals >= $qtde_variacoes) {
-                // Verifica se o limite superior e o inferior aumentaram
-                if ($intervals[$i][0] > $intervals[$i - 1][0] && $intervals[$i][1] > $intervals[$i - 1][1]) {
-                    array_push($inflection_dots, [
-                        'sup' => $intervals[$i][1],
-                        'inf' => $intervals[$i][0],
-                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i + 1]['date']->toDateTime()->format('d/m/Y'))
-                    ]);
-
-                   
-
-                    array_push($before_inflection, [
-                        'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
-                        'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
-                        'prev_heur' => null
-                    ]);
-
-                    array_push($after_inflection, [
-                        'day_inflection' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i]['date']->toDateTime()->format('d/m/Y')),
-                        'day_after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_after_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i + 1]['date']->toDateTime()->format('d/m/Y')),
-                    ]);
-
-                    $constant_intervals = 0;
-                    // Verifica se o limite superior e o inferior abaixaram
-                } else if ($intervals[$i][0] < $intervals[$i - 1][0] && $intervals[$i][1] < $intervals[$i - 1][1]) {
-                    array_push($inflection_dots, [
-                        'sup' => $intervals[$i][1],
-                        'inf' => $intervals[$i][0],
-                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i + 1]['date']->toDateTime()->format('d/m/Y'))
-                    ]);
-
-                    array_push($before_inflection, [
-                        'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
-                        'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
-                        'prev_heur' => null
-                    ]);
-
-                    array_push($after_inflection, [
-                        'day_inflection' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i]['date']->toDateTime()->format('d/m/Y')),
-                        'day_after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_after_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i + 1]['date']->toDateTime()->format('d/m/Y')),
-                    ]);
-
-                    $constant_intervals = 0;
-                    // Verifica se o limite superior aumentou e o inferior abaixou
-                } else if ($intervals[$i][0] > $intervals[$i - 1][0] && $intervals[$i][1] < $intervals[$i - 1][1]) {
-                    array_push($inflection_dots, [
-                        'sup' => $intervals[$i][1],
-                        'inf' => $intervals[$i][0],
-                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i + 1]['date']->toDateTime()->format('d/m/Y'))
-                    ]);
-
-                    array_push($before_inflection, [
-                        'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
-                        'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
-                        'prev_heur' => null
-                    ]);
-
-                    array_push($after_inflection, [
-                        'day_inflection' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i]['date']->toDateTime()->format('d/m/Y')),
-                        'day_after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_after_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i + 1]['date']->toDateTime()->format('d/m/Y')),
-                    ]);
-
-                    $constant_intervals = 0;
-                    // Verifica se o limite superior abaixou e o inferior aumentou
-                } else if ($intervals[$i][0] < $intervals[$i - 1][0] && $intervals[$i][1] > $intervals[$i - 1][1]) {
-                    array_push($inflection_dots, [
-                        'sup' => $intervals[$i][1],
-                        'inf' => $intervals[$i][0],
-                        'date' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i + 1]['date']->toDateTime()->format('d/m/Y'))
-                    ]);
-
-                    array_push($before_inflection, [
-                        'day_before_inflection' => $next[$i - 2]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_before_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 2]['date']->toDateTime()->format('d/m/Y')),
-                        'day_inflection' => $next[$i - 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day, $next[$i - 1]['date']->toDateTime()->format('d/m/Y')),
-                        'prev_heur' => null
-                    ]);
-
-                    array_push($after_inflection, [
-                        'day_inflection' => $next[$i]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i]['date']->toDateTime()->format('d/m/Y')),
-                        'day_after_inflection' => $next[$i + 1]['date']->toDateTime()->format('d/m/Y'),
-                        'prob_day_after_inflection' => $this->searchProbInArrayReturnGreaterProb($arr_with_prob_by_day,$next[$i + 1]['date']->toDateTime()->format('d/m/Y')),
-                    ]);
-
-                    $constant_intervals = 0;
-                } else {
-                    $constant_intervals++;
-                }
+    public function forecastHeuristicBeforeInflection($before_forecast, $current_forecast)
+    {
+        if($before_forecast == $current_forecast){
+            if($before_forecast == 1){
+                return 3;
+            }else if($before_forecast == 3){
+                return 1;
             }
+        }else{
+            return $current_forecast;
         }
-
-
-        foreach ($before_inflection as $key => $value) {
-            if ($value['prob_day_before_inflection'] == "Aumentar" && $value['prob_day_inflection'] == "Aumentar") {
-                $prev_heur = "Diminuir";
-            } else if ($value['prob_day_before_inflection'] == "Diminuir" && $value['prob_day_inflection'] == "Diminuir") {
-                $prev_heur = "Aumentar";
-            } else if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_before_inflection'] == "Diminuir") {
-                $prev_heur = "Aumentar";
-            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_before_inflection'] == "Aumentar") {
-                $prev_heur = "Diminuir";
-            }
-
-            $value['prev_heur'] = $prev_heur;
-
-            $before_inflection[$key] = $value;
+        /*
+        if ($before_forecast == 1 && $current_forecast == 1) {
+            return 3;
+        } else if ($before_forecast == 3 && $current_forecast == 3) {
+            return 1;
+        } else if ($current_forecast == 1 && $before_forecast == 3) {
+            return 1;
+        } else if ($current_forecast == 3 && $before_forecast == 1) {
+            return 3;
         }
-
-        foreach ($after_inflection as $key => $value) {
-            if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_after_inflection'] == "Diminuir") {
-                $prev_heur = "Aumentar";
-            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_after_inflection'] == "Aumentar") {
-                $prev_heur = "Diminuir";
-            } else if ($value['prob_day_inflection'] == "Aumentar" && $value['prob_day_after_inflection'] == "Aumentar") {
-                $prev_heur = "Aumentar";
-            } else if ($value['prob_day_inflection'] == "Diminuir" && $value['prob_day_after_inflection'] == "Diminuir") {
-                $prev_heur = "Diminuir";
-            }
-
-            $value['prev_heur'] = $prev_heur;
-
-            $after_inflection[$key] = $value;
-        }
-
-        $hits = $this->analyzeHits($arr_closing_data, $before_inflection);
-
-        return [$inflection_dots, $before_inflection, $after_inflection,$hits];
+        */
     }
 
-    private function searchProbInArrayReturnGreaterProb($arr_with_days_prob, $searching_value)
+    public function forecastHeuristicAfterInflection($current_forecast, $after_forecast)
     {
-        foreach ($arr_with_days_prob as $value) {
-            if (strcmp($value['day'], $searching_value) == 0) {
-                if($value["prob_next_day"][0] > $value["prob_next_day"][2]){
-                    return "Aumentar";
-                }else if($value["prob_next_day"][2] > $value["prob_next_day"][0]){
-                    return "Diminuir";
-                }else if($value["prob_next_day"][0] == $value["prob_next_day"][2]){
-                    return "Aumentar";
-                }
-            }
+        if($current_forecast != $after_forecast){
+            return $current_forecast;
+        }else{
+            return $after_forecast;
         }
+        /*
+        if ($current_forecast == 1 && $after_forecast == 3) {
+            return 1;
+        } else if ($current_forecast == 3 && $after_forecast == 1) {
+            return 3;
+        } else if ($current_forecast == 1 && $after_forecast == 1) {
+            return 1;
+        } else if ($current_forecast == 3 && $after_forecast == 3) {
+            return 3;
+        }
+        */
     }
 
-    private function searchClosingPriceInArray($arr_closing_data, $searching_data)
+    public function searchProbInArrayReturnGreaterProb($arr_three_states_vector)
     {
-        foreach ($arr_closing_data as $value) {
-            if (strcmp($value['date'], $searching_data) == 0) {
-                return $value['closing_price'];
-            }
+        if($arr_three_states_vector[0] > $arr_three_states_vector[2]){
+            return 0;
+        }else if($arr_three_states_vector[2] > $arr_three_states_vector[0]){
+            return 2;
+        }else if($arr_three_states_vector[0] == $arr_three_states_vector[2]){
+            return 0;
         }
-    }
-
-    private function analyzeHits($arr_closing_price, $arr_inflection)
-    {
-        $hits = 0;
-        foreach ($arr_inflection as $key => $value) {
-            if($value['prev_heur'] == "Aumentar"){
-                $close_data_before_inflection = $this->searchClosingPriceInArray($arr_closing_price, $value['day_before_inflection']);
-                $close_data_inflection = $this->searchClosingPriceInArray($arr_closing_price, $value['day_inflection']);
-
-                if($close_data_before_inflection < $close_data_inflection){
-                  $hits++;  
-                }
-            }else if($value['prev_heur'] == "Diminuir"){
-                $close_data_before_inflection = $this->searchClosingPriceInArray($arr_closing_price, $value['day_before_inflection']);
-                $close_data_inflection = $this->searchClosingPriceInArray($arr_closing_price, $value['day_inflection']);
-
-                if($close_data_before_inflection > $close_data_inflection){
-                    $hits++;  
-                  }
-            }
-        }
-        return $hits;
     }
 }

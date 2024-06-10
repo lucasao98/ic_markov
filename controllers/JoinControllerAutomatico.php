@@ -17,90 +17,146 @@ class JoinController extends Controller
         $post = $_POST;
 
         if ($model->load($post) && $model->validate() && $model->periodo) {
-            $start = $model->inicio;
-            $final = $model->final;
-            $start = $model->inicio;
-            $consultas = 0;
-            $acertou = 0;
-            $errou = 0;
-            $acertou_avg = 0;
-            $errou_avg = 0;
-            $t_acertou = 0;
-            $acertos_heuristica = 0;
-            $t_errou = 0;
-            $next = array();
-            $intervals = array();
-            $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->format('U'));
-            $next_day = new Paper();
-            $client1 = ['cash' => 100, 'actions' => 0];
-            $client2 = ['cash' => 100, 'actions' => 0];
-            $client3 = ['cash' => 100, 'actions' => 0];
-            $client4 = ['cash' => 100, 'actions' => 0];
-            $clientDatas = [];
-            $t_client1 = ['cash' => 100, 'actions' => 0];
-            $t_client2 = ['cash' => 100, 'actions' => 0];
-            $t_client3 = ['cash' => 100, 'actions' => 0];
-            $t_client4 = ['cash' => 100, 'actions' => 0];
-            $t_client5 = ['cash' => 100, 'actions' => 0];
-            $t_clientDatas = [];
-            $t_datas = [];
-            $base = $model->base;
-            $current_interval = 0;
-            $score_equal_times = 0;
+            
+            $actions = [
+                'ALPA4',
+                'BBDC3',
+                'BBDC4',
+                'BRKM5',
+                'BRML3',
+                'BTOW3',
+                'CESP6',
+                'CMIG4',
+                'COCE5',
+                'CPFE3',
+                'CPLE6',
+                'CSNA3',
+                'DIRR3',
+                'EQTL3',
+                'EVEN3',
+                'EZTC3',
+                'FLRY3',
+                'IGTA3',
+                'ITUB3',
+                'ITUB4',
+                'JBSS3',
+                'JHSF3',
+                'LAME3',
+                'LAME4',
+                'MRFG3',
+                'MRVE3',
+                'ODPV3',
+                'RENT3',
+                'SANB11',
+                'SMTO3',
+                'SULA11',
+                'TRIS3',
+                'TRPL4',
+                'WEGE3',
+                'PSSA3',
+                'GGBR4',
+                'BRFS3',
+                'ENGI11',
+                'ENBR3',
+                'CIEL3',
+                'BBAS3',
+                'ITSA4',
+                'LREN3',
+                'HYPE3',
+                'GOAU4',
+                'CYRE3',
+                'MULT3',
+            ];
 
-            $arr_with_prob_by_day = [];
-            $inflection_dots = [];
-            $before_inflection = [];
-            $after_inflection = [];
-            $inter_test = [];
-            $arr_forecast = [];
-            $last_day_inflection_day = false;
-            $cont_total_actions = 0;
+            $file_percentage_hits = fopen("percentage_hits.txt", "w");
+            fwrite($file_percentage_hits, "Nome "." Taxa de Acertos 3 estados " . "Taxa Acertos Heuristica"."\n");
+            foreach ($actions as $action_name) {
+                $model->inicio = "31/12/2020";
+                $model_final = "31/12/2021";
+                $start = $model->inicio;
+                $consultas = 0;
+                $acertou = 0;
+                $errou = 0;
+                $acertou_avg = 0;
+                $errou_avg = 0;
+                $t_acertou = 0;
+                $acertos_heuristica = 0;
+                $t_errou = 0;
+                $next = array();
+                $intervals = array();
+                $aux = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->format('U'));
+                $next_day = new Paper();
+                $client1 = ['cash' => 100, 'actions' => 0];
+                $client2 = ['cash' => 100, 'actions' => 0];
+                $client3 = ['cash' => 100, 'actions' => 0];
+                $client4 = ['cash' => 100, 'actions' => 0];
+                $clientDatas = [];
+                $t_client1 = ['cash' => 100, 'actions' => 0];
+                $t_client2 = ['cash' => 100, 'actions' => 0];
+                $t_client3 = ['cash' => 100, 'actions' => 0];
+                $t_client4 = ['cash' => 100, 'actions' => 0];
+                $t_client5 = ['cash' => 100, 'actions' => 0];
+                $t_clientDatas = [];
+                $t_datas = [];
+                $base = $model->base;
+                $current_interval = 0;
+                $score_equal_times = 0;
+                $model->qtde_obs = 3;
+
+                $arr_with_prob_by_day = [];
+                $inflection_dots = [];
+                $before_inflection = [];
+                $after_inflection = [];
+                $inter_test = [];
+                $arr_forecast = [];
+                $last_day_inflection_day = false;
+                $cont_total_actions = 0;
 
 
 
-            $final = $start;
-            //Dia de início do conjunto de treinamento
-            $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
+                $final = $start;
+                //Dia de início do conjunto de treinamento
+                $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
 
-            //O conjunto de treinamento será definido n meses antes do dia a ser previsto
-            $start = $start->modify("-$model->periodo $model->metric");
+                //O conjunto de treinamento será definido n meses antes do dia a ser previsto
+                $start = $start->modify("-$model->periodo $model->metric");
 
-            /* -------------------------------------------------------------------- */
-            //Dia final do conjunto de treinamento
-            $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');
+                /* -------------------------------------------------------------------- */
+                //Dia final do conjunto de treinamento
+                $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');
 
-            //Passando para o padrão de datas do banco
-            $start = Paper::toIsoDate($start->format('U'));
+                //Passando para o padrão de datas do banco
+                $start = Paper::toIsoDate($start->format('U'));
 
-            //Passando para o padrão de datas do banco
-            $final = Paper::toIsoDate($final->format('U'));
+                //Passando para o padrão de datas do banco
+                $final = Paper::toIsoDate($final->format('U'));
 
-            $stock = $model->nome;
+                //$stock = $model->nome;
+                $stock = $action_name;
 
-            //Setup inicial do conjunto de treinamento, contém as ações do intervalo passado pelo usuário
-            $cursor_by_price = $model->getData($stock, $start, $final);
+                //Setup inicial do conjunto de treinamento, contém as ações do intervalo passado pelo usuário
+                $cursor_by_price = $model->getData($stock, $start, $final);
 
-            //Setup inicial do conjunto de treinamento
-            // $cursor_by_price_avg_aux = $model->getData($stock, $start, $final);
+                //Setup inicial do conjunto de treinamento
+                // $cursor_by_price_avg_aux = $model->getData($stock, $start, $final);
 
-            //Calculando médias e tirando as diferenças
-            // $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux, $base);
+                //Calculando médias e tirando as diferenças
+                // $cursor_by_price_avg = ConsultaModel::handleAverages($cursor_by_price_avg_aux, $base);
 
-            // Data da predição
-            $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
+                // Data da predição
+                $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $model->inicio . '24:00:00');
 
-            //Busca no banco os dias que serão previstos
-            $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux);
-            $consultas = count($next_days);
+                //Busca no banco os dias que serão previstos
+                $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux);
+                $consultas = count($next_days);
 
                 /*
-                if($stock){
-                    $new_final_date = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('+5 days')->format('U'));
-                    $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $new_final_date);
-                    $consultas = count($next_days);
-                }
-                */
+            if($stock){
+                $new_final_date = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('+5 days')->format('U'));
+                $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $new_final_date);
+                $consultas = count($next_days);
+            }
+            */
 
                 //$file = fopen($stock . ".txt", "w");
                 //$file_real = fopen("arquivo_reais.txt", "w");
@@ -495,6 +551,13 @@ class JoinController extends Controller
                 //fclose($file);
 
                 fwrite($file_percentage_hits, $stock . " ".round(($t_acertou / $consultas) * 100, 2)." " . number_format($percentage_heuristica, 2) . "\n");
+            }
+
+
+            /*
+            var_dump($inter_test);
+            exit();
+            */
 
             return $this->render('result', [
                 'data_dots' => $inflection_dots,
@@ -527,9 +590,8 @@ class JoinController extends Controller
                 'cliente3' => $client3,
                 'cliente4' => $client4
             ]);
-              
         } else {
             return $this->render('index');
         }
-}
+    }
 }

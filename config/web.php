@@ -86,7 +86,8 @@ $config = [
                 'import' => 'import/import-form',
                 'import-data' => 'import/import-data',
                 'annual-analysis' => 'main/annual-analysis',
-                'join-methods' => 'join/index'
+                'join-methods' => 'join/index',
+                'heuristic-m3' => 'heuristic-m3/index'
             ],
         ],
         

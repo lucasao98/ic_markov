@@ -14,17 +14,17 @@ $consultaModel = new ConsultaModel;
 
 <div class="container">
     <div class="row">
+        <h1>Heuristica M3</h1>
+        <p>O objetivo da heurística M3 é coletar informações de períodos contínuos de aumento ou de diminuição</p>
+    </div>
+    <hr/>
+    <div class="row">
         <h2>Previsão de grandes períodos usando CMTD</h2>
         <p>Data Inicial: Primeira data do período a ser previsto</p>
         <p>Data Final: Última data do períiodo a ser previsto</p>
         <p>Periodo: Número (inteiro) de meses ou anos que formarão o conjunto de treinamento</p>
         <p>Métrica: Métrica para criação do conjunto de treinamento</p>
         <p>Base Média Móvel: Número de elementos usados para o cálculo da média móvel</p>
-    </div>
-    <hr>
-    <div class="row">
-        <h2>Heuristica</h2>
-        <p>Quantidade de observações: Esse campo servirá para a heuristica, nele podemos enviar a quantidade de observações necessarias antes de localizar um ponto de inflexão</p>
     </div>
 </div>
 

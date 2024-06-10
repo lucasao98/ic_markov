@@ -734,48 +734,30 @@ class ConsultaModel extends Model
         }
     }
 
-    public function forecastHeuristicBeforeInflection($before_forecast, $current_forecast)
+    public function forecastHeuristicBeforeInflection($before_forecast, $current_forecast, $real_value)
     {
+        /* 
+            Compara os tres estados atual, com o 3 estados anterior se forem iguais verifico se a previsão real anterior (next_day['t_state'] é menor ou igual a 2, se for ele muda para 3 se não for ele muda para 1
+        */
         if($before_forecast == $current_forecast){
-            if($before_forecast == 1){
+            if($real_value <= 2){
                 return 3;
-            }else if($before_forecast == 3){
+            }else{
                 return 1;
             }
         }else{
             return $current_forecast;
         }
-        /*
-        if ($before_forecast == 1 && $current_forecast == 1) {
-            return 3;
-        } else if ($before_forecast == 3 && $current_forecast == 3) {
-            return 1;
-        } else if ($current_forecast == 1 && $before_forecast == 3) {
-            return 1;
-        } else if ($current_forecast == 3 && $before_forecast == 1) {
-            return 3;
-        }
-        */
     }
 
-    public function forecastHeuristicAfterInflection($current_forecast, $after_forecast)
+    public function forecastHeuristicAfterInflection($before_forecast, $current_forecast, $real_value)
     {
-        if($current_forecast != $after_forecast){
-            return $current_forecast;
+        // Compara as previsões de 3 estados anterior e a atual
+        if($real_value != $current_forecast){
+            return $real_value;
         }else{
-            return $after_forecast;
+            return $current_forecast;
         }
-        /*
-        if ($current_forecast == 1 && $after_forecast == 3) {
-            return 1;
-        } else if ($current_forecast == 3 && $after_forecast == 1) {
-            return 3;
-        } else if ($current_forecast == 1 && $after_forecast == 1) {
-            return 1;
-        } else if ($current_forecast == 3 && $after_forecast == 3) {
-            return 3;
-        }
-        */
     }
 
     public function searchProbInArrayReturnGreaterProb($arr_three_states_vector)

@@ -90,6 +90,9 @@ TesteAsset::register($this);
         <li>
           <a href="join-methods">Intervalos Fixos e Método de 3 estados</a>
         </li>
+        <li>
+          <a href="heuristic-m3">Heuristica M3</a>
+        </li>
       </ul>
     </div>
   </div>

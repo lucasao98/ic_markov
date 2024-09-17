@@ -87,7 +87,10 @@ $config = [
                 'import-data' => 'import/import-data',
                 'annual-analysis' => 'main/annual-analysis',
                 'join-methods' => 'join/index',
-                'heuristic-m3' => 'heuristic-m3/index'
+                'heuristic-m3' => 'heuristic-m3/index',
+                'heuristic-m1-plus' => 'heuristic-m1-plus/index',
+                'automatic-heuristic-m3' => 'automatic-heuristic-m3/index',
+                'result-automatic-heuristic-m3' => 'automatic-heuristic-m3/result'
             ],
         ],
         

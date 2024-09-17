@@ -5,7 +5,9 @@ namespace app\controllers;
 use yii\base\Controller;
 use app\models\ConsultaModel;
 use app\models\Paper;
+use app\models\Client;
 use Exception;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 
 class HeuristicM3Controller extends Controller
 {
@@ -19,7 +21,6 @@ class HeuristicM3Controller extends Controller
         if ($model->load($post) && $model->validate() && $model->periodo) {
             $start = $model->inicio;
             $final = $model->final;
-            $start = $model->inicio;
             $consultas = 0;
             $acertou = 0;
             $errou = 0;
@@ -27,6 +28,8 @@ class HeuristicM3Controller extends Controller
             $errou_avg = 0;
             $t_acertou = 0;
             $acertos_heuristica = 0;
+            $acertos_heuristica_m3 = 0;
+            $erro_heuristica_m3 = 0;
             $t_errou = 0;
             $next = array();
             $intervals = array();
@@ -47,12 +50,15 @@ class HeuristicM3Controller extends Controller
             $base = $model->base;
             $current_interval = 0;
             $score_equal_times = 0;
-
             $arr_with_prob_by_day = [];
-            $inflection_dots = [];
+            $prev_continuous_up_down = [];
             $before_inflection = [];
-            $after_inflection = [];
+            $inflection_dots = [];
+            $erros_heuristica = 0;
             $inter_test = [];
+            $cliente_teste_1 = new Client(0, 100);
+            $cliente_teste_2 = new Client(0, 100);
+            $cliente_teste_3 = new Client(0, 100);
             $arr_forecast = [];
             $last_day_inflection_day = false;
             $cont_total_actions = 0;
@@ -62,13 +68,13 @@ class HeuristicM3Controller extends Controller
                 'dates' => 0
             ];
 
-
             $final = $start;
             //Dia de início do conjunto de treinamento
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
 
             //O conjunto de treinamento será definido n meses antes do dia a ser previsto
             $start = $start->modify("-$model->periodo $model->metric");
+            
 
             /* -------------------------------------------------------------------- */
             //Dia final do conjunto de treinamento
@@ -84,6 +90,9 @@ class HeuristicM3Controller extends Controller
 
             //Setup inicial do conjunto de treinamento, contém as ações do intervalo passado pelo usuário
             $cursor_by_price = $model->getData($stock, $start, $final);
+
+            //$a = $cursor_by_price[0]['date']->toDateTime()->format('Y');
+            //var_dump(intval($a));
 
             //Setup inicial do conjunto de treinamento
             // $cursor_by_price_avg_aux = $model->getData($stock, $start, $final);
@@ -107,33 +116,23 @@ class HeuristicM3Controller extends Controller
                 */
 
             //$file = fopen($stock . ".txt", "w");
-            //$file_real = fopen("arquivo_reais.txt", "w");
             //$file_percentage_hits = fopen("percentage_hits.txt", "a");
             $file_continuous_growth = fopen("continuous_growth.txt", "w");
-            fwrite($file_continuous_growth, "Dia " . "Orientação" . " Contador"."\n");
-            //fwrite($file_real, "Dia " . "Previsão" . "\n");
-            /*
-                fwrite(
-                    $file,
-                    "Dia Antes de Inflexão," .
-                        "Previsão Dia Antes," .
-                        "Data Inflexão," .
-                        "Previsão Inflexão," .
-                        "Heuristica Antes Inflexão," .
-                        "Dia Após Inflexão," .
-                        "Previsão Dia após inflexão," .
-                        "Heuristica," .
-                        "Real," .
-                        "\n"
-                );*/
-
+            $file_get_percentage_heuristic_m3 = fopen("verifyPercentages.txt", "a");
+            //fwrite($file_get_percentage_heuristic_m3, "Numero de subidas/descidas constantes selecionadas " . $model->qtde_up_down_constants . "\n");
+            //fwrite($file_get_percentage_heuristic_m3, "Ano " . $model->inicio . " " . $model->final . "\n");
+            //fwrite($file_get_percentage_heuristic_m3, "Ação " . "3_estados" . " Heuristica_M3" . "\n");
+            fwrite($file_continuous_growth, "Data " . "Orientação " . "Contagem ");
             while (1) {
 
                 if (count($next_days) == 0)
                     break;
+               
+
 
                 //busca no array a ação do dia seguinte
                 $next_day = array_shift($next_days);
+
 
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 if ($next_day['date'] > $aux || $next_day['date'] == null)
@@ -145,18 +144,6 @@ class HeuristicM3Controller extends Controller
 
                 //calculo do intervalo
                 $interval = ($premax['preult'] - $premin['preult']) / $model->states_number;
-
-                // foreach ($cursor_by_price_avg as $avg) {
-                //     $avg['preult'] += $last_day['preult'];
-                // }
-
-                // $premin_avg = $model->definePremin($cursor_by_price_avg);
-                // $premax_avg = $model->definePremax($cursor_by_price_avg);
-
-                //calculo do intervalo
-                // $interval_avg = abs($premin_avg['preult'] - $premax_avg['preult']) / $model->states_number;
-
-
 
                 $states = []; //vetor que contem a quantidade de elementos em cada estado
                 $states_avg = []; //vetor que contem a quantidade de elementos em cada estado
@@ -203,8 +190,16 @@ class HeuristicM3Controller extends Controller
                 // $vector_avg = $model->predictVector($matrix_avg, $cursor_by_price_avg, $model->states_number, "state"); //função que constrói o vetor de predição
                 /* Validação ----------------------------------------------------------------- */
 
-                $before_day = $cursor_by_price[count($cursor_by_price) - 2];
                 $last_day = $cursor_by_price[count($cursor_by_price) - 1];
+
+                // Verifica se a quantidade de dias no array next_days é igual ao total de consultas - 1. Ou seja a primeira consulta
+                if (count($next_days) == $consultas - 1) {
+                    $cliente_teste_3->buyActions($next_day['preult']);
+                }
+
+                if (count($next_days) == 1) {
+                    $cliente_teste_3->sellActions($next_day['preult']);
+                }
 
                 // calcula o estado do dia seguinte
                 $next_day['state'] = $model->getState($next_day['preult'], $premin['preult'], $interval, $model->states_number);
@@ -273,46 +268,147 @@ class HeuristicM3Controller extends Controller
                         // Caso os intervalos estejam subindo
                         // Se a orientação for -1, não tem nenhum registro de subida ou descida salvo previamente
                         // Então, a orientação 1 é adicionada para informar que tem um registro de subida e o contador é incrementado
+                        // Lembrar que: orientação 3 é descida, orientação 1 é subida e -1 significa que ainda não tem uma direção definida
                         if ($array_continuos_growth_date['orientation'] == -1) {
                             $array_continuos_growth_date['orientation'] = 1;
                             $array_continuos_growth_date['continuos_growth'] += 1;
                             $array_continuos_growth_date['date'] = $next_day['date']->toDateTime()->format('d/m/Y');
-                            fwrite($file_continuous_growth, 
-                            $next_day['date']->toDateTime()->format('d/m/Y')." ". $array_continuos_growth_date['orientation']." ".$array_continuos_growth_date['continuos_growth']."\n");
+                            fwrite(
+                                $file_continuous_growth,
+                                $last_day['date']->toDateTime()->format('d/m/Y') .
+                                    " " .
+                                    $array_continuos_growth_date['orientation'] .
+                                    " " .
+                                    $array_continuos_growth_date['continuos_growth'] .
+                                    " " .
+                                    $cliente_teste_1->getCash() . "valor sobrou" .
+                                    " " .
+                                    $last_day['preult'] . "preço ação" .
+                                    "\n"
+                            );
                         } else if ($array_continuos_growth_date['orientation'] == 1) {
                             $array_continuos_growth_date['continuos_growth'] += 1;
                             $array_continuos_growth_date['date'] = $next_day['date']->toDateTime()->format('d/m/Y');
-                            fwrite($file_continuous_growth, 
-                            $next_day['date']->toDateTime()->format('d/m/Y')." ". $array_continuos_growth_date['orientation']." ".$array_continuos_growth_date['continuos_growth']."\n");
+                            fwrite(
+                                $file_continuous_growth,
+                                $last_day['date']->toDateTime()->format('d/m/Y') .
+                                    " " .
+                                    $array_continuos_growth_date['orientation'] .
+                                    " " .
+                                    $array_continuos_growth_date['continuos_growth'] .
+                                    " " .
+                                    $cliente_teste_1->getCash() . "valor sobrou" .
+                                    " " .
+                                    $last_day['preult'] . "preço ação" .
+                                    "\n"
+                            );
+
+                            if ($array_continuos_growth_date['continuos_growth'] >= $model->qtde_up_down_constants) {
+                                array_push($prev_continuous_up_down, [
+                                    'orientation' => $array_continuos_growth_date['orientation'], // Orientação
+                                    'prev_day' => $t_max + 1, // Previsão Do Dia
+                                    'date' => $next_day['date']->toDateTime()->format('d/m/Y'), // Dia do Ponto
+                                    'real_value' => $next_day['t_state']
+                                ]);
+                                $comparison = $model->compareVerifyWithPrevision($next_day['t_state'], $array_continuos_growth_date['orientation']);
+                                if ($comparison == 1) {
+                                    $acertos_heuristica_m3++;
+                                } else {
+                                    $erro_heuristica_m3 += 1;
+                                }
+                                /*
+                                fwrite(
+                                    $file_continuous_growth,
+                                    $next_day['date']->toDateTime()->format('d/m/Y') . " " . $array_continuos_growth_date['orientation'] . " " . $array_continuos_growth_date['continuos_growth'] . "\n"
+                                );
+                                */
+                            }
                         } else {
                             $array_continuos_growth_date['orientation'] = -1;
-                            $array_continuos_growth_date['continuos_growth'] = 0;
-                            fwrite($file_continuous_growth, 
-                            $next_day['date']->toDateTime()->format('d/m/Y')." ". $array_continuos_growth_date['orientation']." ".$array_continuos_growth_date['continuos_growth']."\n");
+                            if (!$model->verifyContinuosGrowthIsZero($array_continuos_growth_date['orientation'])) {
+                                $array_continuos_growth_date['continuos_growth'] = 0;
+                            }
+                            fwrite(
+                                $file_continuous_growth,
+                                $last_day['date']->toDateTime()->format('d/m/Y') . " " . $array_continuos_growth_date['orientation'] . " " . $array_continuos_growth_date['continuos_growth'] . "\n"
+                            );
                         }
                     } else if (($last_interval[0] > $current_interval[0]) && ($last_interval[1] > $current_interval[1])) {
                         // Caso os intervalos estejam descendo
                         if ($array_continuos_growth_date['orientation'] == -1) {
-                            $array_continuos_growth_date['orientation'] = 0;
+                            $array_continuos_growth_date['orientation'] = 3;
                             $array_continuos_growth_date['continuos_growth'] += 1;
-                            fwrite($file_continuous_growth, 
-                            $next_day['date']->toDateTime()->format('d/m/Y')." ". $array_continuos_growth_date['orientation']." ".$array_continuos_growth_date['continuos_growth']."\n");
-                        } else if ($array_continuos_growth_date['orientation'] == 0) {
+                            $array_continuos_growth_date['date'] = $next_day['date']->toDateTime()->format('d/m/Y');
+                            fwrite(
+                                $file_continuous_growth,
+                                $last_day['date']->toDateTime()->format('d/m/Y') .
+                                    " " .
+                                    $array_continuos_growth_date['orientation'] .
+                                    " " .
+                                    $array_continuos_growth_date['continuos_growth'] .
+                                    " " .
+                                    $cliente_teste_1->getCash() . "valor novo" .
+                                    " " .
+                                    $last_day['preult'] . "preço ação" .
+                                    "\n"
+                            );
+                        } else if ($array_continuos_growth_date['orientation'] == 3) {
                             $array_continuos_growth_date['continuos_growth'] += 1;
-                            fwrite($file_continuous_growth, 
-                            $next_day['date']->toDateTime()->format('d/m/Y')." ". $array_continuos_growth_date['orientation']." ".$array_continuos_growth_date['continuos_growth']."\n");
+                            $array_continuos_growth_date['date'] = $next_day['date']->toDateTime()->format('d/m/Y');
+                            fwrite(
+                                $file_continuous_growth,
+                                $last_day['date']->toDateTime()->format('d/m/Y') .
+                                    " " .
+                                    $array_continuos_growth_date['orientation'] .
+                                    " " .
+                                    $array_continuos_growth_date['continuos_growth'] .
+                                    " " .
+                                    $cliente_teste_1->getCash() . "valor novo" .
+                                    " " .
+                                    $last_day['preult'] . "preço ação" .
+                                    "\n"
+                            );
+                            if ($array_continuos_growth_date['continuos_growth'] >= $model->qtde_up_down_constants) {
+                                array_push($prev_continuous_up_down, [
+                                    'orientation' => $array_continuos_growth_date['orientation'], // Orientação
+                                    'prev_day' => $t_max + 1, // Previsão Do Dia
+                                    'date' => $next_day['date']->toDateTime()->format('d/m/Y'), // Dia do Ponto
+                                    'real_value' => $next_day['t_state']
+                                ]);
+                                $comparison = $model->compareVerifyWithPrevision($next_day['t_state'], $array_continuos_growth_date['orientation']);
+                                if ($comparison == 1) {
+                                    $acertos_heuristica_m3++;
+                                } else {
+                                    $erro_heuristica_m3 += 1;
+                                }
+                                /*
+                                fwrite(
+                                    $file_continuous_growth,
+                                    $next_day['date']->toDateTime()->format('d/m/Y') . " " . $array_continuos_growth_date['orientation'] . " " . $array_continuos_growth_date['continuos_growth'] . "\n"
+                                );
+                                */
+                            }
                         } else {
                             $array_continuos_growth_date['orientation'] = -1;
-                            $array_continuos_growth_date['continuos_growth'] = 0;
-                            fwrite($file_continuous_growth, 
-                            $next_day['date']->toDateTime()->format('d/m/Y')." ". $array_continuos_growth_date['orientation']." ".$array_continuos_growth_date['continuos_growth']."\n");
+                            if (!$model->verifyContinuosGrowthIsZero($array_continuos_growth_date['continuos_growth'])) {
+                                $array_continuos_growth_date['continuos_growth'] = 0;
+                            }
+                            fwrite(
+                                $file_continuous_growth,
+                                $last_day['date']->toDateTime()->format('d/m/Y') . " " . $array_continuos_growth_date['orientation'] . " " . $array_continuos_growth_date['continuos_growth'] . "\n"
+                            );
                         }
                     } else {
                         $array_continuos_growth_date['orientation'] = -1;
-                        $array_continuos_growth_date['continuos_growth'] = 0;
-                        fwrite($file_continuous_growth, 
-                            $next_day['date']->toDateTime()->format('d/m/Y')." ". $array_continuos_growth_date['orientation']." ".$array_continuos_growth_date['continuos_growth']."\n");
+                        if (!$model->verifyContinuosGrowthIsZero($array_continuos_growth_date['continuos_growth'])) {
+                            $array_continuos_growth_date['continuos_growth'] = 0;
+                        }
+                        fwrite(
+                            $file_continuous_growth,
+                            $last_day['date']->toDateTime()->format('d/m/Y') . " " . $array_continuos_growth_date['orientation'] . " " . $array_continuos_growth_date['continuos_growth'] . "\n"
+                        );
                     }
+                    // Verifica se a contagem de intervalos se manteve igual. Se for maior ou igual ao valor digitado entra no else if.
                     // Verifica se a contagem de intervalos se manteve igual. Se for maior ou igual ao valor digitado entra no else if.
                     if ($score_equal_times < $model->qtde_obs) {
                         if ($last_day_inflection_day) {
@@ -321,23 +417,27 @@ class HeuristicM3Controller extends Controller
                             $inter_test[count($inter_test) - 1]['prev_heur'] = $model->forecastHeuristicAfterInflection($arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'], $t_max + 1, $arr_with_prob_by_day[$cont_total_actions - 1]['three_state_real_before']);
                             $inter_test[count($inter_test) - 1]['price_after_inflection'] = $next_day['preult'];
                             /*
-                                fwrite(
-                                    $file,
-                                    $next_day['date']->toDateTime()->format('d/m/Y') . " " .
-                                        $arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'] .
-                                        " " .
-                                        $inter_test[count($inter_test) - 1]['prev_heur'] . " " . $next_day['t_state'] . "\n"
-                                );
-                                */
+                        fwrite(
+                            $file,
+                            $next_day['date']->toDateTime()->format('d/m/Y') . " " .
+                                $arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'] .
+                                " " .
+                                $inter_test[count($inter_test) - 1]['prev_heur'] . " " . $next_day['t_state'] . "\n"
+                        );
+                        */
 
                             if ($next_day['t_state'] == (end($inter_test)['prev_heur'])) {
                                 $acertos_heuristica++;
+                            } else {
+                                $erros_heuristica += 1;
                             }
 
                             $last_day_inflection_day = false;
                         } else {
                             if ($next_day['t_state'] == ($t_max + 1)) {
                                 $acertos_heuristica++;
+                            } else {
+                                $erros_heuristica += 1;
                             }
                         }
 
@@ -353,6 +453,8 @@ class HeuristicM3Controller extends Controller
                             $score_equal_times++;
                             if ($next_day['t_state'] == ($t_max + 1)) {
                                 $acertos_heuristica++;
+                            } else {
+                                $erros_heuristica += 1;
                             }
                         } else {
                             // Se os intervalos forem diferentes guardamos os valores do ponto de inflexão, um dia antes e um dia após.
@@ -379,18 +481,19 @@ class HeuristicM3Controller extends Controller
                                 'prev_heur' => $model->forecastHeuristicBeforeInflection($arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'], $t_max + 1, $arr_with_prob_by_day[$cont_total_actions - 1]['three_state_real_before'])
                             ]);
                             /*
-                                fwrite(
-                                    $file,
-                                    $last_day['date']->toDateTime()->format('d/m/Y') . " " .
-                                        $arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'] . " " .
-                                        $next_day['date']->toDateTime()->format('d/m/Y') . " " .
-                                        ($t_max + 1) . " " . end($before_inflection)['prev_heur'] . " "
-                                );
-                                */
+                        fwrite(
+                            $file,
+                            $last_day['date']->toDateTime()->format('d/m/Y') . " " .
+                                $arr_with_prob_by_day[$cont_total_actions - 1]['prob_day'] . " " .
+                                $next_day['date']->toDateTime()->format('d/m/Y') . " " .
+                                ($t_max + 1) . " " . end($before_inflection)['prev_heur'] . " "
+                        );
+                        */
 
-                            //$heur_state = $model->getThreeState($last_day['preult'], $before_day['preult']);
                             if ($next_day['t_state'] == (end($before_inflection)['prev_heur'])) {
                                 $acertos_heuristica++;
+                            } else {
+                                $erros_heuristica += 1;
                             }
 
 
@@ -401,10 +504,11 @@ class HeuristicM3Controller extends Controller
                     if ($next_day['t_state'] == ($t_max + 1)) {
                         $acertos_heuristica++;
                         //fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y') . "\n");
+                    } else {
+                        $erros_heuristica += 1;
                     }
+                    fwrite($file_continuous_growth, "" . "\n");
 
-                    fwrite($file_continuous_growth,"Nada ainda "."\n");
-                    
 
                     //var_dump($next_day['date']->toDateTime()->format('d/m/Y'));
                 }
@@ -418,6 +522,23 @@ class HeuristicM3Controller extends Controller
                 } else {
                     $t_errou++;
                 }
+
+                if ($array_continuos_growth_date['orientation'] == 1 || $array_continuos_growth_date['orientation'] == -1) {
+                    $cliente_teste_1->buyActions($next_day['preult']);
+                    $cliente_teste_2->buyActions($next_day['preult']);
+                } else if ($array_continuos_growth_date['orientation'] == 3 || $array_continuos_growth_date['orientation'] == -1) {
+                    if($cliente_teste_1->getActions() > 0){
+                        $cliente_teste_1->sellActions($next_day['preult']);
+                    }
+                }
+
+                if ($cliente_teste_2->getActions() > 0) {
+                    $comparison_price = $next_day['preult'] * $cliente_teste_2->getActions();
+                    if ($comparison_price > 100) {
+                        $cliente_teste_2->sellActions($next_day['preult']);
+                    }
+                }
+
 
 
                 // if ($next_day['state_avg'] == $max_avg + 1)
@@ -546,12 +667,33 @@ class HeuristicM3Controller extends Controller
 
             $chart = $model->chartData($next, $intervals, $t_clientDatas, $t_datas);
             $percentage_heuristica = ($acertos_heuristica / $consultas) * 100;
-            //fclose($file);
+
+            $percentage_heuristica_m3 = (($acertos_heuristica + $acertos_heuristica_m3) / $consultas) * 100;
+            $acertos_heuristica_m3 = $acertos_heuristica_m3 + $acertos_heuristica;
+
+            if ($cliente_teste_1->getActions() > 0) {
+                $cliente_teste_1->sellActions($next_day['preult']);
+            }
+
+            if ($cliente_teste_2->getActions() > 0) {
+                $cliente_teste_2->sellActions($next_day['preult']);
+            }
 
             //fwrite($file_percentage_hits, $stock . " " . round(($t_acertou / $consultas) * 100, 2) . " " . number_format($percentage_heuristica, 2) . "\n");
+            fwrite($file_get_percentage_heuristic_m3, $stock . " " . round(($t_acertou / $consultas) * 100, 2) . " " . $percentage_heuristica_m3 . "\n");
 
             return $this->render('result', [
-                'data_dots' => $inflection_dots,
+                'cliente_heuristica_e1_cash' => $cliente_teste_1->getCash(),
+                'cliente_heuristica_e1_actions' => $cliente_teste_1->getActions(),
+                'cliente_heuristica_e2_cash' => $cliente_teste_2->getCash(),
+                'cliente_heuristica_e2_actions' => $cliente_teste_2->getActions(),
+                'cliente_heuristica_e3_cash' => $cliente_teste_3->getCash(),
+                'cliente_heuristica_e3_actions' => $cliente_teste_3->getActions(),
+                'quantidade_acertos_m3' => $acertos_heuristica_m3,
+                'erro_heuristica_m3' => ($erros_heuristica - $erro_heuristica_m3),
+                'percentage_heuristica_m3' => round($percentage_heuristica_m3, 2),
+                'erros_heuristica' => $erros_heuristica,
+                'data_dots' => $prev_continuous_up_down,
                 'data_dots_inflection_before' => $before_inflection,
                 'data_dots_inflection_after' => $inter_test,
                 'acerto_heuristica' => round($percentage_heuristica, 2),

@@ -22,6 +22,8 @@ class ConsultaModel extends Model
     public $metric;
     public $base;
     public $initial_year;
+    public $qtde_up_down_constants;
+    public $actions;
 
     public function rules()
     {
@@ -30,7 +32,9 @@ class ConsultaModel extends Model
             [['states_number', 'periodo'], 'integer'],
             [['metric'], 'string'],
             [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy'],
-            ['qtde_obs', 'integer']
+            ['qtde_obs', 'integer'],
+            ['qtde_up_down_constants','integer'],
+            ['actions','each','rule' => ['string']],
         ];
     }
 
@@ -39,10 +43,12 @@ class ConsultaModel extends Model
         return [
             'nome' => 'Ação',
             'inicio' => 'Data Inicial',
+            'actions' => 'Ações',
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
             'metric' => 'Métrica',
-            'qtde_obs' => 'Quantidade de observações'
+            'qtde_obs' => 'Quantidade de observações',
+            'qtde_up_down_constants' => 'Quantidade de subidas/descidas constantes antes da previsão'
         ];
     }
 
@@ -96,7 +102,7 @@ class ConsultaModel extends Model
 
         return 0;
     }
-
+    
     public static function getThreeState($price, $price_before)
     {
         if ($price > $price_before) {
@@ -739,13 +745,13 @@ class ConsultaModel extends Model
         /* 
             Compara os tres estados atual, com o 3 estados anterior se forem iguais verifico se a previsão real anterior (next_day['t_state'] é menor ou igual a 2, se for ele muda para 3 se não for ele muda para 1
         */
-        if($before_forecast == $current_forecast){
-            if($real_value <= 2){
+        if ($before_forecast == $current_forecast) {
+            if ($real_value <= 2) {
                 return 3;
-            }else{
+            } else {
                 return 1;
             }
-        }else{
+        } else {
             return $current_forecast;
         }
     }
@@ -753,21 +759,46 @@ class ConsultaModel extends Model
     public function forecastHeuristicAfterInflection($before_forecast, $current_forecast, $real_value)
     {
         // Compara as previsões de 3 estados anterior e a atual
-        if($real_value != $current_forecast){
+        if ($real_value != $current_forecast) {
             return $real_value;
-        }else{
+        } else {
             return $current_forecast;
         }
     }
 
     public function searchProbInArrayReturnGreaterProb($arr_three_states_vector)
     {
-        if($arr_three_states_vector[0] > $arr_three_states_vector[2]){
+        if ($arr_three_states_vector[0] > $arr_three_states_vector[2]) {
             return 0;
-        }else if($arr_three_states_vector[2] > $arr_three_states_vector[0]){
+        } else if ($arr_three_states_vector[2] > $arr_three_states_vector[0]) {
             return 2;
-        }else if($arr_three_states_vector[0] == $arr_three_states_vector[2]){
+        } else if ($arr_three_states_vector[0] == $arr_three_states_vector[2]) {
             return 0;
         }
+    }
+
+    public function verifyContinuosGrowthIsZero($continuos_growth)
+    {
+        if ($continuos_growth == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function compareVerifyWithPrevision($real_value, $prevision)
+    {
+        if ($real_value == $prevision) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    public function verifyHitThreeTimes($times)
+    {
+        if ($times == 3) {
+            return [true,3];
+        }
+        return [false,$times];
     }
 }

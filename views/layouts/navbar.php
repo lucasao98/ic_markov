@@ -22,6 +22,7 @@ TesteAsset::register($this);
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
+  
   <?= Html::csrfMetaTags() ?>
 
   <!--  <title>Business Frontpage - Start Bootstrap Template</title> -->
@@ -69,29 +70,38 @@ TesteAsset::register($this);
           ]);
           ?>
         </li>
+        <!--
         <li>
           <a href="first-passage-time">Tempo de primeira passagem</a>
         </li>
-        <!--
-        <li>
-          <a href="steady-state-automatic">Estado Estável Automatizado</a>
-        </li>
         -->
         <!--
-        <li>
-          <a href="calculo-media-desvio">Cálculo das Médias</a>
-        </li>
-        -->
-        <!--
-        <li>
-          <a href="annual-analysis">Análise Estado Estável</a>
-        </li>
-        -->
         <li>
           <a href="join-methods">Intervalos Fixos e Método de 3 estados</a>
         </li>
+        -->
         <li>
           <a href="heuristic-m3">Heuristica M3</a>
+        </li>
+        <!--
+        <li>
+          <a href="heuristic-m1-plus">Heuristica M1+</a>
+        </li>
+        -->
+        <li>
+          <?php
+          echo ButtonDropdown::widget([
+            'label' => 'Automatico',
+            'options' => [
+              'class' => 'btn btn-primary',
+            ],
+            'dropdown' => [
+              'items' => [
+                ['label' => 'Heuristica M3', 'url' => 'automatic-heuristic-m3'],
+              ],
+            ],
+          ]);
+          ?>
         </li>
       </ul>
     </div>

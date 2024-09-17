@@ -17,7 +17,7 @@ $consultaModel = new ConsultaModel;
         <h1>Heuristica M3</h1>
         <p>O objetivo da heurística M3 é coletar informações de períodos contínuos de aumento ou de diminuição</p>
     </div>
-    <hr/>
+    <hr />
     <div class="row">
         <h2>Previsão de grandes períodos usando CMTD</h2>
         <p>Data Inicial: Primeira data do período a ser previsto</p>
@@ -403,11 +403,6 @@ $consultaModel = new ConsultaModel;
         'style' => ['width' => '190px', 'height' => '30px']
     ]) ?>
 
-    <?= $form->field($consultaModel, 'qtde_obs')->textInput([
-        'style' => ['width' => '190px', 'height' => '30px']
-    ]) ?>
-
-
     <?= $form->field($consultaModel, 'metric')->dropDownList(
         [
             'month' => 'Meses',
@@ -419,6 +414,13 @@ $consultaModel = new ConsultaModel;
     ) ?>
 
     <?= $form->field($consultaModel, 'states_number')->textInput([
+        'style' => ['width' => '190px', 'height' => '30px']
+    ]) ?>
+
+    <?= $form->field($consultaModel, 'qtde_obs')->textInput([
+        'style' => ['width' => '190px', 'height' => '30px']
+    ]) ?>
+    <?= $form->field($consultaModel, 'qtde_up_down_constants')->textInput([
         'style' => ['width' => '190px', 'height' => '30px']
     ]) ?>
     <!-- <?= $form->field($consultaModel, 'base')->textInput() ?> -->

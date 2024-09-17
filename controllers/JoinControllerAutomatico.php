@@ -19,45 +19,13 @@ class JoinController extends Controller
         if ($model->load($post) && $model->validate() && $model->periodo) {
             
             $actions = [
-                'ALPA4',
-                'BBDC3',
-                'BBDC4',
-                'BRKM5',
-                'BRML3',
-                'BTOW3',
-                'CESP6',
-                'CMIG4',
-                'COCE5',
-                'CPFE3',
-                'CPLE6',
-                'CSNA3',
-                'DIRR3',
-                'EQTL3',
-                'EVEN3',
-                'EZTC3',
-                'FLRY3',
-                'IGTA3',
-                'ITUB3',
-                'ITUB4',
-                'JBSS3',
-                'JHSF3',
-                'LAME3',
-                'LAME4',
-                'MRFG3',
-                'MRVE3',
-                'ODPV3',
-                'RENT3',
-                'SANB11',
-                'SMTO3',
-                'SULA11',
-                'TRIS3',
-                'TRPL4',
-                'WEGE3',
+                'VALE3',
                 'PSSA3',
                 'GGBR4',
                 'BRFS3',
                 'ENGI11',
                 'ENBR3',
+                'CSAN3',
                 'CIEL3',
                 'BBAS3',
                 'ITSA4',
@@ -66,14 +34,16 @@ class JoinController extends Controller
                 'GOAU4',
                 'CYRE3',
                 'MULT3',
+                'PETR4'
             ];
 
-            $file_percentage_hits = fopen("percentage_hits.txt", "w");
-            fwrite($file_percentage_hits, "Nome "." Taxa de Acertos 3 estados " . "Taxa Acertos Heuristica"."\n");
+            $file_percentage_hits = fopen("verifyPercentages.txt", "a");
+            //fwrite($file_percentage_hits, "Ação "." Taxa de Acertos 3 estados " . "Taxa Acertos Heuristica"."\n");
+            fwrite($file_percentage_hits, "Quantidade de observações ".$model->qtde_obs."\n");
+            fwrite($file_percentage_hits, "Ano Da Previsão ".$model->inicio." ".$model->final."\n");
             foreach ($actions as $action_name) {
-                $model->inicio = "31/12/2020";
-                $model_final = "31/12/2021";
                 $start = $model->inicio;
+                $final = $model->final;
                 $consultas = 0;
                 $acertou = 0;
                 $errou = 0;
@@ -101,7 +71,6 @@ class JoinController extends Controller
                 $base = $model->base;
                 $current_interval = 0;
                 $score_equal_times = 0;
-                $model->qtde_obs = 3;
 
                 $arr_with_prob_by_day = [];
                 $inflection_dots = [];
@@ -150,32 +119,7 @@ class JoinController extends Controller
                 $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux);
                 $consultas = count($next_days);
 
-                /*
-            if($stock){
-                $new_final_date = Paper::toIsoDate(\DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('+5 days')->format('U'));
-                $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $new_final_date);
-                $consultas = count($next_days);
-            }
-            */
-
-                //$file = fopen($stock . ".txt", "w");
-                //$file_real = fopen("arquivo_reais.txt", "w");
-                $file_percentage_hits = fopen("percentage_hits.txt", "a");
-                //fwrite($file_real, "Dia " . "Previsão" . "\n");
-                /*
-                fwrite(
-                    $file,
-                    "Dia Antes de Inflexão," .
-                        "Previsão Dia Antes," .
-                        "Data Inflexão," .
-                        "Previsão Inflexão," .
-                        "Heuristica Antes Inflexão," .
-                        "Dia Após Inflexão," .
-                        "Previsão Dia após inflexão," .
-                        "Heuristica," .
-                        "Real," .
-                        "\n"
-                );*/
+                $file_percentage_hits = fopen("verifyPercentages.txt", "a");
 
                 while (1) {
 
@@ -548,16 +492,9 @@ class JoinController extends Controller
 
                 $chart = $model->chartData($next, $intervals, $t_clientDatas, $t_datas);
                 $percentage_heuristica = ($acertos_heuristica / $consultas) * 100;
-                //fclose($file);
 
                 fwrite($file_percentage_hits, $stock . " ".round(($t_acertou / $consultas) * 100, 2)." " . number_format($percentage_heuristica, 2) . "\n");
             }
-
-
-            /*
-            var_dump($inter_test);
-            exit();
-            */
 
             return $this->render('result', [
                 'data_dots' => $inflection_dots,

@@ -563,7 +563,6 @@ class MainController extends Controller
 
             $start = Paper::toIsoDate($start->format('U')); //Passando para o padrão de datas do banco
             $final = Paper::toIsoDate($final->format('U')); //Passando para o padrão de datas do banco
-
             $stock = $model->nome;
             //Setup inicial do conjunto de treinamento
             $cursor_by_price = $model->getData($stock, $start, $final);
@@ -890,11 +889,14 @@ class MainController extends Controller
                 }
                 $three_states[$cursor['t_state'] - 1] += 1;
             }
+            
             $three_state_matrix = $model->transitionMatrix($actions_by_date, $three_states, 3, "t_state");
+            
 
             $Matrix = MatrixFactory::create($three_state_matrix);
 
             $result = $model->getSteadyState($Matrix);
+
 
             if ($result === 0) {
                 $session = Yii::$app->session;

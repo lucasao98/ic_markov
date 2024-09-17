@@ -403,11 +403,6 @@ $consultaModel = new ConsultaModel;
         'style' => ['width' => '190px', 'height' => '30px']
     ]) ?>
 
-    <?= $form->field($consultaModel, 'qtde_obs')->textInput([
-        'style' => ['width' => '190px', 'height' => '30px']
-    ]) ?>
-
-
     <?= $form->field($consultaModel, 'metric')->dropDownList(
         [
             'month' => 'Meses',
@@ -419,6 +414,9 @@ $consultaModel = new ConsultaModel;
     ) ?>
 
     <?= $form->field($consultaModel, 'states_number')->textInput([
+        'style' => ['width' => '190px', 'height' => '30px']
+    ]) ?>
+    <?= $form->field($consultaModel, 'qtde_obs')->textInput([
         'style' => ['width' => '190px', 'height' => '30px']
     ]) ?>
     <!-- <?= $form->field($consultaModel, 'base')->textInput() ?> -->

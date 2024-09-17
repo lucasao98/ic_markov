@@ -57,94 +57,51 @@
                 <!-- Resultado -->
                 <h1>Previsão da heurística</h1>
                 <h3 class="result-acertou"><?= "Acertou: $quantidade_acertos_heuristica - " . $acerto_heuristica . '%' ?></h3>
-                <h3 class="result-errou"><?= "Errou: $t_errou - " . round(($t_errou / $consultas) * 100, 2) . '%' ?></h3>
+                <h3 class="result-errou"><?= "Errou: $erros_heuristica - " . round(($erros_heuristica / $consultas) * 100, 2) . '%' ?></h3>
+                
+            </div>
+            
+            <div class="col-md-12">
+                <!-- Resultado -->
+                <h1>Previsão da heurística M3</h1>
+                <h3 class="result-acertou"><?= "Acertou: $quantidade_acertos_m3 - " . $percentage_heuristica_m3 . '%' ?></h3>
+                <h3 class="result-errou"><?= "Errou: $erro_heuristica_m3 - " . round(($erro_heuristica_m3 / $consultas) * 100, 2) . '%' ?></h3>
+                <h3><?= "Compra e venda:" ?></h3>
+                <h3><?= "Quantia inicial: R$100" ?></h3>
+                <h3><?= "Estratégia 1: Quantia final: R$" . $cliente_heuristica_e1_cash . " e " . $cliente_heuristica_e1_actions . " ações" ?></h3>
+                <h3><?= "Estratégia 2: Quantia final: R$" . $cliente_heuristica_e2_cash . " e " . $cliente_heuristica_e2_actions . " ações" ?></h3>
+                <h3><?= "Estratégia 3(buy and hold): Quantia final: R$" . $cliente_heuristica_e3_cash . " e " . $cliente_heuristica_e3_actions. " ações" ?></h3>
             </div>
 
         </div>
 
-        <div class="row">
+        <div class="row mt-5">
             <table class="table">
                 <thead>
                     <tr>
-                        Pontos de Inflexões
+                        <h3>
+                            Pontos de Mudança
+                        </h3>
                     </tr>
                     <tr>
                         <th>Data</th>
-                        <th>Limite Superior</th>
-                        <th>Limite Inferior</th>
+                        <th>Heuristica -> Aumentando(1)/Diminuindo(0)</th>
+                        <th>Previsão do Dia</th>
+                        <th>Valor Real</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($data_dots as $data) { ?>
                         <tr>
                             <th><?= $data['date'] ?></th>
-                            <th><?= $data['sup'] ?></th>
-                            <th><?= $data['inf'] ?></th>
+                            <th><?= $data['orientation'] ?></th>
+                            <th><?= $data['prev_day'] ?></th>
+                            <th><?= $data['real_value'] ?></th>
                         </tr>
                     <?php } ?>
                 </tbody>
             </table>
         </div>
-
-
-        <div class="row">
-            <table class="table">
-                <thead>
-                    <tr>
-                        Pontos Antes do Ponto de Inflexão
-                    </tr>
-                    <tr>
-                        <th>Data Antes do Ponto de Inflexão</th>
-                        <th>Previsão</th>
-                        <th>Data do Ponto de Inflexão</th>
-                        <th>Previsão</th>
-                        <th>Previsão Heurística</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($data_dots_inflection_before as $data) { ?>
-                        <tr>
-                            <th><?= $data['day_before_inflection'] ?></th>
-                            <th><?= $data['prob_day_before_inflection'] ?></th>
-                            <th><?= $data['day_inflection'] ?></th>
-                            <th><?= $data['prob_day_inflection'] ?></th>
-                            <th><?= $data['prev_heur'] ?></th>
-                        </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-        </div>
-
-
-        <div class="row">
-            <table class="table">
-                <thead>
-                    <tr>
-                        Pontos após o ponto de inflexão
-                    </tr>
-                    <tr>
-                        <th>Data do Ponto de Inflexão</th>
-                        <th>Previsão</th>
-                        <th>Data Após o Ponto de Inflexão</th>
-                        <th>Previsão</th>
-                        <th>Previsão Heurística</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($data_dots_inflection_after as $data) { ?>
-                        <tr>
-                            <th><?= $data['day'] ?></th>
-                            <th><?= $data['prob'] ?></th>
-                            <th><?= $data['after_inflection_day'] ?></th>
-                            <th><?= $data['after_inflection_prob'] ?></th>
-                            <th><?= $data['prev_heur'] ?></th>
-                        </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-        </div>
-
-
         <div style="margin-top: 3rem;" class="row">
             <?php
 

@@ -57,9 +57,8 @@
                 <!-- Resultado -->
                 <h1>Previsão da heurística</h1>
                 <h3 class="result-acertou"><?= "Acertou: $quantidade_acertos_heuristica - " . $acerto_heuristica . '%' ?></h3>
-                <h3 class="result-errou"><?= "Errou: $t_errou - " . round(($t_errou / $consultas) * 100, 2) . '%' ?></h3>
+                <h3 class="result-errou"><?= "Errou: $erros_heuristica - " . round(($erros_heuristica / $consultas) * 100, 2) . '%' ?></h3>
             </div>
-
         </div>
 
         <div class="row">

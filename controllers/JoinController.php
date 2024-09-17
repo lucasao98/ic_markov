@@ -19,7 +19,6 @@ class JoinController extends Controller
         if ($model->load($post) && $model->validate() && $model->periodo) {
             $start = $model->inicio;
             $final = $model->final;
-            $start = $model->inicio;
             $consultas = 0;
             $acertou = 0;
             $errou = 0;
@@ -27,6 +26,7 @@ class JoinController extends Controller
             $errou_avg = 0;
             $t_acertou = 0;
             $acertos_heuristica = 0;
+            $erros_heuristica = 0;
             $t_errou = 0;
             $next = array();
             $intervals = array();
@@ -54,10 +54,9 @@ class JoinController extends Controller
             $after_inflection = [];
             $inter_test = [];
             $arr_forecast = [];
+            $test_errors = [];
             $last_day_inflection_day = false;
             $cont_total_actions = 0;
-
-
 
             $final = $start;
             //Dia de início do conjunto de treinamento
@@ -104,8 +103,11 @@ class JoinController extends Controller
 
                 //$file = fopen($stock . ".txt", "w");
                 //$file_real = fopen("arquivo_reais.txt", "w");
-                $file_percentage_hits = fopen("percentage_hits.txt", "a");
+                //$file_percentage_hits = fopen("percentage_hits.txt", "a");
+                $file_percentage_hits = fopen("verifyPercentages.txt", "a");
                 //fwrite($file_real, "Dia " . "Previsão" . "\n");
+                //fwrite($file_percentage_hits, "Quantidade de Observações ".$model->qtde_obs. "\n");
+                //fwrite($file_percentage_hits, "Ação"."  "."3 estados "." "."Heuristica ". "\n");
                 /*
                 fwrite(
                     $file,
@@ -281,12 +283,16 @@ class JoinController extends Controller
 
                                 if ($next_day['t_state'] == (end($inter_test)['prev_heur'])) {
                                     $acertos_heuristica++;
+                                }else{
+                                    $erros_heuristica += 1;
                                 }
 
                                 $last_day_inflection_day = false;
                             } else {
                                 if ($next_day['t_state'] == ($t_max + 1)) {
                                     $acertos_heuristica++;
+                                }else{
+                                    $erros_heuristica += 1;
                                 }
                             }
 
@@ -302,6 +308,8 @@ class JoinController extends Controller
                                 $score_equal_times++;
                                 if ($next_day['t_state'] == ($t_max + 1)) {
                                     $acertos_heuristica++;
+                                }else{
+                                    $erros_heuristica += 1;
                                 }
                             } else {
                                 // Se os intervalos forem diferentes guardamos os valores do ponto de inflexão, um dia antes e um dia após.
@@ -340,19 +348,18 @@ class JoinController extends Controller
                                 //$heur_state = $model->getThreeState($last_day['preult'], $before_day['preult']);
                                 if ($next_day['t_state'] == (end($before_inflection)['prev_heur'])) {
                                     $acertos_heuristica++;
+                                }else{
+                                    $erros_heuristica += 1;
                                 }
-
-
                                 $score_equal_times = 0;
                             }
                         }
                     } else {
                         if ($next_day['t_state'] == ($t_max + 1)) {
                             $acertos_heuristica++;
-                            //fwrite($file, $next_day['date']->toDateTime()->format('d/m/Y') . "\n");
+                        }else{
+                            $erros_heuristica += 1;
                         }
-
-                        //var_dump($next_day['date']->toDateTime()->format('d/m/Y'));
                     }
 
                     if ($next_day['state'] == $max + 1)
@@ -492,7 +499,6 @@ class JoinController extends Controller
 
                 $chart = $model->chartData($next, $intervals, $t_clientDatas, $t_datas);
                 $percentage_heuristica = ($acertos_heuristica / $consultas) * 100;
-                //fclose($file);
 
                 fwrite($file_percentage_hits, $stock . " ".round(($t_acertou / $consultas) * 100, 2)." " . number_format($percentage_heuristica, 2) . "\n");
 
@@ -501,6 +507,7 @@ class JoinController extends Controller
                 'data_dots_inflection_before' => $before_inflection,
                 'data_dots_inflection_after' => $inter_test,
                 'acerto_heuristica' => round($percentage_heuristica, 2),
+                'erros_heuristica' => $erros_heuristica,
                 'quantidade_acertos_heuristica' => $acertos_heuristica,
                 'acertou' => $acertou,
                 'errou' => $errou,

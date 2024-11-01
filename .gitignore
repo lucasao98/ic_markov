@@ -53,3 +53,4 @@ web/arquivo_reais.txt
 web/arquivo_teste_days.txt
 web/continuous_growth.txt
 web/percentage_hits.txt
+web/*.txt

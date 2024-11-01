@@ -1,6 +1,6 @@
 <?php
 
-use app\models\ConsultaModel;
+use app\models\ConsultaHeuristica;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\jui\DatePicker;
@@ -8,7 +8,7 @@ use yii\jui\DatePicker;
 ini_set('max_execution_time', 0); //300 seconds = 5 minutes
 ini_set('memory_limit', '-1');
 
-$consultaModel = new ConsultaModel;
+$consultaModel = new ConsultaHeuristica;
 
 ?>
 
@@ -398,30 +398,10 @@ $consultaModel = new ConsultaModel;
         ]
     ) ?>
 
-    <?= $form->field($consultaModel, 'inicio')->widget(DatePicker::className(), [
-        'language' => 'pt-BR',
-        'dateFormat' => 'dd/MM/yyyy'
-    ]) ?>
-
     <?= $form->field($consultaModel, 'final')->widget(DatePicker::className(), [
         'language' => 'pt-BR',
         'dateFormat' => 'dd/MM/yyyy'
     ]) ?>
-
-
-    <?= $form->field($consultaModel, 'periodo')->textInput([
-        'style' => ['width' => '190px', 'height' => '30px']
-    ]) ?>
-
-    <?= $form->field($consultaModel, 'metric')->dropDownList(
-        [
-            'month' => 'Meses',
-            'year' => 'Anos'
-        ],
-        [
-            'style' => ['width' => '190px', 'height' => '30px']
-        ]
-    ) ?>
 
     <?= $form->field($consultaModel, 'states_number')->textInput([
         'style' => ['width' => '190px', 'height' => '30px'],

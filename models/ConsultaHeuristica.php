@@ -11,7 +11,7 @@ use yii\base\Model;
 use Yii;
 use yii\base\ErrorException;
 
-class ConsultaModel extends Model
+class ConsultaHeuristica extends Model
 {
     public $nome;
     public $inicio;
@@ -23,18 +23,16 @@ class ConsultaModel extends Model
     public $base;
     public $initial_year;
     public $qtde_up_down_constants;
-    public $actions;
 
     public function rules()
     {
         return [
-            [['nome', 'inicio', 'final'], 'required'],
+            [['nome', 'final'], 'required'],
             [['states_number', 'periodo'], 'integer'],
             [['metric'], 'string'],
-            [['inicio', 'final'], 'date', 'format' => 'dd/mm/yyyy'],
+            [['final'], 'date', 'format' => 'dd/mm/yyyy'],
             ['qtde_obs', 'integer'],
-            ['qtde_up_down_constants','integer'],
-            ['actions','each','rule' => ['string']],
+            ['qtde_up_down_constants', 'integer'],
         ];
     }
 
@@ -42,7 +40,7 @@ class ConsultaModel extends Model
     {
         return [
             'nome' => 'Ação',
-            'inicio' => 'Data Inicial',
+            'inicio' => 'Data',
             'actions' => 'Ações',
             'final' => 'Data Final',
             'states_number' => 'Quantidade de intervalos',
@@ -102,7 +100,7 @@ class ConsultaModel extends Model
 
         return 0;
     }
-    
+
     public static function getThreeState($price, $price_before)
     {
         if ($price > $price_before) {
@@ -199,8 +197,7 @@ class ConsultaModel extends Model
 
         for ($i = 0; $i < $states_number; $i++)
             for ($j = 0; $j < $states_number; $j++)
-                $matrix[$j][$i] = 0;
-                
+                $matrix[$i][$j] = 0;
 
 
         //calculando a quantidade de elementos em cada transição da matriz
@@ -388,6 +385,7 @@ class ConsultaModel extends Model
         //declaração do vetor de estado inicial a partir do ultimo dia do conjunto de treinamento
         $vector[0][$paper[count($paper) - 1][$state_type] - 1] = 1;
         $vector = MatrixFactory::create($vector);
+        
 
         $vector = $vector->multiply($matrix); //multiplicando
 
@@ -798,8 +796,41 @@ class ConsultaModel extends Model
     public function verifyHitThreeTimes($times)
     {
         if ($times == 3) {
-            return [true,3];
+            return [true, 3];
         }
-        return [false,$times];
+        return [false, $times];
+    }
+
+    public function previsionQuality($total_mean_m1, $total_mean_other_period)
+    {
+        if ($total_mean_m1 < 48.6 && $total_mean_other_period < 48.6) {
+            if (($total_mean_other_period - $total_mean_m1) > 1) {
+                return $total_mean_other_period;
+            } else {
+                return $total_mean_m1;
+            }
+        } else if (($total_mean_m1 < 48.6) && ($total_mean_other_period > 48.6 && $total_mean_other_period < 50.9)) {
+            if (abs(48.6 - $total_mean_m1) >= 1) {
+                return $total_mean_other_period;
+            }else{
+                return $total_mean_m1;
+            }
+        } else if ($total_mean_m1 < 48.6 && $total_mean_other_period > 50.9) {
+            return $total_mean_other_period;
+        } else if (($total_mean_m1 > 48.6 && $total_mean_m1 < 50.9) && ($total_mean_other_period > 48.9 && $total_mean_other_period < 50.9)) {
+            return $total_mean_m1;
+        } else if (($total_mean_m1 > 48.6 && $total_mean_m1 < 50.9) && ($total_mean_other_period > 50.9)) {
+            if (abs($total_mean_other_period - 50.9) > 1) {
+                return $total_mean_other_period;
+            } else {
+                return $total_mean_m1;
+            }
+        } else if ($total_mean_m1 > 50.9 && $total_mean_other_period > 50.9) {
+            if (($total_mean_other_period - $total_mean_m1) > 1) {
+                return $total_mean_other_period;
+            } else {
+                return $total_mean_m1;
+            }
+        }
     }
 }

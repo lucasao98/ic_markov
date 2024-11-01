@@ -17,7 +17,7 @@ class HeuristicM3Controller extends Controller
 
         $model = new ConsultaModel;
         $post = $_POST;
-
+        
         if ($model->load($post) && $model->validate() && $model->periodo) {
             $start = $model->inicio;
             $final = $model->final;
@@ -127,12 +127,8 @@ class HeuristicM3Controller extends Controller
 
                 if (count($next_days) == 0)
                     break;
-               
-
-
                 //busca no array a ação do dia seguinte
                 $next_day = array_shift($next_days);
-
 
                 //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                 if ($next_day['date'] > $aux || $next_day['date'] == null)

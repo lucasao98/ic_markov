@@ -17,9 +17,12 @@ class HeuristicM1PlusController extends Controller
         $post = $_POST;
 
         $transitions_matrix_fixed = [];
-        $transitions_matrix_fixed[0] = ['metric' => 'month', 'period' => "3"];
-        $transitions_matrix_fixed[1] = ['metric' => 'month', 'period' => "12"];
-        $transitions_matrix_fixed[2] = ['metric' => 'year', 'period' => "3"];
+        $transitions_matrix_fixed[0] = ['metric' => 'days', 'period' => "15"];
+        $transitions_matrix_fixed[1] = ['metric' => 'month', 'period' => "1"];
+        $transitions_matrix_fixed[2] = ['metric' => 'months', 'period' => "2"];
+        $transitions_matrix_fixed[3] = ['metric' => 'month', 'period' => "3"];
+        $transitions_matrix_fixed[4] = ['metric' => 'month', 'period' => "12"];
+        $transitions_matrix_fixed[5] = ['metric' => 'year', 'period' => "3"];
         $obj_accuracy_rate = [];
 
         if ($model->load($post) && $model->validate() && $model->periodo) {
@@ -33,8 +36,6 @@ class HeuristicM1PlusController extends Controller
 
                     // Coloca o período do objeto atual no model->periodo
                     $model->periodo = $value['period'];
-
-
 
                     $start = $model->inicio;
                     $final = $model->final;
@@ -90,8 +91,6 @@ class HeuristicM1PlusController extends Controller
                     $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
                     $ano_previsao = intval($start->format('Y'));
 
-
-
                     //O conjunto de treinamento será definido n meses antes do dia a ser previsto
                     $start = $start->modify("-$model->periodo $model->metric");
 
@@ -128,10 +127,8 @@ class HeuristicM1PlusController extends Controller
                         if (count($next_days) == 0)
                             break;
 
-
                         //busca no array a ação do dia seguinte
                         $next_day = array_shift($next_days);
-
 
                         //Se o dia a ser previsto for maior do que o nosso ultimo dia estipulado o laço ou nulo acaba
                         if ($next_day['date'] > $aux || $next_day['date'] == null)

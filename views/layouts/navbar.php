@@ -75,19 +75,15 @@ TesteAsset::register($this);
           <a href="first-passage-time">Tempo de primeira passagem</a>
         </li>
         -->
-        <!--
         <li>
           <a href="join-methods">Intervalos Fixos e Método de 3 estados</a>
         </li>
-        -->
         <li>
           <a href="heuristic-m3">Heuristica M3</a>
         </li>
-        <!--
         <li>
           <a href="heuristic-m1-plus">Heuristica M1+</a>
         </li>
-        -->
         <li>
           <?php
           echo ButtonDropdown::widget([

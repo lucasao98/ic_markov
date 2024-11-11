@@ -36,14 +36,6 @@ $consultaModel = new ConsultaHeuristica;
 <div class="container">
     <?php $form = ActiveForm::begin(['layout' => 'horizontal']) ?>
 
-    <?php if ($flag_error) {
-        echo "<div class='alert alert-warning alert-dismissible' role='alert'>
-        <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-        <strong>Cuidado!</strong> O tamanho da matriz de transição selecionado não possui registros no banco de dados.
-        </div>";
-    }
-    ?>
-
     <?= $form->field($consultaModel, 'nome')->dropDownList(
         [
             'ABCB4' => 'ABCB4',

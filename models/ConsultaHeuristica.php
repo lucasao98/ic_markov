@@ -42,7 +42,7 @@ class ConsultaHeuristica extends Model
             'nome' => 'Ação',
             'inicio' => 'Data',
             'actions' => 'Ações',
-            'final' => 'Data Final',
+            'final' => 'Data Inicial da Previsão',
             'states_number' => 'Quantidade de intervalos',
             'metric' => 'Métrica',
             'qtde_obs' => 'Quantidade de observações',

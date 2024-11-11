@@ -94,6 +94,7 @@ TesteAsset::register($this);
             'dropdown' => [
               'items' => [
                 ['label' => 'Heuristica M3', 'url' => 'automatic-heuristic-m3'],
+                ['label' => 'Heuristica M1 Plus', 'url' => 'automatic-heuristic-m1-plus'],
               ],
             ],
           ]);

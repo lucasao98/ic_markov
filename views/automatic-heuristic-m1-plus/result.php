@@ -1,6 +1,17 @@
 <?php
 
 ?>
+
+<style>
+    .result-acertou {
+        color: green;
+    }
+
+    .result-errou {
+        color: red;
+    }
+</style>
+
 <body>
     <div class="container">
         <div class="row">
@@ -25,39 +36,31 @@
                 Nesse caso, iremos verificar caso o valor real seja diferente da previsão atual de 3 estados,
                 se forem diferentes, a previsão será o valor real, mas caso sejam iguais a previsão será a previsão atual.
             </p>
-            <p></p>
-        </div>
-        <div class="row">
-            <h3>Período Selecionado: <?= $period . " " . $metric ?></h3>
         </div>
         <div class="row mt-5">
             <table class="table">
                 <thead>
                     <tr>
                         <h3>
-                            Pontos de Mudança
+                            Resultados
                         </h3>
                     </tr>
                     <tr>
                         <th>Ação</th>
-                        <th>15 dias</th>
-                        <th>1 mes</th>
-                        <th>2 meses</th>
-                        <th>3 meses</th>
-                        <th>12 meses</th>
-                        <th>3 anos</th>
+                        <th>Acertos</th>
+                        <th>Erros</th>
+                        <th>Taxa de Acertos</th>
+                        <th>Período Selecionado</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($info_mean as $data) { ?>
+                    <?php foreach ($results as $data) { ?>
                         <tr>
-                            <th><?= $data['stock'] ?></th>
-                            <th><?= $data['fifteen_days'] ?></th>
-                            <th><?= $data['one_month'] ?></th>
-                            <th><?= $data['two_months'] ?></th>
-                            <th><?= $data['three_months'] ?></th>
-                            <th><?= $data['twelve_months'] ?></th>
-                            <th><?= $data['three_years'] ?></th>
+                            <th><?= $data['action'] ?></th>
+                            <th><?= $data['hits'] ?></th>
+                            <th><?= $data['errors'] ?></th>
+                            <th><?= $data['percentage_hits'] ?></th>
+                            <th><?= $data['selected_period'] ?></th>
                         </tr>
                     <?php } ?>
                 </tbody>

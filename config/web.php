@@ -90,6 +90,7 @@ $config = [
                 'heuristic-m3' => 'heuristic-m3/index',
                 'heuristic-m1-plus' => 'heuristic-m1-plus/index',
                 'automatic-heuristic-m3' => 'automatic-heuristic-m3/index',
+                'automatic-heuristic-m1-plus' => 'automatic-heuristic-m1-plus/index',
                 'result-automatic-heuristic-m3' => 'automatic-heuristic-m3/result'
             ],
         ],

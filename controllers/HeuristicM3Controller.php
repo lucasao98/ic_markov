@@ -7,7 +7,6 @@ use app\models\ConsultaModel;
 use app\models\Paper;
 use app\models\Client;
 use Exception;
-use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 
 class HeuristicM3Controller extends Controller
 {
@@ -71,6 +70,7 @@ class HeuristicM3Controller extends Controller
             $final = $start;
             //Dia de início do conjunto de treinamento
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
+            
 
             //O conjunto de treinamento será definido n meses antes do dia a ser previsto
             $start = $start->modify("-$model->periodo $model->metric");
@@ -90,7 +90,8 @@ class HeuristicM3Controller extends Controller
 
             //Setup inicial do conjunto de treinamento, contém as ações do intervalo passado pelo usuário
             $cursor_by_price = $model->getData($stock, $start, $final);
-
+            
+            
             //$a = $cursor_by_price[0]['date']->toDateTime()->format('Y');
             //var_dump(intval($a));
 
@@ -105,6 +106,7 @@ class HeuristicM3Controller extends Controller
 
             //Busca no banco os dias que serão previstos
             $next_days = $model->getData($stock, Paper::toIsoDate($predictStart->format('U')), $aux);
+            
             $consultas = count($next_days);
 
             /*
@@ -124,7 +126,6 @@ class HeuristicM3Controller extends Controller
             //fwrite($file_get_percentage_heuristic_m3, "Ação " . "3_estados" . " Heuristica_M3" . "\n");
             fwrite($file_continuous_growth, "Data " . "Orientação " . "Contagem ");
             while (1) {
-
                 if (count($next_days) == 0)
                     break;
                 //busca no array a ação do dia seguinte

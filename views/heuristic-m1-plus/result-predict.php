@@ -42,6 +42,11 @@
                 <h1>Previsão com 3 estados</h1>
                 <h3 class="result-acertou"><?= "Acertou: $t_acertou - " . round(($t_acertou / $consultas) * 100, 2) . '%' ?></h3>
                 <h3 class="result-errou"><?= "Errou: $t_errou - " . round(($t_errou / $consultas) * 100, 2) . '%' ?></h3>
+                <h3><?= "Compra e venda:" ?></h3>
+                <h3><?= "Quantia inicial: R$100" ?></h3>
+                <h3><?= "Estratégia 1: Quantia final: R$" . $cliente_heuristica_e1_cash . " e " . $cliente_heuristica_e1_actions . " ações" ?></h3>
+                <h3><?= "Estratégia 2: Quantia final: R$" . $cliente_heuristica_e2_cash . " e " . $cliente_heuristica_e2_actions . " ações" ?></h3>
+                <h3><?= "Estratégia 3(buy and hold): Quantia final: R$" . $cliente_heuristica_e3_cash . " e " . $cliente_heuristica_e3_actions. " ações" ?></h3>
             </div>
         </div>
     </div>

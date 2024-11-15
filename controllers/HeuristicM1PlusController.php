@@ -8,6 +8,8 @@ use app\models\Paper;
 use app\models\Client;
 use app\models\ConsultaHeuristica;
 
+define("prevision_heuristic", True);
+
 class HeuristicM1PlusController extends Controller
 {
     public function actionIndex()
@@ -18,18 +20,12 @@ class HeuristicM1PlusController extends Controller
         $post = $_POST;
 
         $transitions_matrix_fixed = [
-            ['metric' => 'days', 'period' => 15],
-            ['metric' => 'month', 'period' => 1],
-            ['metric' => 'months', 'period' => 2],
             ['metric' => 'months', 'period' => 3],
             ['metric' => 'months', 'period' => 12],
             ['metric' => 'years', 'period' => 3]
         ];
 
         $total_values_by_period = [
-            ['metric' => 'days', 'period' => 15, "total_sum" => 0, "total_sum_heuristic" => 0, "total_years" => 0 ],
-            ['metric' => 'month', 'period' => 1, "total_sum" => 0, "total_sum_heuristic" => 0, "total_years" => 0],
-            ['metric' => 'months', 'period' => 2, "total_sum" => 0, "total_sum_heuristic" => 0, "total_years" => 0],
             ['metric' => 'months', 'period' => 3, "total_sum" => 0, "total_sum_heuristic" => 0, "total_years" => 0],
             ['metric' => 'months', 'period' => 12, "total_sum" => 0, "total_sum_heuristic" => 0, "total_years" => 0],
             ['metric' => 'years', 'period' => 3, "total_sum" => 0, "total_sum_heuristic" => 0, "total_years" => 0]
@@ -41,8 +37,6 @@ class HeuristicM1PlusController extends Controller
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('-1 year')->modify('-2 day');
             $final = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('-2 day');
 
-           
-
             $start_prevision = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('-2 day');
             $final_prevision = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('+1 year')->modify('-2 day');
 
@@ -50,15 +44,19 @@ class HeuristicM1PlusController extends Controller
             $prevision_year = intval($final->format('Y'));
             $initial_date_prevision = $start_prevision->format("d/m/Y");
             $final_date_prevision = $final_prevision->format("d/m/Y");
-            
+
 
             $action_name = $model->nome;
             $info_predict = [];
             $info_predict_heuristic = [];
+            $acertos = 0;
+            $erros = 0;
+            $percentage = 0;
+            $percentage_errors = 0;
 
             $file_transition_matrix_size = fopen("transition_matrix_size.txt", "w");
             $file_transition_matrix_size_heuristic = fopen("transition_matrix_size_heuristic.txt", "w");
-            $file_results = fopen("results_". ($prevision_year + 1) .".txt", "a");
+            $file_results = fopen("results_" . ($prevision_year + 1) . ".txt", "a");
             $file_best_period = fopen("best_period_new_periods_" . ($prevision_year + 1) . ".txt", "a");
 
             fwrite($file_transition_matrix_size, "Ação " . "Taxa de Acertos " . "Ano " . "Metrica " . "Período " . "\n");
@@ -72,7 +70,7 @@ class HeuristicM1PlusController extends Controller
 
                     // Coloca o período do objeto atual no model->periodo
                     $model->periodo = $value['period'];
-                   
+
                     $start = $start_day;
                     $final = $model->final;
                     $consultas = 0;
@@ -121,7 +119,8 @@ class HeuristicM1PlusController extends Controller
                         'orientation' => -1,
                         'dates' => 0
                     ];
-                    
+                    $title = "";
+
                     $final = $start;
                     //Dia de início do conjunto de treinamento
                     $start = \DateTime::createFromFormat('d/m/YH:i:s', $start . '24:00:00');
@@ -133,7 +132,11 @@ class HeuristicM1PlusController extends Controller
 
                     /* -------------------------------------------------------------------- */
                     //Dia final do conjunto de treinamento
-                    $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');
+                    if ($value['period'] == 15 && $action_name == 'ENGI11') {
+                        $final = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('-1 day');
+                    } else {
+                        $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');
+                    }
 
                     //Passando para o padrão de datas do banco
                     $start = Paper::toIsoDate($start->format('U'));
@@ -145,8 +148,8 @@ class HeuristicM1PlusController extends Controller
 
                     //Setup inicial do conjunto de treinamento, contém as ações do intervalo passado pelo usuário
                     $cursor_by_price = $model->getData($stock, $start, $final);
-                    
-                   
+
+
                     // Data da predição
                     $predictStart = \DateTime::createFromFormat('d/m/YH:i:s', $start_day . '24:00:00');
 
@@ -178,7 +181,7 @@ class HeuristicM1PlusController extends Controller
                             break;
 
                         // Busca e guarda o menor valor do array e o maior de todas as ações buscadas.
-                        
+
                         $premin = $model->definePremin($cursor_by_price);
                         $premax = $model->definePremax($cursor_by_price);
 
@@ -597,7 +600,6 @@ class HeuristicM1PlusController extends Controller
                     fwrite($file_transition_matrix_size_heuristic, $model->nome . " " . round((($acertos_heuristica + $acertos_heuristica_m3) / $consultas) * 100, 2) . " " . $prevision_year . " " . $value['period'] . " " . $value['metric'] . "\n");
 
 
-                    $chart = $model->chartData($next, $intervals, $t_clientDatas, $t_datas);
                     $percentage_heuristica = ($acertos_heuristica / $consultas) * 100;
 
                     $percentage_heuristica_m3 = (($acertos_heuristica + $acertos_heuristica_m3) / $consultas) * 100;
@@ -613,53 +615,32 @@ class HeuristicM1PlusController extends Controller
                 }
                 $start = \DateTime::createFromFormat('d/m/YH:i:s', $start_day . '24:00:00')->modify('-1 day');
                 $final = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('-1 day');
-                
+
                 $start = $start->modify("- 1 year");
                 $final = $final->modify("- 1 year");
 
                 $prevision_year = intval($final->format('Y') - 1);
-                
 
                 $start_day = $start->format('d/m/Y');
                 $model->final = $final->format('d/m/Y');
-
-                // if($prevision_year == 2015){
-                //     $model->final = "31/12/2015";
-                // }
             }
 
             foreach ($obj_accuracy_rate as $key => $value) {
                 switch ($value) {
-                    case $value['metric'] == 'days' && $value['period'] == 15:
+                    case $value['metric'] == 'months' && $value['period'] == 3:
                         $total_values_by_period[0]['total_sum'] += $value['accuracy rate'];
                         $total_values_by_period[0]['total_sum_heuristic'] += $value['percentage_heuristic'];
                         $total_values_by_period[0]['total_years'] += 1;
-
                         break;
-                    case $value['metric'] == 'month' && $value['period'] == 1:
+                    case $value['metric'] == 'months' && $value['period'] == 12:
                         $total_values_by_period[1]['total_sum'] += $value['accuracy rate'];
                         $total_values_by_period[1]['total_sum_heuristic'] += $value['percentage_heuristic'];
                         $total_values_by_period[1]['total_years'] += 1;
                         break;
-                    case $value['metric'] == 'months' && $value['period'] == 2:
+                    case $value['metric'] == 'years' && $value['period'] == 3:
                         $total_values_by_period[2]['total_sum'] += $value['accuracy rate'];
                         $total_values_by_period[2]['total_sum_heuristic'] += $value['percentage_heuristic'];
                         $total_values_by_period[2]['total_years'] += 1;
-                        break;
-                    case $value['metric'] == 'months' && $value['period'] == 3:
-                        $total_values_by_period[3]['total_sum'] += $value['accuracy rate'];
-                        $total_values_by_period[3]['total_sum_heuristic'] += $value['percentage_heuristic'];
-                        $total_values_by_period[3]['total_years'] += 1;
-                        break;
-                    case $value['metric'] == 'months' && $value['period'] == 12:
-                        $total_values_by_period[4]['total_sum'] += $value['accuracy rate'];
-                        $total_values_by_period[4]['total_sum_heuristic'] += $value['percentage_heuristic'];
-                        $total_values_by_period[4]['total_years'] += 1;
-                        break;
-                    case $value['metric'] == 'years' && $value['period'] == 3:
-                        $total_values_by_period[5]['total_sum'] += $value['accuracy rate'];
-                        $total_values_by_period[5]['total_sum_heuristic'] += $value['percentage_heuristic'];
-                        $total_values_by_period[5]['total_years'] += 1;
                         break;
                     default:
                         break;
@@ -670,40 +651,34 @@ class HeuristicM1PlusController extends Controller
             // Contem as médias dos periodos dos anos anteriores ao ano da previsão
             array_push($info_predict, [
                 'stock' => $obj_accuracy_rate[0]['stock'],
-                'fifteen_days' => $total_values_by_period[0]['total_years'] == 0 ? 0 : round($total_values_by_period[0]['total_sum'] / $total_values_by_period[0]['total_years'], 2),
-                'one_month' => $total_values_by_period[1]['total_years'] == 0 ? 0 : round($total_values_by_period[1]['total_sum'] / $total_values_by_period[1]['total_years'], 2),
-                'two_months' => $total_values_by_period[2]['total_years'] == 0 ? 0 : round($total_values_by_period[2]['total_sum'] / $total_values_by_period[2]['total_years'], 2),
-                'three_months' => $total_values_by_period[3]['total_years'] == 0 ? 0 : round($total_values_by_period[3]['total_sum'] / $total_values_by_period[3]['total_years'], 2),
-                'twelve_months' => $total_values_by_period[4]['total_years'] == 0 ? 0 : round($total_values_by_period[4]['total_sum'] / $total_values_by_period[4]['total_years'], 2),
-                'three_years' => $total_values_by_period[5]['total_years'] == 0 ? 0 : round($total_values_by_period[5]['total_sum'] / $total_values_by_period[5]['total_years'], 2),
+                'three_months' => $total_values_by_period[0]['total_years'] == 0 ? 0 : round($total_values_by_period[0]['total_sum'] / $total_values_by_period[0]['total_years'], 2),
+                'twelve_months' => $total_values_by_period[1]['total_years'] == 0 ? 0 : round($total_values_by_period[1]['total_sum'] / $total_values_by_period[1]['total_years'], 2),
+                'three_years' => $total_values_by_period[2]['total_years'] == 0 ? 0 : round($total_values_by_period[2]['total_sum'] / $total_values_by_period[2]['total_years'], 2),
             ]);
 
             array_push($info_predict_heuristic, [
                 'stock' => $obj_accuracy_rate[0]['stock'],
-                'fifteen_days' => $total_values_by_period[0]['total_years'] == 0 ? 0 : round($total_values_by_period[0]['total_sum_heuristic'] / $total_values_by_period[0]['total_years'], 2),
-                'one_month' => $total_values_by_period[1]['total_years'] == 0 ? 0 : round($total_values_by_period[1]['total_sum_heuristic'] / $total_values_by_period[1]['total_years'], 2),
-                'two_months' => $total_values_by_period[2]['total_years'] == 0 ? 0 : round($total_values_by_period[2]['total_sum_heuristic'] / $total_values_by_period[2]['total_years'], 2),
-                'three_months' => $total_values_by_period[3]['total_years'] == 0 ? 0 : round($total_values_by_period[3]['total_sum_heuristic'] / $total_values_by_period[3]['total_years'], 2),
-                'twelve_months' => $total_values_by_period[4]['total_years'] == 0 ? 0 : round($total_values_by_period[4]['total_sum_heuristic'] / $total_values_by_period[4]['total_years'], 2),
-                'three_years' => $total_values_by_period[5]['total_years'] == 0 ? 0 : round($total_values_by_period[5]['total_sum_heuristic'] / $total_values_by_period[5]['total_years'], 2),
+                'three_months' => $total_values_by_period[0]['total_years'] == 0 ? 0 : round($total_values_by_period[0]['total_sum_heuristic'] / $total_values_by_period[0]['total_years'], 2),
+                'twelve_months' => $total_values_by_period[1]['total_years'] == 0 ? 0 : round($total_values_by_period[1]['total_sum_heuristic'] / $total_values_by_period[1]['total_years'], 2),
+                'three_years' => $total_values_by_period[2]['total_years'] == 0 ? 0 : round($total_values_by_period[2]['total_sum_heuristic'] / $total_values_by_period[2]['total_years'], 2),
             ]);
-            /*
-            Utilizando os resultados originais de 3 estados
-            */
-            array_push($hits_percentages, $info_predict[0]['fifteen_days']);
-            array_push($hits_percentages, $info_predict[0]['one_month']);
-            array_push($hits_percentages, $info_predict[0]['two_months']);
-            array_push($hits_percentages, $info_predict[0]['three_months']);
-            array_push($hits_percentages, $info_predict[0]['twelve_months']);
-            array_push($hits_percentages, $info_predict[0]['three_years']);
 
-            /*
-            IC - 2023
-            Utilizando os resultados da heurística de subidas e descidas constantes.
-            */
-            // array_push($hits_percentages,$info_predict_heuristic[0]['fifteen_days_heuristic']);
-            // array_push($hits_percentages,$info_predict_heuristic[0]['one_month_heuristic']);
-            // array_push($hits_percentages,$info_predict_heuristic[0]['two_months_heuristic']);
+            if (prevision_heuristic) {
+                //Utilizando os resultados originais de 3 estados
+                array_push($hits_percentages, $info_predict_heuristic[0]['three_months']);
+                array_push($hits_percentages, $info_predict_heuristic[0]['twelve_months']);
+                array_push($hits_percentages, $info_predict_heuristic[0]['three_years']);
+                $title = "Heuristica";
+            } else {
+                /*
+                IC - 2023
+                Utilizando os resultados da heurística de subidas e descidas constantes.
+                */
+                array_push($hits_percentages, $info_predict[0]['three_months']);
+                array_push($hits_percentages, $info_predict[0]['twelve_months']);
+                array_push($hits_percentages, $info_predict[0]['three_years']);
+                $title = "3 estados";
+            }
 
             $percentage_max = 0;
             $index_max = -1;
@@ -716,64 +691,86 @@ class HeuristicM1PlusController extends Controller
                     $index_max = $key;
                 }
             }
-            
-            $greater_value_found = $model->previsionQuality($hits_percentages[5], $hits_percentages[$index_max]);
 
-            $index_greater_value_founded= array_search($greater_value_found,$hits_percentages);
+            $greater_value_found = $model->previsionQuality($hits_percentages[2], $hits_percentages[$index_max]);
 
-            if ($index_greater_value_founded == 0) {
-                $period = 15;
-                $metric = 'days';
-            } else if ($index_greater_value_founded == 1) {
-                $period = 1;
-                $metric = 'month';
-            } else if ($index_greater_value_founded == 2) {
-                $period = 2;
-                $metric = 'months';
-            } else if ($index_greater_value_founded == 3) {
-                $period = 3;
-                $metric = 'months';
-            } else if ($index_greater_value_founded == 4) {
-                $period = 12;
-                $metric = 'months';
-            } else if ($index_greater_value_founded == 5) {
-                $period = 3;
-                $metric = 'years';
+            $index_greater_value_founded = array_search($greater_value_found, $hits_percentages);
+
+            switch ($index_greater_value_founded) {
+                case 0:
+                    $period = 3;
+                    $metric = 'months';
+                    break;
+                case 1:
+                    $period = 12;
+                    $metric = 'months';
+                    break;
+                case 2:
+                    $period = 3;
+                    $metric = 'years';
+                    break;
+                default:
+                    break;
             }
-            
-            $prevision_return = $this->actionPredict($initial_date_prevision,$final_date_prevision,$period,$metric,$action_name);
-            
+
+            $prevision_return = $this->actionPredict($initial_date_prevision, $final_date_prevision, $period, $metric, $action_name);
+
             /*
             Para escrever no arquivo best_period, com as médias do período selecionado
             */
-            fwrite($file_best_period, 
-            $info_predict[0]['stock'] . " " . "15 dias: " . $hits_percentages[0] .
-            " 1 mês: " . $hits_percentages[1] .
-            " 2 meses: " . $hits_percentages[2] .
-            " 3 meses: " . $hits_percentages[3] .
-            " 12 meses: " . $hits_percentages[4] .
-            " 3 anos: " . $hits_percentages[5] .
-            " Período Escolhido: " . $period . " " . $metric . "\n");
+            fwrite(
+                $file_best_period,
+                $info_predict[0]['stock'] . " " .
+                    " 3 meses: " . $hits_percentages[0] .
+                    " 12 meses: " . $hits_percentages[1] .
+                    " 3 anos: " . $hits_percentages[2] .
+                    " Período Escolhido: " . $period . " " . $metric . "\n"
+            );
 
-            $percentage = 0;
-            $percentage = round(($prevision_return['t_acertou']/$prevision_return['consultas'])*100,2);
-            fwrite($file_results, 
-            $info_predict[0]['stock']." " . $percentage . "\n");
+            fwrite(
+                $file_results,
+                $info_predict[0]['stock'] . " " . $percentage . " " . $prevision_return['cliente_heuristica_e1_cash'] . " " . $prevision_return['cliente_heuristica_e2_cash'] . " " . $prevision_return['cliente_heuristica_e3_cash'] . "\n"
+            );
             
+            if(prevision_heuristic){
+                $acertos = $prevision_return['quantidade_acertos_m3'];
+                $erros = $prevision_return['erro_heuristica_m3'];
+                $percentage = $prevision_return['percentage_heuristica_m3'];
+                $percentage_errors = round(($prevision_return['erro_heuristica_m3']/$prevision_return['consultas'])*100,2);
+                $client_1_cash_remaining = $prevision_return['cliente_heuristica_e1_cash'];
+                $client_1_actions_remaining = $prevision_return['cliente_heuristica_e1_actions']; 
+                $client_2_cash_remaining = $prevision_return['cliente_heuristica_e2_cash'];
+                $client_2_actions_remaining = $prevision_return['cliente_heuristica_e2_actions']; 
+                $client_3_cash_remaining = $prevision_return['cliente_heuristica_e3_cash'];
+                $client_3_actions_remaining = $prevision_return['cliente_heuristica_e3_actions']; 
+            }else{
+                $acertos = $prevision_return['t_acertou'];
+                $erros = $prevision_return['t_errou'];
+                $percentage = round(($prevision_return['t_acertou']/$prevision_return['consultas'])*100,2);
+                $percentage_errors = round(($prevision_return['t_errou']/$prevision_return['consultas'])*100,2);
+                $client_1_cash_remaining = $cliente_teste_1->getCash();
+                $client_1_actions_remaining = $cliente_teste_1->getActions(); 
+                $client_2_cash_remaining = $cliente_teste_2->getCash();
+                $client_2_actions_remaining = $cliente_teste_2->getActions(); 
+                $client_3_cash_remaining = $cliente_teste_3->getCash();
+                $client_3_actions_remaining = $cliente_teste_3->getActions();
+            }
             /*
             * Para retornar o resultado da previsão de 3 estados original basta alterar a chave para t_acertou e t_errou
                 Já, para retornar os valores da heurística, basta adicionar quantidade_acertos_m3 e erro_heuristica_m3
             */
             return $this->render('result-predict', [
-                't_acertou' => $prevision_return['t_acertou'],
-                't_errou' => $prevision_return['t_errou'],
-                'consultas' => $prevision_return['consultas'],
-                'cliente_heuristica_e1_cash' => $prevision_return['cliente_heuristica_e1_cash'],
-                'cliente_heuristica_e1_actions' => $prevision_return['cliente_heuristica_e1_actions'],
-                'cliente_heuristica_e2_cash' => $prevision_return['cliente_heuristica_e2_cash'],
-                'cliente_heuristica_e2_actions' => $prevision_return['cliente_heuristica_e2_actions'],
-                'cliente_heuristica_e3_cash' => $prevision_return['cliente_heuristica_e3_cash'],
-                'cliente_heuristica_e3_actions' => $prevision_return['cliente_heuristica_e3_actions'],
+                'title' => $title,
+                'acertos' => $acertos,
+                'erros' => $erros,
+                'percentage' => $percentage,
+                'percentage_errors' => $percentage_errors,
+                'cliente_heuristica_e1_cash' => $client_1_cash_remaining,
+                'cliente_heuristica_e1_actions' => $client_1_actions_remaining,
+                'cliente_heuristica_e2_cash' => $client_2_cash_remaining,
+                'cliente_heuristica_e2_actions' => $client_2_actions_remaining,
+                'cliente_heuristica_e3_cash' => $client_3_cash_remaining,
+                'cliente_heuristica_e3_actions' => $client_3_actions_remaining,
             ]);
 
             //Retorno para porcentagens de seleção de períodos para montagem da matriz de transição
@@ -850,7 +847,7 @@ class HeuristicM1PlusController extends Controller
 
         //O conjunto de treinamento será definido n meses antes do dia a ser previsto
         $start = $start->modify("-$period $metric");
-       
+
         /* -------------------------------------------------------------------- */
         //Dia final do conjunto de treinamento
         $final = \DateTime::createFromFormat('d/m/YH:i:s', $final . '24:00:00')->modify('-1 day');

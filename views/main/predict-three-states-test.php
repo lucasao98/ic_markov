@@ -395,7 +395,8 @@ $consultaModel = new ConsultaModel;
 
 <?= $form->field($consultaModel, 'metric')->dropDownList([
 	'month' => 'Meses',
-	'year' => 'Anos'
+	'year' => 'Anos',
+	'days' => 'Dias'
 ],
 [
 	'style' => ['width' => '190px', 'height' => '30px']

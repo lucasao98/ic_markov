@@ -7,6 +7,7 @@ use app\models\ConsultaModel;
 use app\models\Paper;
 use Yii;
 use MathPHP\LinearAlgebra\MatrixFactory;
+use Simplex;
 
 //date_default_timezone_set("america/bahia");
 
@@ -16,7 +17,7 @@ class MainController extends Controller
     public function actionHome()
     {
         $this->layout = 'navbar';
-
+       
         return $this->render('home');
     }
 

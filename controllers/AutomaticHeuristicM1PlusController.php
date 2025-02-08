@@ -12,7 +12,7 @@ define("all_actions", [
     "ALPA4",
     "PSSA3",
     "GGBR4",
-    "BRFS3",
+    /*"BRFS3",
     "ENGI11",
     "ENBR3",
     "CIEL3",
@@ -55,7 +55,7 @@ define("all_actions", [
     "SULA11",
     "TRIS3",
     "TRPL4",
-    "WEGE3"
+    "WEGE3"*/
 ]);
 define("prevision_heuristic", True);
 class AutomaticHeuristicM1PlusController extends Controller
@@ -82,6 +82,7 @@ class AutomaticHeuristicM1PlusController extends Controller
 
         $obj_accuracy_rate = [];
         $prevision_in_year_with_best_period = [];
+        $model->nome = "ALPA4";
 
         if ($model->load($post) && $model->validate()) {
             $start = \DateTime::createFromFormat('d/m/YH:i:s', $model->final . '24:00:00')->modify('-1 year')->modify('-2 day');
@@ -97,9 +98,13 @@ class AutomaticHeuristicM1PlusController extends Controller
 
             $original_input_date = $model->final;
             
-            $file_transition_matrix_size = fopen("transition_matrix_size.txt", "w");
-            $file_best_period = fopen("best_period_automatic_" . ($prevision_year + 1) . ".txt", "w");
-            $file_results = fopen("results_" . ($prevision_year + 1) . ".txt", "w");
+            // $file_transition_matrix_size = fopen("transition_matrix_size.txt", "w");
+            // $file_best_period = fopen("best_period_automatic_" . ($prevision_year + 1) . "_new.txt", "w");
+            // $file_results = fopen("results_" . ($prevision_year + 1) . "_new.txt", "w");
+            
+            $file_transition_matrix_size = fopen("test1.txt", "w");
+            $file_best_period = fopen("test2.txt", "w");
+            $file_results = fopen("test3.txt", "w");
             
 
             foreach (all_actions as $key => $current_action_name) {
@@ -116,8 +121,6 @@ class AutomaticHeuristicM1PlusController extends Controller
                 $final_date_prevision = $final_prevision->format("d/m/Y");
 
                 fwrite($file_transition_matrix_size, "Ação " . "Taxa de Acertos " . "Ano " . "Metrica " . "Período " . "\n");
-                //$file_transition_matrix_size_heuristic = fopen("transition_matrix_size_heuristic.txt", "w");
-                //fwrite($file_transition_matrix_size_heuristic, "Ação " . "Taxa de Acertos " . "Ano " . "Metrica " . "Período " . "\n");
 
                 $info_predict = [];
                 $info_predict_heuristic = [];
@@ -781,6 +784,12 @@ class AutomaticHeuristicM1PlusController extends Controller
                     Para escrever no arquivo best_period, com as médias do período selecionado
                 */
 
+                if($metric == 'years'){
+                    $metric = "Anos";
+                }else if($metric == 'months'){
+                    $metric = "Meses";
+                }
+
                 fwrite(
                     $file_best_period,
                         $current_action_name . " " .
@@ -798,22 +807,39 @@ class AutomaticHeuristicM1PlusController extends Controller
                     $errors = $prevision_return['erro_heuristica_m3'];
                     $hit_percentages = $prevision_return['percentage_heuristica_m3'];
                     $errors_percentages = round(($prevision_return['erro_heuristica_m3']/$prevision_return['consultas'])*100,2);
+                    $client_1_cash_remaining = $prevision_return['cliente_heuristica_e1_cash'];
+                    $client_1_actions_remaining = $prevision_return['cliente_heuristica_e1_actions']; 
+                    $client_2_cash_remaining = $prevision_return['cliente_heuristica_e2_cash'];
+                    $client_2_actions_remaining = $prevision_return['cliente_heuristica_e2_actions']; 
+                    $client_3_cash_remaining = $prevision_return['cliente_heuristica_e3_cash'];
+                    $client_3_actions_remaining = $prevision_return['cliente_heuristica_e3_actions'];
                 }else{
                     $hits = $prevision_return['t_acertou'];
                     $errors = $prevision_return['t_errou'];
                     $hit_percentages = round(($prevision_return['t_acertou']/$prevision_return['consultas'])*100,2);
                     $errors_percentages = round(($prevision_return['t_errou']/$prevision_return['consultas'])*100,2);
+                    $client_1_cash_remaining = $cliente_teste_1->getCash();
+                    $client_1_actions_remaining = $cliente_teste_1->getActions(); 
+                    $client_2_cash_remaining = $cliente_teste_2->getCash();
+                    $client_2_actions_remaining = $cliente_teste_2->getActions(); 
+                    $client_3_cash_remaining = $cliente_teste_3->getCash();
+                    $client_3_actions_remaining = $cliente_teste_3->getActions();
                 }
+
                 fwrite(
                     $file_results,
                     $current_action_name . 
                     " " .
                     $hit_percentages . 
                     " " .
-                    $period . " " . $metric . 
+                    $period . " " . $metric .
+                    " "  .
+                    $client_1_cash_remaining . " " .
+                    $client_2_cash_remaining . " " .
+                    $client_3_cash_remaining . " " .
                     "\n"
                 );
-                /*
+                
                 array_push($prevision_in_year_with_best_period, [
                     "action" => $current_action_name,
                     "hits" => $hits,
@@ -821,7 +847,6 @@ class AutomaticHeuristicM1PlusController extends Controller
                     "percentage_hits" => $hit_percentages,
                     "selected_period" => $period . " " . $metric
                 ]);
-                */
             }
 
             return $this->render('result', [

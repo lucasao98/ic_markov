@@ -20,41 +20,20 @@ class ImportController extends Controller
         return $this->render('import-form');
     }
 
-    public function actionImportData(/*$startDate, $endDate, $type*/)
+    public function actionImportData()
     {
+        $filename = $_GET['filename'];
         $this->layout = 'navbar';
-
-
-        $startDate = $_GET['startDate'];
-        $endDate = $_GET['endDate'];
-        $type = $_GET['type'];
-
+       
         ini_set('max_execution_time', 0); //300 seconds = 5 minutes
         ini_set('memory_limit', '-1');
-
-        // Yii::debug("[IMPORT] start");
-
-        $begin =  DateTime::createFromFormat('Y', $startDate);
-        $end =  DateTime::createFromFormat('j-M-Y', $endDate);
-
-        if ($type == 'day') {
-            $format = 'dmY';
-            $typeFromDownload = 'D';
-        } else {
-            $format = 'Y';
-            $typeFromDownload = 'A';
-        }
-
-        $begin = $begin->format($format);
 
         try {
             //$this->downloadData($begin, $typeFromDownload);
             //$this->extractData($startDate);
-            $this->parseDataAndSaveInDatabase($begin, $typeFromDownload);
-
-            Yii::debug("[IMPORT]sucesso na data " . $begin);
+            return $this->parseDataAndSaveInDatabase($filename);
         } catch (\Exception $e) {
-            return ("[IMPORT]falha na data " . $begin . " " . $e->getMessage());
+            return ("[IMPORT] Erro " . $e->getMessage());
         }
         /*
         for ($i = $begin; $i <= $end; $i->modify('+1 ' . $type)) {
@@ -117,25 +96,25 @@ class ImportController extends Controller
         $zip->close();
     }
 
-    public function parseDataAndSaveInDatabase($date, $type)
+    public function parseDataAndSaveInDatabase($filename)
     {
-        Yii::debug("[IMPORT] start parseDataAndSaveInDatabase data from " . $date);
+        $path_file_actions = "../assets/dados_historicos/";
 
-        if ($type == 'D') {
-            $extension = '.TXT';
-            $typeWithSeparator = "_D";
-        } else {
-            $extension = '.TXT';
-            $typeWithSeparator = "_A";
+        if(empty($filename)){
+            throw new \yii\web\NotFoundHttpException("Nome do Arquivo em branco");
         }
 
-        $file = fopen("../assets/COTAHIST/ZIP/COTAHIST" . $typeWithSeparator . $date . $extension, "r");
+        if(!file_exists($path_file_actions . $filename)){
+            throw new \yii\web\NotFoundHttpException("Arquivo não foi encontrado");
+        }
+        
+        $file = fopen($path_file_actions.$filename, "r");
 
         if ($file) {
             $header = fgets($file);
             while (($line = fgets($file)) !== false) {
                 if (substr($line, 0, 10) == "99COTAHIST") {
-                    return "FIM";
+                    return "Sucesso! Os Dados Adicionados ao banco de dados.";
                 }
                 try {
                     $line = mb_convert_encoding($line, 'US-ASCII', 'UTF-8');
@@ -533,11 +512,10 @@ class ImportController extends Controller
                 }
             }
             fclose($file);
+            return "OK";
         } else {
 
             Yii::debug("[IMPORT] file not found " . $date);
         }
-
-        return "OK";
     }
 }

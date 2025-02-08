@@ -668,7 +668,7 @@ class HeuristicM1PlusController extends Controller
                 array_push($hits_percentages, $info_predict_heuristic[0]['three_months']);
                 array_push($hits_percentages, $info_predict_heuristic[0]['twelve_months']);
                 array_push($hits_percentages, $info_predict_heuristic[0]['three_years']);
-                $title = "Heuristica";
+                $title = "Heuristica do Melhor Período";
             } else {
                 /*
                 IC - 2023
@@ -929,15 +929,6 @@ class HeuristicM1PlusController extends Controller
             /* Validação ----------------------------------------------------------------- */
 
             $last_day = $cursor_by_price[count($cursor_by_price) - 1];
-
-            // Verifica se a quantidade de dias no array next_days é igual ao total de consultas - 1. Ou seja a primeira consulta
-            if (count($next_days) == $consultas - 1) {
-                $cliente_teste_3->buyActions($next_day['preult']);
-            }
-
-            if (count($next_days) == 1) {
-                $cliente_teste_3->sellActions($next_day['preult']);
-            }
 
             // calcula o estado do dia seguinte
             $next_day['state'] = $model->getState($next_day['preult'], $premin['preult'], $interval, $model->states_number);
@@ -1269,8 +1260,10 @@ class HeuristicM1PlusController extends Controller
 
             if (count($next_days) == $consultas - 1) {
                 $t_client5 = $model->handleBuy($t_client5, $last_day['preult']);
+                $cliente_teste_3->buyActions($last_day['preult']);
                 $t_client5['cash'] = 0;
             } else if (empty($next_days)) {
+                $cliente_teste_3->sellActions($last_day['preult']);
                 $t_client5 = $model->handleSell($t_client5, $last_day['preult']);
                 $client1 = $model->handleSell($client1, $last_day['preult']);
                 $client2 = $model->handleSell($client2, $last_day['preult']);
